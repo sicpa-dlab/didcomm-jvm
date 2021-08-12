@@ -7,9 +7,14 @@ version = "${version}"
 
 repositories {
     mavenCentral()
+    flatDir {
+        // TODO remove when contribution will be merged to upstream
+        dir "lib"
+    }
 }
 
 dependencies {
+    implementation "com.nimbusds:nimbus-jose-jwt:${nimbusJoseJWTVersion}"
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
 }
 
