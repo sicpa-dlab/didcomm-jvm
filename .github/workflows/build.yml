@@ -17,7 +17,6 @@ jobs:
           java-version: 11
       - name: Execute tests
         run: |
-#          gradle build test
         ./gradlew test
       - name: Install ktlint
         run: |
