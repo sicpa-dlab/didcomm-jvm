@@ -1,4 +1,4 @@
-package org.dif.common
+package org.dif.diddoc
 
 /**
  * DID DOC (https://www.w3.org/TR/did-core/#dfn-did-documents)
