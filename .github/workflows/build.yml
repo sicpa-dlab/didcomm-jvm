@@ -17,7 +17,7 @@ jobs:
           java-version: 11
       - name: Execute tests
         run: |
-        ./gradlew test
+          ./gradlew test
       - name: Install ktlint
         run: |
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.42.1/ktlint &&
