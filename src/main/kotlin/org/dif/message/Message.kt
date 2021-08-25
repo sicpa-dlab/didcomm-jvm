@@ -1,16 +1,11 @@
 package org.dif.message
 
-import org.dif.common.Json
-
-enum class TYP(typ: String) {
-    Encrypted("application/didcomm-encrypted+json"),
-    Signed("application/didcomm-signed+json"),
-    Plaintext("application/didcomm-plain+json"),
-}
+import org.dif.common.JSON
+import org.dif.common.TYP
 
 data class Message(
     val id: String,
-    val payload: Json,
+    val payload: JSON,
     val type: String,
     val typ: TYP,
     val from: String?,
@@ -49,23 +44,52 @@ data class Message(
 
     class Builder {
         lateinit var id: String
-        lateinit var payload: Json
+            private set
+
+        lateinit var payload: JSON
+            private set
+
         lateinit var type: String
+            private set
+
         lateinit var typ: TYP
+            private set
+
         var from: String? = null
+            private set
+
         var to: List<String>? = null
+            private set
+
         var createdTime: Int? = null
+            private set
+
         var expiresTime: Int? = null
+            private set
+
         var headers: Map<String, Any>? = null
+            private set
+
         var attachments: List<Attachment>? = null
+            private set
+
         var fromPrior: FromPrior? = null
+            private set
+
         var pleaseAck: Boolean? = null
+            private set
+
         var ack: String? = null
+            private set
+
         var thid: String? = null
+            private set
+
         var pthid: String? = null
+            private set
 
         fun id(id: String) = apply { this.id = id }
-        fun payload(payload: Json) = apply { this.payload = payload }
+        fun payload(payload: JSON) = apply { this.payload = payload }
         fun type(type: String) = apply { this.type = type }
         fun typ(typ: TYP) = apply { this.typ = typ }
         fun from(from: String) = apply { this.from = from }

@@ -27,13 +27,28 @@ data class FromPrior(
 
     class Builder {
         lateinit var iss: String
+            private set
+
         lateinit var sub: String
+            private set
+
         var aud: String? = null
+            private set
+
         var exp: Int? = null
+            private set
+
         var nbf: Int? = null
+            private set
+
         var iat: Int? = null
+            private set
+
         var jti: String? = null
+            private set
+
         var issKid: String? = null
+            private set
 
         fun iss(iss: String) = apply { this.iss = iss }
         fun sub(sub: String) = apply { this.sub = sub }

@@ -1,17 +1,17 @@
 package org.dif.message
 
-import org.dif.common.Json
+import org.dif.common.JSON
 
 interface AttachmentData {
     val hash: String?
-    val jws: Json?
+    val jws: JSON?
     fun toJSONObject(): Map<String, Any?>
 }
 
 data class AttachmentDataLinks(
     val links: List<String>,
     override val hash: String,
-    override val jws: Json? = null,
+    override val jws: JSON? = null,
 ): AttachmentData {
     override fun toJSONObject(): Map<String, Any?> = mapOf(
         "hash" to hash,
@@ -23,7 +23,7 @@ data class AttachmentDataLinks(
 data class AttachmentDataBase64(
     val base64: String,
     override val hash: String? = null,
-    override val jws: Json? = null,
+    override val jws: JSON? = null,
 ): AttachmentData {
     override fun toJSONObject(): Map<String, Any?> = mapOf(
         "hash" to hash,
@@ -34,9 +34,9 @@ data class AttachmentDataBase64(
 
 
 data class AttachmentDataJson(
-    val json: Json,
+    val json: JSON,
     override val hash: String? = null,
-    override val jws: Json? = null,
+    override val jws: JSON? = null,
 ): AttachmentData {
     override fun toJSONObject(): Map<String, Any?> = mapOf(
         "hash" to hash,
@@ -72,13 +72,28 @@ data class Attachment(
 
     class Builder {
         lateinit var id: String
+            private set
+
         lateinit var data: AttachmentData
+            private set
+
         var filename: String? = null
+            private set
+
         var format: String? = null
+            private set
+
         var lastModTime: Int? = null
+            private set
+
         var description: String? = null
+            private set
+
         var mimeType: String? = null
+            private set
+
         var byteCount: Int? = null
+            private set
 
         fun id(id: String) = apply { this.id = id }
         fun filename(filename: String) = apply { this.filename = filename }

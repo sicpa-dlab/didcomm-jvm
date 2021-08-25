@@ -2,11 +2,11 @@ package org.dif.common
 
 import com.nimbusds.jose.util.JSONObjectUtils
 
-interface Json {
+interface JSON {
     fun toJSONObject(): Any
 }
 
-class JsonObject(private val data: Map<String, Any>): Json {
+class JSONObject(private val data: Map<String, Any>): JSON {
     override fun toString(): String
             = JSONObjectUtils.toJSONString(data)
 
@@ -14,7 +14,7 @@ class JsonObject(private val data: Map<String, Any>): Json {
             = data
 }
 
-class JsonArray(val data: List<Any>): Json {
+class JSONArray(val data: List<Any>): JSON {
     override fun toJSONObject(): Any {
         TODO("Not yet implemented")
     }
