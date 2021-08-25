@@ -8,7 +8,7 @@ enum class TYP(typ: String) {
     Plaintext("application/didcomm-plain+json"),
 }
 
-class Message(
+data class Message(
     val id: String,
     val payload: Json,
     val type: String,
