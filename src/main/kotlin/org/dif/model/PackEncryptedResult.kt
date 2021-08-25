@@ -1,0 +1,32 @@
+package org.dif.model
+
+import org.dif.common.JSON
+
+/**
+ * Result of pack encrypted message operation.
+ *
+ * @property packedMessage   A packed message as a JSON string.
+ * @property toKids          Identifiers (DID URLs) of recipient keys used for message encryption.
+ * @property serviceMetadata An optional service metadata which contains a service endpoint
+ *                           to be used to transport the 'packedMessage'.
+ * @property fromKid         Identifier (DID URL) of sender key used for message encryption.
+ * @property signFromKid     Identifier (DID URL) of sender key used for message signing.
+ */
+data class PackEncryptedResult(
+    val packedMessage: JSON,
+    val toKids: List<String>,
+    val fromKid: String?,
+    val signFromKid: String?,
+    val serviceMetadata: ServiceMetadata?,
+)
+
+/**
+ * Service Metadata
+ *
+ * @property id              The Identifier of Service Endpoint
+ * @property serviceEndpoint The service endpoint
+ */
+data class ServiceMetadata(
+    val id: String,
+    val serviceEndpoint: String,
+)
