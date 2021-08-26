@@ -51,9 +51,15 @@ enum class EncodingType {
  * DID DOC Service of 'DIDCommMessaging' type.
  * see https://www.w3.org/TR/did-core/#services
  * and https://identity.foundation/didcomm-messaging/spec/#did-document-service-endpoint.
+ *
+ * @property id              Service's 'id' field
+ * @property serviceEndpoint A service endpoint. It can be either a URI to be used for transport
+ *                           or a mediator's DID in case of alternative endpoints.
+ * @property routingKeys     A possibly empty ordered array of strings referencing keys
+ *                           to be used when preparing the message for transmission.
  */
 data class DIDCommService(
     val id: String,
     val serviceEndpoint: String,
-    val routingKeys: String
+    val routingKeys: List<String>
 )

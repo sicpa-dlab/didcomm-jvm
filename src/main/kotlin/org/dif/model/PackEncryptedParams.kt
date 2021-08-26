@@ -14,28 +14,28 @@ data class PackEncryptedParams(
     val to: String,
     val from: String?,
     val signFrom: String?,
-    val didDocResolver: DIDDocResolver?,
-    val secretResolver: SecretResolver?,
     val encAlgAuth: AuthCryptAlg,
     val encAlgAnon: AnonCryptAlg,
     val protectSenderId: Boolean,
     val forward: Boolean,
     val forwardHeaders: Map<String, Any>?,
-    val forwardServiceId: String?
+    val forwardServiceId: String?,
+    val didDocResolver: DIDDocResolver?,
+    val secretResolver: SecretResolver?,
 ) {
     private constructor(builder: Builder): this(
         builder.message,
         builder.to,
         builder.from,
         builder.signFrom,
-        builder.didDocResolver,
-        builder.secretResolver,
         builder.encAlgAuth,
         builder.encAlgAnon,
         builder.protectSenderId,
         builder.forward,
         builder.forwardHeaders,
-        builder.forwardServiceId
+        builder.forwardServiceId,
+        builder.didDocResolver,
+        builder.secretResolver
     )
 
     companion object {

@@ -1,13 +1,13 @@
 package org.dif.message
 
 import org.dif.common.JSON
-import org.dif.common.TYP
+import org.dif.common.Typ
 
 data class Message(
     val id: String,
     val payload: JSON,
     val type: String,
-    val typ: TYP,
+    val typ: Typ,
     val from: String?,
     val to: List<String>?,
     val createdTime: Int?,
@@ -52,7 +52,7 @@ data class Message(
         lateinit var type: String
             private set
 
-        lateinit var typ: TYP
+        lateinit var typ: Typ
             private set
 
         var from: String? = null
@@ -91,7 +91,7 @@ data class Message(
         fun id(id: String) = apply { this.id = id }
         fun payload(payload: JSON) = apply { this.payload = payload }
         fun type(type: String) = apply { this.type = type }
-        fun typ(typ: TYP) = apply { this.typ = typ }
+        fun typ(typ: Typ) = apply { this.typ = typ }
         fun from(from: String) = apply { this.from = from }
         fun to(to: List<String>) = apply { this.to = to }
         fun createdTime(createdTime: Int) = apply { this.createdTime = createdTime }
