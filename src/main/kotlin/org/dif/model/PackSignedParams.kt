@@ -22,39 +22,21 @@ data class PackSignedParams(
     )
 
     companion object {
-        fun builder() = Attachment.Builder()
+        fun builder(message: Message, signFrom: String) = Builder(message, signFrom)
     }
 
-    class Builder {
-        lateinit var message: Message
-            private set
-
-        lateinit var signFrom: String
-            private set
-
+    /**
+     * Creates Pack Signed Parameters Builder
+     *
+     * @property message  The message to be packed into a Signed DIDComm message.
+     * @property signFrom DID or key ID the sender uses for signing.
+     */
+    class Builder(val message: Message, val signFrom: String) {
         var didDocResolver: DIDDocResolver? = null
             private set
 
         var secretResolver: SecretResolver? = null
             private set
-
-        /**
-         * Sets the message parameter.
-         *
-         * @param message The message to be packed into a Signed DIDComm message.
-         *
-         * @return This builder.
-         */
-        fun message(message: Message) = apply { this.message = message }
-
-        /**
-         * Sets signing key parameter.
-         *
-         * @param signFrom DID or key ID the sender uses for signing.
-         *
-         * @return This builder.
-         */
-        fun signFrom(signFrom: String) = apply { this.signFrom = signFrom }
 
         /**
          * Sets Optional DIDDoc resolver that can override a default DIDDoc resolver.

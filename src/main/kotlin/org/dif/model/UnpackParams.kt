@@ -3,6 +3,9 @@ package org.dif.model
 import org.dif.diddoc.DIDDocResolver
 import org.dif.secret.SecretResolver
 
+/**
+ * Unpack Parameters.
+ */
 data class UnpackParams(
     val packedMessage: String,
     val expectNonRepudiation: Boolean,
@@ -28,8 +31,12 @@ data class UnpackParams(
         builder.secretResolver
     )
 
-    class Builder {
-        lateinit var packedMessage: String
+    /**
+     * Creates Unpack Builder.
+     *
+     * @property packedMessage packed DIDComm message as JSON string to be unpacked.
+     */
+    class Builder(val packedMessage: String) {
         var expectNonRepudiation: Boolean = false
             private set
 
@@ -56,15 +63,6 @@ data class UnpackParams(
 
         var secretResolver: SecretResolver? = null
             private set
-
-        /**
-         * Sets [packedMessage] parameter.
-         *
-         * @param packedMessage packed DIDComm message as JSON string to be unpacked.
-         *
-         * @return This builder.
-         */
-        fun packedMessage(packedMessage: String) = apply { this.packedMessage = packedMessage }
 
         /**
          * Sets [expectNonRepudiation] parameter.

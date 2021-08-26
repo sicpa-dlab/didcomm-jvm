@@ -19,28 +19,20 @@ data class PackPlaintextParams(
     )
 
     companion object {
-        fun builder() = Builder()
+        fun builder(message: Message) = Builder(message)
     }
 
-    class Builder {
-        lateinit var message: Message
-            private set
-
+    /**
+     * Creates Pack Plaintext Parameters Builder.
+     *
+     * @property message The message to be packed into a Plaintext DIDComm message.
+     */
+    class Builder(val message: Message) {
         var didDocResolver: DIDDocResolver? = null
             private set
 
         var secretResolver: SecretResolver? = null
             private set
-
-        /**
-         * Sets the message parameter.
-         *
-         * @param message The message to be packed into a Plaintext DIDComm message.
-         *
-         * @return This builder.
-         */
-        fun message(message: Message) = apply { this.message = message }
-
 
         /**
          * Sets Optional DIDDoc resolver that can override a default DIDDoc resolver.

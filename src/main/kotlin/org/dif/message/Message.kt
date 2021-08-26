@@ -39,22 +39,10 @@ data class Message(
     )
 
     companion object {
-        fun builder() = Builder()
+        fun builder(id: String, payload: JSON, type: String, typ: Typ) = Builder(id, payload, type, typ)
     }
 
-    class Builder {
-        lateinit var id: String
-            private set
-
-        lateinit var payload: JSON
-            private set
-
-        lateinit var type: String
-            private set
-
-        lateinit var typ: Typ
-            private set
-
+    class Builder(val id: String, val payload: JSON, val type: String, val typ: Typ) {
         var from: String? = null
             private set
 
@@ -88,10 +76,6 @@ data class Message(
         var pthid: String? = null
             private set
 
-        fun id(id: String) = apply { this.id = id }
-        fun payload(payload: JSON) = apply { this.payload = payload }
-        fun type(type: String) = apply { this.type = type }
-        fun typ(typ: Typ) = apply { this.typ = typ }
         fun from(from: String) = apply { this.from = from }
         fun to(to: List<String>) = apply { this.to = to }
         fun createdTime(createdTime: Int) = apply { this.createdTime = createdTime }

@@ -22,16 +22,10 @@ data class FromPrior(
     )
 
     companion object {
-        fun builder() = Builder()
+        fun builder(iss: String, sub: String) = Builder(iss, sub)
     }
 
-    class Builder {
-        lateinit var iss: String
-            private set
-
-        lateinit var sub: String
-            private set
-
+    class Builder(val iss: String, val sub: String) {
         var aud: String? = null
             private set
 
@@ -50,8 +44,6 @@ data class FromPrior(
         var issKid: String? = null
             private set
 
-        fun iss(iss: String) = apply { this.iss = iss }
-        fun sub(sub: String) = apply { this.sub = sub }
         fun aud(aud: String) = apply { this.aud = aud }
         fun exp(exp: Int) = apply { this.exp = exp }
         fun nbf(nbf: Int) = apply { this.nbf = nbf }

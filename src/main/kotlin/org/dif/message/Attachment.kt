@@ -67,16 +67,10 @@ data class Attachment(
     )
 
     companion object {
-        fun builder() = Builder()
+        fun builder(id: String, data: AttachmentData) = Builder(id, data)
     }
 
-    class Builder {
-        lateinit var id: String
-            private set
-
-        lateinit var data: AttachmentData
-            private set
-
+    class Builder(val id: String, val data: AttachmentData) {
         var filename: String? = null
             private set
 
@@ -95,11 +89,9 @@ data class Attachment(
         var byteCount: Int? = null
             private set
 
-        fun id(id: String) = apply { this.id = id }
         fun filename(filename: String) = apply { this.filename = filename }
         fun lastModTime(lastModTime: Int) = apply { this.lastModTime = lastModTime }
         fun format(format: String) = apply { this.format = format }
-        fun data(data: AttachmentData) = apply { this.data = data }
         fun description(description: String) = apply { this.description = description }
         fun mimeType(mimeType: String) = apply { this.mimeType = mimeType }
         fun byteCount(byteCount: Int) = apply { this.byteCount = byteCount }

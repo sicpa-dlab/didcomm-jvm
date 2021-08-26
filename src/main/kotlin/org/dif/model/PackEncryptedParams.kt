@@ -7,7 +7,7 @@ import org.dif.message.Message
 import org.dif.secret.SecretResolver
 
 /**
- * Pack Signed Message Parameters
+ * Pack Encrypted Message Parameters
  */
 data class PackEncryptedParams(
     val message: Message,
@@ -39,16 +39,16 @@ data class PackEncryptedParams(
     )
 
     companion object {
-        fun builder() = Builder()
+        fun builder(message: Message, to: String) = Builder(message, to)
     }
 
-    class Builder {
-        lateinit var message: Message
-            private set
-
-        lateinit var to: String
-            private set
-
+    /**
+     * Creates Pack Encrypted Parameters Builder.
+     *
+     * @property message The message to be packed into a Encrypted DIDComm message.
+     * @property to      Identifiers (DID URLs) of recipient keys used for message encryption.
+     */
+    class Builder(val message: Message, val to: String) {
         var from: String? = null
             private set
 
@@ -80,15 +80,6 @@ data class PackEncryptedParams(
             private set
 
         /**
-         * Sets the message parameter.
-         *
-         * @param message The message to be packed into a Signed DIDComm message.
-         *
-         * @return This builder.
-         */
-        fun message(message: Message) = apply { this.message = message }
-
-        /**
          * Sets signing key parameter.
          *
          * @param signFrom Identifier (DID URL) of sender key used for message signing.
@@ -112,14 +103,6 @@ data class PackEncryptedParams(
          * @return This builder.
          */
         fun secretResolver(secretResolver: SecretResolver) = apply { this.secretResolver = secretResolver }
-
-        /**
-         * Sets [to] parameter.
-         *
-         * @param to Identifiers (DID URLs) of recipient keys used for message encryption.
-         * @return This builder.
-         */
-        fun to(to: String) = apply { this.to = to }
 
         /**
          * Sets [from] parameter.
