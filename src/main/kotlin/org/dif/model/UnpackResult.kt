@@ -39,11 +39,11 @@ data class Metadata(
     val nonRepudiation: Boolean,
     val anonymousSender: Boolean,
     val reWrappedInForward: Boolean,
-    val encryptedFrom: Boolean?,
     val encryptedTo: List<String>,
-    val signFrom: String?,
-    val encAlgAuth: AuthCryptAlg?,
-    val encAlgAnon: AnonCryptAlg?,
-    val signAlg: SignAlg?,
-    val signedMessage: JSONObject?,
+    val encryptedFrom: Boolean? = null,
+    val signFrom: String? = null,
+    val encAlgAuth: AuthCryptAlg? = null,
+    val encAlgAnon: AnonCryptAlg? = null,
+    val signAlg: SignAlg? = null,
+    val signedMessage: JSONObject? = null
 )

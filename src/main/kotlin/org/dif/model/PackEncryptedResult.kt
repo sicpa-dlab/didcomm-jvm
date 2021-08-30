@@ -1,7 +1,5 @@
 package org.dif.model
 
-import org.dif.common.JSON
-
 /**
  * Result of pack encrypted message operation.
  *
@@ -13,11 +11,11 @@ import org.dif.common.JSON
  * @property signFromKid     Identifier (DID URL) of sender key used for message signing.
  */
 data class PackEncryptedResult(
-    val packedMessage: JSON,
+    val packedMessage: String,
     val toKids: List<String>,
-    val fromKid: String?,
-    val signFromKid: String?,
-    val serviceMetadata: ServiceMetadata?,
+    val fromKid: String? = null,
+    val signFromKid: String? = null,
+    val serviceMetadata: ServiceMetadata? = null,
 )
 
 /**

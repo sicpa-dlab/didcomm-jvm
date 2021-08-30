@@ -1,7 +1,5 @@
 package org.dif.model
 
-import org.dif.common.JSON
-
 /**
  * Result of pack signed message operation.
  *
@@ -9,6 +7,6 @@ import org.dif.common.JSON
  * @property signFromKid    Identifier (DID URL) of sender key used for message signing
  */
 data class PackSignedResult(
-    val packedMessage: JSON,
+    val packedMessage: String,
     val signFromKid: String
 )

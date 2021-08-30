@@ -1,7 +1,6 @@
 package org.dif.model
 
 import org.dif.diddoc.DIDDocResolver
-import org.dif.message.Attachment
 import org.dif.message.Message
 import org.dif.secret.SecretResolver
 

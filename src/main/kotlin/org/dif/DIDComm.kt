@@ -5,11 +5,10 @@ import org.dif.common.*
 import org.dif.diddoc.*
 import org.dif.model.*
 import org.dif.secret.SecretResolver
-
 /**
  *
  */
-class DIDComm(val didDocResolver: DIDDocResolver, val secretResolver: SecretResolver) {
+class DIDComm(private val didDocResolver: DIDDocResolver, private val secretResolver: SecretResolver) {
     /**
      * Produces [DIDComm Plaintext Messages](https://identity.foundation/didcomm-messaging/spec/#didcomm-plaintext-messages).
      *
@@ -27,7 +26,7 @@ class DIDComm(val didDocResolver: DIDDocResolver, val secretResolver: SecretReso
      * @return Result of Pack Plaintext Operation.
      */
     fun packPlaintext(params: PackPlaintextParams): PackPlaintextResult {
-        throw NotImplementedError()
+        TODO("Not yet implemented")
     }
 
     /**
@@ -54,7 +53,7 @@ class DIDComm(val didDocResolver: DIDDocResolver, val secretResolver: SecretReso
      * @return Result of Pack Signed Operation.
      */
     fun packSigned(params: PackSignedParams): PackSignedResult {
-        throw NotImplementedError()
+        TODO("Not yet implemented")
     }
 
     /**
@@ -111,7 +110,7 @@ class DIDComm(val didDocResolver: DIDDocResolver, val secretResolver: SecretReso
      * @return Result of pack encrypted operation.
      */
     fun packEncrypted(params: PackEncryptedParams): PackEncryptedResult {
-        throw NotImplementedError()
+        TODO("Not yet implemented")
     }
 
     /**
@@ -123,6 +122,6 @@ class DIDComm(val didDocResolver: DIDDocResolver, val secretResolver: SecretReso
      *  @return Result of Unpack Operation.
      */
     fun unpack(params: UnpackParams): UnpackResult {
-        throw NotImplementedError()
+        TODO("Not yet implemented")
     }
 }

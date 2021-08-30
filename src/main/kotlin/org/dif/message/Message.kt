@@ -93,18 +93,18 @@ data class Message(
 
     fun toJSONObject() = mapOf(
         "id" to id,
-        "payload" to payload.toJSONObject(),
+        "typ" to typ.typ,
         "type" to type,
-        "typ" to typ.name,
         "from" to from,
         "to" to to,
         "created_time" to createdTime,
         "expires_time" to expiresTime,
+        "body" to payload.toJSONObject(),
         "attachments" to attachments,
         "from_prior" to fromPrior,
         "please_ack" to pleaseAck,
         "ack" to ack,
         "thid" to thid,
         "pthid" to pthid
-    )
+    ).filterValues { it != null }
 }

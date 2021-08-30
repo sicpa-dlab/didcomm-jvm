@@ -1,5 +1,7 @@
 package org.dif.diddoc
 
+import org.dif.common.VerificationMaterial
+
 /**
  * DID DOC (https://www.w3.org/TR/did-core/#dfn-did-documents)
  * @property did                    a DID for the given DID Doc
@@ -36,17 +38,6 @@ data class VerificationMethod(
     val verificationMaterial: VerificationMaterial,
 )
 
-data class VerificationMaterial(
-    val type: EncodingType,
-    val encodedValue: String
-)
-
-enum class EncodingType {
-    JWK,
-    BASE58,
-    OTHER
-}
-
 /**
  * DID DOC Service of 'DIDCommMessaging' type.
  * see https://www.w3.org/TR/did-core/#services
@@ -57,9 +48,12 @@ enum class EncodingType {
  *                           or a mediator's DID in case of alternative endpoints.
  * @property routingKeys     A possibly empty ordered array of strings referencing keys
  *                           to be used when preparing the message for transmission.
+ * @property accept          A possibly empty ordered array of strings representing
+ *                           accepted didcomm specification versions.
  */
 data class DIDCommService(
     val id: String,
     val serviceEndpoint: String,
-    val routingKeys: List<String>
+    val routingKeys: List<String>,
+    val accept: List<String>
 )
