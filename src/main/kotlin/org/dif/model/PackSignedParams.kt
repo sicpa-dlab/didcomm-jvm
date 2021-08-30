@@ -13,7 +13,7 @@ data class PackSignedParams(
     val didDocResolver: DIDDocResolver?,
     val secretResolver: SecretResolver?,
 ) {
-    private constructor(builder: Builder): this(
+    private constructor(builder: Builder) : this(
         builder.message,
         builder.signFrom,
         builder.didDocResolver,

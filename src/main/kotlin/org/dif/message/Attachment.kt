@@ -12,7 +12,7 @@ data class AttachmentDataLinks(
     val links: List<String>,
     override val hash: String,
     override val jws: JSON? = null,
-): AttachmentData {
+) : AttachmentData {
     override fun toJSONObject(): Map<String, Any?> = mapOf(
         "hash" to hash,
         "jws" to jws?.toString(),
@@ -24,7 +24,7 @@ data class AttachmentDataBase64(
     val base64: String,
     override val hash: String? = null,
     override val jws: JSON? = null,
-): AttachmentData {
+) : AttachmentData {
     override fun toJSONObject(): Map<String, Any?> = mapOf(
         "hash" to hash,
         "jws" to jws?.toString(),
@@ -32,12 +32,11 @@ data class AttachmentDataBase64(
     )
 }
 
-
 data class AttachmentDataJson(
     val json: JSON,
     override val hash: String? = null,
     override val jws: JSON? = null,
-): AttachmentData {
+) : AttachmentData {
     override fun toJSONObject(): Map<String, Any?> = mapOf(
         "hash" to hash,
         "jws" to jws?.toString(),

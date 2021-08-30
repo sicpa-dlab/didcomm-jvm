@@ -1,6 +1,5 @@
 package org.dif.common
 
-
 /**
  * Algorithms for anonymous encryption.
  */
@@ -27,7 +26,7 @@ enum class AnonCryptAlg {
 /**
  * Algorithms for authentication encryption.
  */
-enum class AuthCryptAlg{
+enum class AuthCryptAlg {
     /**
      * A256CBC_HS512_ECDH_1PU_A256KW: AES256-CBC + HMAC-SHA512 with a 512 bit key content encryption,
      * ECDH-1PU key agreement with A256KW key wrapping

@@ -13,8 +13,7 @@ import org.dif.model.PackEncryptedParams
 import org.dif.model.PackPlaintextParams
 import org.dif.model.PackSignedParams
 import org.dif.model.UnpackParams
-import org.junit.Test
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 class DIDDocTest {
     companion object {

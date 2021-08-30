@@ -23,7 +23,7 @@ data class PackEncryptedParams(
     val didDocResolver: DIDDocResolver?,
     val secretResolver: SecretResolver?,
 ) {
-    private constructor(builder: Builder): this(
+    private constructor(builder: Builder) : this(
         builder.message,
         builder.to,
         builder.from,

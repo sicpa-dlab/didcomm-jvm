@@ -1,12 +1,21 @@
 package org.dif
 
+import org.dif.common.AnonCryptAlg
+import org.dif.common.AuthCryptAlg
+import org.dif.diddoc.DIDDoc
 import org.dif.diddoc.DIDDocResolver
-import org.dif.common.*
-import org.dif.diddoc.*
-import org.dif.model.*
+import org.dif.model.PackEncryptedParams
+import org.dif.model.PackEncryptedResult
+import org.dif.model.PackPlaintextParams
+import org.dif.model.PackPlaintextResult
+import org.dif.model.PackSignedParams
+import org.dif.model.PackSignedResult
+import org.dif.model.UnpackParams
+import org.dif.model.UnpackResult
 import org.dif.secret.SecretResolver
+
 /**
- *
+ * DID Comm operations
  */
 class DIDComm(private val didDocResolver: DIDDocResolver, private val secretResolver: SecretResolver) {
     /**

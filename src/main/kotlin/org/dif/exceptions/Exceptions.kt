@@ -13,4 +13,4 @@ open class DIDCommException(message: String, cause: Throwable? = null) : Throwab
  *
  * @param type The secret type.
  */
-class UnsupportedSecretTypeException(type: String): DIDCommException("The secret type $type is unsupported")
+class UnsupportedSecretTypeException(type: String) : DIDCommException("The secret type $type is unsupported")

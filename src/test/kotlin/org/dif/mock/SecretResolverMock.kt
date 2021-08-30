@@ -2,9 +2,9 @@ package org.dif.mock
 
 import org.dif.secret.Secret
 import org.dif.secret.SecretResolver
-import java.util.*
+import java.util.Optional
 
-class SecretResolverMock: SecretResolver {
+class SecretResolverMock : SecretResolver {
     override fun findKey(kid: String): Optional<Secret> {
         TODO("Not yet implemented")
     }

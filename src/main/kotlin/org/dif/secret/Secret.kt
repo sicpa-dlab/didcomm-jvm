@@ -18,5 +18,4 @@ import org.dif.common.VerificationMethodType
  *                                For example, for 'JsonWebKey2020' type it will be a JWK JSON string.
  *                                For 'X25519KeyAgreementKey2019' type it will be a base58-encoded string.
  */
-data class Secret(val kid: String, val type: VerificationMethodType, val verificationMaterial: VerificationMaterial) {
-}
+data class Secret(val kid: String, val type: VerificationMethodType, val verificationMaterial: VerificationMaterial)

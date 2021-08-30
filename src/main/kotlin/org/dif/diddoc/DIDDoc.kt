@@ -10,7 +10,7 @@ import org.dif.common.VerificationMaterial
  *                                  See https://www.w3.org/TR/did-core/#verification-methods.
  * @property authentications        Key IDs (DID URLs) of all verification methods from the 'authentication'
  *                                  verification relationship in this DID DOC.
-                                    See https://www.w3.org/TR/did-core/#authentication.
+ See https://www.w3.org/TR/did-core/#authentication.
  * @property verificationMethods    Returns all local verification methods including embedded
  *                                  to key agreement and authentication sections.
  *                                  See https://www.w3.org/TR/did-core/#verification-methods.

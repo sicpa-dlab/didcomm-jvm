@@ -6,15 +6,15 @@ interface JSON {
     fun toJSONObject(): Any
 }
 
-class JSONObject(private val data: Map<String, Any>): JSON {
-    override fun toString(): String
-            = JSONObjectUtils.toJSONString(data)
+class JSONObject(private val data: Map<String, Any>) : JSON {
+    override fun toString(): String =
+        JSONObjectUtils.toJSONString(data)
 
-    override fun toJSONObject(): Any
-            = data
+    override fun toJSONObject(): Any =
+        data
 }
 
-class JSONArray(val data: List<Any>): JSON {
+class JSONArray(val data: List<Any>) : JSON {
     override fun toJSONObject(): Any {
         TODO("Not yet implemented")
     }
