@@ -1,6 +1,7 @@
 package org.dif.diddoc
 
 import org.dif.common.VerificationMaterial
+import org.dif.common.VerificationMethodType
 
 /**
  * DID DOC (https://www.w3.org/TR/did-core/#dfn-did-documents)
@@ -33,7 +34,7 @@ data class DIDDoc(
  */
 data class VerificationMethod(
     val id: String,
-    val type: String,
+    val type: VerificationMethodType,
     val controller: String,
     val verificationMaterial: VerificationMaterial,
 )

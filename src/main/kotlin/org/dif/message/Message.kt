@@ -1,11 +1,10 @@
 package org.dif.message
 
-import org.dif.common.JSON
 import org.dif.common.Typ
 
 data class Message(
     val id: String,
-    val payload: JSON,
+    val body: Map<String, Any>,
     val type: String,
     val typ: Typ,
     val from: String?,
@@ -22,7 +21,7 @@ data class Message(
 ) {
     private constructor(builder: Builder) : this(
         builder.id,
-        builder.payload,
+        builder.body,
         builder.type,
         builder.typ,
         builder.from,
@@ -39,10 +38,12 @@ data class Message(
     )
 
     companion object {
-        fun builder(id: String, payload: JSON, type: String, typ: Typ) = Builder(id, payload, type, typ)
+        fun builder(id: String, body: Map<String, Any>, type: String) = Builder(id, body, type)
     }
 
-    class Builder(val id: String, val payload: JSON, val type: String, val typ: Typ) {
+    class Builder(val id: String, val body: Map<String, Any>, val type: String) {
+        var typ: Typ = Typ.Plaintext
+
         var from: String? = null
             private set
 
@@ -99,7 +100,7 @@ data class Message(
         "to" to to,
         "created_time" to createdTime,
         "expires_time" to expiresTime,
-        "body" to payload.toJSONObject(),
+        "body" to body,
         "attachments" to attachments,
         "from_prior" to fromPrior,
         "please_ack" to pleaseAck,

@@ -4,6 +4,8 @@ import org.dif.common.AnonCryptAlg
 import org.dif.common.AuthCryptAlg
 import org.dif.diddoc.DIDDoc
 import org.dif.diddoc.DIDDocResolver
+import org.dif.message.Message
+import org.dif.model.Metadata
 import org.dif.model.PackEncryptedParams
 import org.dif.model.PackEncryptedResult
 import org.dif.model.PackPlaintextParams
@@ -35,7 +37,7 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
      * @return Result of Pack Plaintext Operation.
      */
     fun packPlaintext(params: PackPlaintextParams): PackPlaintextResult {
-        TODO("Not yet implemented")
+        return PackPlaintextResult("")
     }
 
     /**
@@ -62,7 +64,7 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
      * @return Result of Pack Signed Operation.
      */
     fun packSigned(params: PackSignedParams): PackSignedResult {
-        TODO("Not yet implemented")
+        return PackSignedResult("", "")
     }
 
     /**
@@ -119,7 +121,7 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
      * @return Result of pack encrypted operation.
      */
     fun packEncrypted(params: PackEncryptedParams): PackEncryptedResult {
-        TODO("Not yet implemented")
+        return PackEncryptedResult("", listOf(), "")
     }
 
     /**
@@ -131,6 +133,9 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
      *  @return Result of Unpack Operation.
      */
     fun unpack(params: UnpackParams): UnpackResult {
-        TODO("Not yet implemented")
+        return UnpackResult(
+            Message.builder("", mapOf("" to ""), "").build(),
+            Metadata(false, false, false, false, false, listOf())
+        )
     }
 }

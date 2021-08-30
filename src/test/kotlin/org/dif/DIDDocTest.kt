@@ -2,7 +2,6 @@ package org.dif
 
 import org.dif.common.AnonCryptAlg
 import org.dif.common.JSONObject
-import org.dif.common.Typ
 import org.dif.message.Attachment
 import org.dif.message.AttachmentDataBase64
 import org.dif.message.AttachmentDataJson
@@ -36,7 +35,7 @@ class DIDDocTest {
                 .build()
         )
 
-        val msg = Message.builder("12345", JSONObject(mapOf("foo" to "bar")), "my-protocol/1.0", Typ.Plaintext)
+        val msg = Message.builder("12345", mapOf("foo" to "bar"), "my-protocol/1.0")
             .attachments(attachments)
             .from(ALICE_DID)
             .to(listOf(BOB_DID))
@@ -57,7 +56,7 @@ class DIDDocTest {
     fun test_repudiable_authentication_encryption() {
         val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
 
-        val msg = Message.builder("12345", JSONObject(mapOf("foo" to "bar")), "my-protocol/1.0", Typ.Plaintext)
+        val msg = Message.builder("12345", mapOf("foo" to "bar"), "my-protocol/1.0")
             .from(ALICE_DID)
             .to(listOf(BOB_DID))
             .build()
@@ -77,7 +76,7 @@ class DIDDocTest {
     fun test_repudiable_non_authenticated_encryption() {
         val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
 
-        val msg = Message.builder("12345", JSONObject(mapOf("foo" to "bar")), "my-protocol/1.0", Typ.Plaintext)
+        val msg = Message.builder("12345", mapOf("foo" to "bar"), "my-protocol/1.0")
             .from(ALICE_DID)
             .to(listOf(BOB_DID))
             .build()
@@ -95,7 +94,7 @@ class DIDDocTest {
     fun test_non_repudiable_encryption() {
         val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
 
-        val msg = Message.builder("12345", JSONObject(mapOf("foo" to "bar")), "my-protocol/1.0", Typ.Plaintext)
+        val msg = Message.builder("12345", mapOf("foo" to "bar"), "my-protocol/1.0")
             .from(ALICE_DID)
             .to(listOf(BOB_DID))
             .build()
@@ -116,7 +115,7 @@ class DIDDocTest {
     fun test_signed_unencrypted() {
         val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
 
-        val msg = Message.builder("12345", JSONObject(mapOf("foo" to "bar")), "my-protocol/1.0", Typ.Plaintext)
+        val msg = Message.builder("12345", mapOf("foo" to "bar"), "my-protocol/1.0")
             .from(ALICE_DID)
             .to(listOf(BOB_DID))
             .build()
@@ -135,7 +134,7 @@ class DIDDocTest {
     fun test_plaintext() {
         val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
 
-        val msg = Message.builder("12345", JSONObject(mapOf("foo" to "bar")), "my-protocol/1.0", Typ.Plaintext)
+        val msg = Message.builder("12345", mapOf("foo" to "bar"), "my-protocol/1.0")
             .from(ALICE_DID)
             .to(listOf(BOB_DID))
             .build()
@@ -154,7 +153,7 @@ class DIDDocTest {
     fun test_advanced_parameters() {
         val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
 
-        val msg = Message.builder("12345", JSONObject(mapOf("foo" to "bar")), "my-protocol/1.0", Typ.Plaintext)
+        val msg = Message.builder("12345", mapOf("foo" to "bar"), "my-protocol/1.0")
             .from(ALICE_DID)
             .to(listOf(BOB_DID))
             .build()

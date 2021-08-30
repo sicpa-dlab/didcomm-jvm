@@ -5,11 +5,9 @@ import org.dif.secret.SecretResolver
 import java.util.Optional
 
 class SecretResolverMock : SecretResolver {
-    override fun findKey(kid: String): Optional<Secret> {
-        TODO("Not yet implemented")
-    }
+    override fun findKey(kid: String): Optional<Secret> =
+        Optional.empty()
 
-    override fun findKeys(kids: List<String>): List<Secret> {
-        TODO("Not yet implemented")
-    }
+    override fun findKeys(kids: List<String>): List<Secret> =
+        listOf()
 }

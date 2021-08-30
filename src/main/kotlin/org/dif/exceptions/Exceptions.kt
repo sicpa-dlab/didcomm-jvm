@@ -14,3 +14,10 @@ open class DIDCommException(message: String, cause: Throwable? = null) : Throwab
  * @param type The secret type.
  */
 class UnsupportedSecretTypeException(type: String) : DIDCommException("The secret type $type is unsupported")
+
+/**
+ * This exception SHOULD be raised if DID Doc can not be found.
+ *
+ * @param did The did.
+ */
+class DIDDocNotFoundException(did: String) : DIDCommException("The DID Doc $did not found")
