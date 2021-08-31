@@ -1,6 +1,5 @@
 package org.dif.message
 
-import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jose.util.JSONObjectUtils
 import org.dif.common.Typ
 
@@ -122,7 +121,6 @@ data class Message(
         "pthid" to pthid
     ).filterValues { it != null }
 
-    fun toBase64URL() = Base64URL.encode(
+    override fun toString(): String =
         JSONObjectUtils.toJSONStringForWeb(toJSONObject())
-    )
 }
