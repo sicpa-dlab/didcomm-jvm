@@ -19,8 +19,8 @@ import org.dif.exceptions.UnsupportedCurveException
 import org.dif.exceptions.UnsupportedJWKException
 import org.dif.utils.asKey
 
-fun sign(payload: Base64URL, key: Key): String {
-    val jwk = key.toJWK()
+fun sign(payload: String, key: Key): String {
+    val jwk = key.jwk
 
     val alg = when (jwk) {
         is ECKey -> when (jwk.curve) {
@@ -43,7 +43,7 @@ fun sign(payload: Base64URL, key: Key): String {
         .type(JOSEObjectType(Typ.Signed.typ))
         .build()
 
-    val jws = JWSObjectJSON(jwsHeader, Payload(payload))
+    val jws = JWSObjectJSON(jwsHeader, Payload(Base64URL.encode(payload)))
     jws.sign(UnprotectedHeader.Builder(key.id).build(), signer)
     return jws.serialize()
 }

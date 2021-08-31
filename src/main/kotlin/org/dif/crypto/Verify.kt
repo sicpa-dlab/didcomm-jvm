@@ -16,7 +16,7 @@ import org.dif.message.Message
 import org.dif.utils.asKey
 
 fun verify(jws: JWSObjectJSON, key: Key): Message {
-    val jwk = key.toJWK()
+    val jwk = key.jwk
 
     val alg = when (jwk) {
         is ECKey -> when (jwk.curve) {
