@@ -1,5 +1,7 @@
 package org.dif.message
 
+import com.nimbusds.jose.util.Base64URL
+import com.nimbusds.jose.util.JSONObjectUtils
 import org.dif.common.Typ
 
 data class Message(
@@ -39,6 +41,17 @@ data class Message(
 
     companion object {
         fun builder(id: String, body: Map<String, Any>, type: String) = Builder(id, body, type)
+
+        fun parse(json: Map<String, Any>): Message = builder(
+            JSONObjectUtils.getString(json, "id"),
+            JSONObjectUtils.getJSONObject(json, "body"),
+            JSONObjectUtils.getString(json, "type")
+        )
+            .from(JSONObjectUtils.getString(json, "from"))
+            .to(JSONObjectUtils.getStringList(json, "to"))
+            .createdTime(JSONObjectUtils.getInt(json, "created_time"))
+            .expiresTime(JSONObjectUtils.getInt(json, "expires_time"))
+            .build()
     }
 
     class Builder(val id: String, val body: Map<String, Any>, val type: String) {
@@ -108,4 +121,8 @@ data class Message(
         "thid" to thid,
         "pthid" to pthid
     ).filterValues { it != null }
+
+    fun toBase64URL() = Base64URL.encode(
+        JSONObjectUtils.toJSONStringForWeb(toJSONObject())
+    )
 }

@@ -3,7 +3,16 @@ package org.dif.common
 enum class Typ(val typ: String) {
     Encrypted("application/didcomm-encrypted+json"),
     Signed("application/didcomm-signed+json"),
-    Plaintext("application/didcomm-plain+json"),
+    Plaintext("application/didcomm-plain+json");
+
+    companion object {
+        fun parse(str: String): Typ = when (str) {
+            "application/didcomm-encrypted+json" -> Encrypted
+            "application/didcomm-signed+json" -> Signed
+            "application/didcomm-plain+json" -> Plaintext
+            else -> throw IllegalArgumentException("Unsupported message typ")
+        }
+    }
 }
 
 enum class VerificationMethodType {

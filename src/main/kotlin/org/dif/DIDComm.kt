@@ -2,6 +2,12 @@ package org.dif
 
 import org.dif.common.AnonCryptAlg
 import org.dif.common.AuthCryptAlg
+import org.dif.common.Typ
+import org.dif.crypto.key.RecipientKeySelector
+import org.dif.crypto.key.SenderKeySelector
+import org.dif.crypto.parse
+import org.dif.crypto.sign
+import org.dif.crypto.verify
 import org.dif.diddoc.DIDDoc
 import org.dif.diddoc.DIDDocResolver
 import org.dif.message.Message
@@ -64,7 +70,14 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
      * @return Result of Pack Signed Operation.
      */
     fun packSigned(params: PackSignedParams): PackSignedResult {
-        return PackSignedResult("", "")
+        val didDocResolver = params.didDocResolver ?: this.didDocResolver
+        val secretResolver = params.secretResolver ?: this.secretResolver
+        val senderKeySelector = SenderKeySelector(didDocResolver, secretResolver)
+
+        val key = senderKeySelector.signKey(params.signFrom)
+        val msg = sign(params.message.toBase64URL(), key)
+
+        return PackSignedResult(msg, params.signFrom)
     }
 
     /**
@@ -133,9 +146,27 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
      *  @return Result of Unpack Operation.
      */
     fun unpack(params: UnpackParams): UnpackResult {
-        return UnpackResult(
-            Message.builder("", mapOf("" to ""), "").build(),
-            Metadata(false, false, false, false, false, listOf())
-        )
+        val didDocResolver = params.didDocResolver ?: this.didDocResolver
+        val secretResolver = params.secretResolver ?: this.secretResolver
+        val recipientKeySelector = RecipientKeySelector(didDocResolver, secretResolver)
+
+        val parseResult = parse(params.packedMessage)
+
+        return when (parseResult.typ) {
+            Typ.Signed -> let {
+                val kid = parseResult.jws.unprotectedHeader.keyID
+                val key = recipientKeySelector.verifyKey(kid)
+
+                UnpackResult(
+                    verify(parseResult.jws, key),
+                    Metadata(false, false, false, false, false, listOf())
+                )
+            }
+
+            else -> UnpackResult(
+                Message.builder("", mapOf("" to ""), "").build(),
+                Metadata(false, false, false, false, false, listOf())
+            )
+        }
     }
 }

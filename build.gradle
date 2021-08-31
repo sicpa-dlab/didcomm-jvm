@@ -16,6 +16,7 @@ repositories {
 
 dependencies {
     implementation "com.nimbusds:nimbus-jose-jwt:${nimbusJoseJWTVersion}"
+    implementation "com.google.crypto.tink:tink:${googleTinkVersion}"
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
 }
 
