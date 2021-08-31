@@ -1,7 +1,7 @@
 package org.dif.crypto.key
 
-import com.nimbusds.jose.jwk.AsymmetricJWK
 import com.nimbusds.jose.jwk.Curve
+import com.nimbusds.jose.jwk.CurveBasedJWK
 import com.nimbusds.jose.jwk.JWK
 import org.dif.common.VerificationMaterial
 import org.dif.common.VerificationMethodType
@@ -41,11 +41,11 @@ sealed interface Key {
         init {
             val jwk = JWK.parse(verificationMaterial.value)
 
-            if (jwk !is AsymmetricJWK)
+            if (jwk !is CurveBasedJWK)
                 throw UnsupportedJWKException(jwk::class.java.name)
 
             this.jwk = jwk
-            this.curve = curve
+            this.curve = jwk.curve
         }
     }
 
