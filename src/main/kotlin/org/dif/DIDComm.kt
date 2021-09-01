@@ -2,7 +2,7 @@ package org.dif
 
 import org.dif.common.AnonCryptAlg
 import org.dif.common.AuthCryptAlg
-import org.dif.common.Typ
+import org.dif.crypto.ParseResult
 import org.dif.crypto.key.RecipientKeySelector
 import org.dif.crypto.key.SenderKeySelector
 import org.dif.crypto.parse
@@ -10,6 +10,7 @@ import org.dif.crypto.sign
 import org.dif.crypto.verify
 import org.dif.diddoc.DIDDoc
 import org.dif.diddoc.DIDDocResolver
+import org.dif.exceptions.MalformedMessageException
 import org.dif.message.Message
 import org.dif.model.Metadata
 import org.dif.model.PackEncryptedParams
@@ -75,7 +76,7 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         val senderKeySelector = SenderKeySelector(didDocResolver, secretResolver)
 
         val key = senderKeySelector.signKey(params.signFrom)
-        val msg = sign(params.message.toBase64URL(), key)
+        val msg = sign(params.message.toString(), key)
 
         return PackSignedResult(msg, params.signFrom)
     }
@@ -150,22 +151,23 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         val secretResolver = params.secretResolver ?: this.secretResolver
         val recipientKeySelector = RecipientKeySelector(didDocResolver, secretResolver)
 
-        val parseResult = parse(params.packedMessage)
+        return when (val parseResult = parse(params.packedMessage)) {
+            is ParseResult.JWS -> let {
+                val message = parseResult.message
+                val kid = message.unprotectedHeader?.keyID
+                    ?: throw MalformedMessageException("JWS Unprotected Per-Signature header must be present")
 
-        return when (parseResult.typ) {
-            Typ.Signed -> let {
-                val kid = parseResult.jws.unprotectedHeader.keyID
                 val key = recipientKeySelector.verifyKey(kid)
 
                 UnpackResult(
-                    verify(parseResult.jws, key),
-                    Metadata(false, false, false, false, false, listOf())
+                    verify(message, key),
+                    Metadata(encrypted = false, authenticated = false, nonRepudiation = false, anonymousSender = false, reWrappedInForward = false, listOf())
                 )
             }
 
             else -> UnpackResult(
                 Message.builder("", mapOf("" to ""), "").build(),
-                Metadata(false, false, false, false, false, listOf())
+                Metadata(encrypted = false, authenticated = false, nonRepudiation = false, anonymousSender = false, reWrappedInForward = false, listOf())
             )
         }
     }

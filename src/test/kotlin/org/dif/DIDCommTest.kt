@@ -2,6 +2,7 @@ package org.dif
 
 import org.dif.common.AnonCryptAlg
 import org.dif.common.JSONObject
+import org.dif.fixtures.JWM
 import org.dif.message.Attachment
 import org.dif.message.AttachmentDataBase64
 import org.dif.message.AttachmentDataJson
@@ -14,24 +15,8 @@ import org.dif.model.PackSignedParams
 import org.junit.jupiter.api.Test
 
 class DIDCommTest {
-    companion object {
-        const val ALICE_DID = "did:example:alice"
-        const val BOB_DID = "did:example:bob"
-
-        private const val ID = "1234567890"
-        private const val TYPE = "http://example.com/protocols/lets_do_lunch/1.0/proposal"
-        private val BODY = mapOf("messagespecificattribute" to "and its value")
-
-        val PLAINTEXT_MESSAGE = Message.builder(ID, BODY, TYPE)
-            .from(ALICE_DID)
-            .to(listOf(BOB_DID))
-            .createdTime(1516269022)
-            .expiresTime(1516385931)
-            .build()
-    }
-
     @Test
-    fun test_message_with_attachments() {
+    fun `Test message with attachments message`() {
         val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
 
         val attachments = listOf(
@@ -47,12 +32,12 @@ class DIDCommTest {
 
         val msg = Message.builder("12345", mapOf("foo" to "bar"), "my-protocol/1.0")
             .attachments(attachments)
-            .from(ALICE_DID)
-            .to(listOf(BOB_DID))
+            .from(JWM.ALICE_DID)
+            .to(listOf(JWM.BOB_DID))
             .build()
 
         val packedMsg = didComm.packEncrypted(
-            PackEncryptedParams.builder(msg, BOB_DID).build()
+            PackEncryptedParams.builder(msg, JWM.BOB_DID).build()
         )
 
         /*val unpack = didComm.unpack(
@@ -63,17 +48,17 @@ class DIDCommTest {
     }
 
     @Test
-    fun test_repudiable_authentication_encryption() {
+    fun `Test repudiable authentication encryption message`() {
         val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
 
         val msg = Message.builder("12345", mapOf("foo" to "bar"), "my-protocol/1.0")
-            .from(ALICE_DID)
-            .to(listOf(BOB_DID))
+            .from(JWM.ALICE_DID)
+            .to(listOf(JWM.BOB_DID))
             .build()
 
         val packResult = didComm.packEncrypted(
-            PackEncryptedParams.builder(msg, BOB_DID)
-                .from(ALICE_DID)
+            PackEncryptedParams.builder(msg, JWM.BOB_DID)
+                .from(JWM.ALICE_DID)
                 .build()
         )
 
@@ -83,16 +68,16 @@ class DIDCommTest {
     }
 
     @Test
-    fun test_repudiable_non_authenticated_encryption() {
+    fun `Test repudiable non authenticated encryption message`() {
         val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
 
         val msg = Message.builder("12345", mapOf("foo" to "bar"), "my-protocol/1.0")
-            .from(ALICE_DID)
-            .to(listOf(BOB_DID))
+            .from(JWM.ALICE_DID)
+            .to(listOf(JWM.BOB_DID))
             .build()
 
         val packResult = didComm.packEncrypted(
-            PackEncryptedParams.builder(msg, BOB_DID).build()
+            PackEncryptedParams.builder(msg, JWM.BOB_DID).build()
         )
 
         /*val unpack = didComm.unpack(
@@ -101,18 +86,18 @@ class DIDCommTest {
     }
 
     @Test()
-    fun test_non_repudiable_encryption() {
+    fun `Test non repudiable encryption message`() {
         val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
 
         val msg = Message.builder("12345", mapOf("foo" to "bar"), "my-protocol/1.0")
-            .from(ALICE_DID)
-            .to(listOf(BOB_DID))
+            .from(JWM.ALICE_DID)
+            .to(listOf(JWM.BOB_DID))
             .build()
 
         val packResult = didComm.packEncrypted(
-            PackEncryptedParams.builder(msg, BOB_DID)
-                .signFrom(ALICE_DID)
-                .from(ALICE_DID)
+            PackEncryptedParams.builder(msg, JWM.BOB_DID)
+                .signFrom(JWM.ALICE_DID)
+                .from(JWM.ALICE_DID)
                 .build()
         )
 
@@ -122,16 +107,16 @@ class DIDCommTest {
     }
 
     @Test()
-    fun test_signed_unencrypted() {
+    fun `Test signed unencrypted message`() {
         val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
 
         val msg = Message.builder("12345", mapOf("foo" to "bar"), "my-protocol/1.0")
-            .from(ALICE_DID)
-            .to(listOf(BOB_DID))
+            .from(JWM.ALICE_DID)
+            .to(listOf(JWM.BOB_DID))
             .build()
 
         val packResult = didComm.packSigned(
-            PackSignedParams.builder(msg, ALICE_DID)
+            PackSignedParams.builder(msg, JWM.ALICE_DID)
                 .build()
         )
 
@@ -141,12 +126,12 @@ class DIDCommTest {
     }
 
     @Test()
-    fun test_plaintext() {
+    fun `Test plaintext message`() {
         val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
 
         val msg = Message.builder("12345", mapOf("foo" to "bar"), "my-protocol/1.0")
-            .from(ALICE_DID)
-            .to(listOf(BOB_DID))
+            .from(JWM.ALICE_DID)
+            .to(listOf(JWM.BOB_DID))
             .build()
 
         val packResult = didComm.packPlaintext(
@@ -160,18 +145,18 @@ class DIDCommTest {
     }
 
     @Test()
-    fun test_advanced_parameters() {
+    fun `Test advanced parameters`() {
         val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
 
         val msg = Message.builder("12345", mapOf("foo" to "bar"), "my-protocol/1.0")
-            .from(ALICE_DID)
-            .to(listOf(BOB_DID))
+            .from(JWM.ALICE_DID)
+            .to(listOf(JWM.BOB_DID))
             .build()
 
         val packResult = didComm.packEncrypted(
-            PackEncryptedParams.builder(msg, BOB_DID)
-                .signFrom(ALICE_DID)
-                .from(ALICE_DID)
+            PackEncryptedParams.builder(msg, JWM.BOB_DID)
+                .signFrom(JWM.ALICE_DID)
+                .from(JWM.ALICE_DID)
                 .protectSenderId(true)
                 .forward(true)
                 .encAlgAnon(AnonCryptAlg.XC20P_ECDH_ES_A256KW)
