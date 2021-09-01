@@ -2,7 +2,6 @@ package org.dif.model
 
 import org.dif.common.AnonCryptAlg
 import org.dif.common.AuthCryptAlg
-import org.dif.common.JSONObject
 import org.dif.common.SignAlg
 import org.dif.message.Message
 
@@ -39,11 +38,11 @@ data class Metadata(
     val nonRepudiation: Boolean,
     val anonymousSender: Boolean,
     val reWrappedInForward: Boolean,
-    val encryptedTo: List<String>,
-    val encryptedFrom: Boolean? = null,
+    val encryptedTo: List<String>? = null,
+    val encryptedFrom: String? = null,
     val signFrom: String? = null,
     val encAlgAuth: AuthCryptAlg? = null,
     val encAlgAnon: AnonCryptAlg? = null,
     val signAlg: SignAlg? = null,
-    val signedMessage: JSONObject? = null
+    val signedMessage: Map<String, Any>? = null
 )

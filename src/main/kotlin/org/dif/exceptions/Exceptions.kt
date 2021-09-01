@@ -70,5 +70,13 @@ class ParseException(message: String, cause: Throwable) : DIDCommException(messa
  * Signals that packed message is malformed.
  *
  * @param message - the detail message.
+ * @param cause - the cause of this.
  */
-class MalformedMessageException(message: String) : DIDCommException(message)
+class MalformedMessageException(message: String, cause: Throwable? = null) : DIDCommException(message, cause)
+
+/**
+ * Signals that crypto is incompatible
+ *
+ * @param message - the detail message.
+ */
+class IncompatibleCryptoException(message: String) : DIDCommException(message)
