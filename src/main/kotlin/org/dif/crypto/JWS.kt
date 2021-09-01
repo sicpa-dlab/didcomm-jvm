@@ -48,17 +48,10 @@ fun sign(payload: String, key: Key): String {
 fun verify(jws: JWSObjectJSON, key: Key): VerifyResult {
     val jwk = key.jwk
 
-    val signAlg: SignAlg = when (val alg = jws.header.algorithm) {
-        JWSAlgorithm.ES256 -> SignAlg.ES256
-        JWSAlgorithm.ES256K -> SignAlg.ES256K
-        JWSAlgorithm.EdDSA -> SignAlg.ED25519
-        else -> throw UnsupportedAlgorithm(alg.name)
-    }
-
-    val verifier = when (val alg = getJWSAlgorithm(jwk)) {
-        JWSAlgorithm.ES256 -> ECDSAVerifier(jwk.asKey<ECKey>())
-        JWSAlgorithm.ES256K -> ECDSAVerifier(jwk.asKey<ECKey>())
-        JWSAlgorithm.EdDSA -> Ed25519Verifier(jwk.asKey())
+    val (signAlg, verifier) = when (val alg = jws.header.algorithm) {
+        JWSAlgorithm.ES256 -> Pair(SignAlg.ES256, ECDSAVerifier(jwk.asKey<ECKey>()))
+        JWSAlgorithm.ES256K -> Pair(SignAlg.ES256K, ECDSAVerifier(jwk.asKey<ECKey>()))
+        JWSAlgorithm.EdDSA -> Pair(SignAlg.ED25519, Ed25519Verifier(jwk.asKey()))
         else -> throw UnsupportedAlgorithm(alg.name)
     }
 
