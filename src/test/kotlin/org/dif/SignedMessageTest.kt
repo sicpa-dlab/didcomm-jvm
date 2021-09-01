@@ -5,7 +5,7 @@ import com.nimbusds.jose.util.JSONObjectUtils
 import org.dif.fixtures.JWM
 import org.dif.fixtures.JWS
 import org.dif.mock.DIDDocResolverMock
-import org.dif.mock.SecretResolverMock
+import org.dif.mock.AliceSecretResolverMock
 import org.dif.model.PackSignedParams
 import org.dif.model.UnpackParams
 import org.junit.jupiter.api.Test
@@ -16,7 +16,7 @@ class SignedMessageTest {
     @Test
     fun `Test signed message test vectors`() {
         for (test in JWS.TEST_VECTORS) {
-            val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
+            val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
             val packed = didComm.packSigned(
                 PackSignedParams.builder(JWM.PLAINTEXT_MESSAGE, test.from).build()

@@ -34,7 +34,7 @@ class DIDDocNotResolvedException(did: String) : DIDDocException("The DID Doc $di
  *
  * @param kid The Key Identifier.
  */
-class SecretNotFoundException(kid: String) : DIDCommException("The Secret Doc $kid is not found")
+class SecretNotFoundException(kid: String) : DIDCommException("The Secret $kid is not found")
 
 /**
  * This exception SHOULD be raised if curve is not supported.

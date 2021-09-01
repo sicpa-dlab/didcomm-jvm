@@ -8,7 +8,7 @@ import org.dif.secret.SecretResolver
 import org.dif.secret.SecretResolverInMemory
 import java.util.Optional
 
-class SecretResolverMock : SecretResolver {
+class AliceSecretResolverMock : SecretResolver {
     private val secretResolver = SecretResolverInMemory(
         listOf(
             Secret(
@@ -56,6 +56,22 @@ class SecretResolverMock : SecretResolver {
                            "crv":"secp256k1",
                            "x":"aToW5EaTq5mlAf8C5ECYDSkqsJycrW-e1SQ6_GJcAOk",
                            "y":"JAGX94caA21WKreXwYUaOCYTBMrqaX4KWIlsQZTHWCk"
+                        }
+                    """.trimIndent()
+                )
+            ),
+
+            Secret(
+                kid = "did:example:alice#key-x25519-1",
+                type = VerificationMethodType.JSON_WEB_KEY_2020,
+                verificationMaterial = VerificationMaterial(
+                    VerificationMaterialFormat.JWK,
+                    """
+                        {
+                           "kty":"OKP",
+                           "d":"D6F_LyXr88XBUIZzLW2HW4Yu_1fUQXB0VPun6roTqKc",
+                           "crv":"X25519",
+                           "x":"MQOV3AyIjJ_1azcXNa2TznwGFVABxnreQXyCHkAOezw"
                         }
                     """.trimIndent()
                 )

@@ -45,4 +45,71 @@ data class Metadata(
     val encAlgAnon: AnonCryptAlg? = null,
     val signAlg: SignAlg? = null,
     val signedMessage: Map<String, Any>? = null
-)
+) {
+    constructor(builder: Builder) : this(
+        builder.encrypted,
+        builder.authenticated,
+        builder.nonRepudiation,
+        builder.anonymousSender,
+        builder.reWrappedInForward,
+        builder.encryptedTo,
+        builder.encryptedFrom,
+        builder.signFrom,
+        builder.encAlgAuth,
+        builder.encAlgAnon,
+        builder.signAlg,
+        builder.signedMessage
+    )
+
+    class Builder {
+        var encrypted: Boolean = false
+            private set
+
+        var authenticated: Boolean = false
+            private set
+
+        var nonRepudiation: Boolean = false
+            private set
+        var anonymousSender: Boolean = false
+            private set
+
+        var reWrappedInForward: Boolean = false
+            private set
+
+        var encryptedTo: List<String>? = null
+            private set
+
+        var encryptedFrom: String? = null
+            private set
+
+        var signFrom: String? = null
+            private set
+
+        var encAlgAuth: AuthCryptAlg? = null
+            private set
+
+        var encAlgAnon: AnonCryptAlg? = null
+            private set
+
+        var signAlg: SignAlg? = null
+            private set
+
+        var signedMessage: Map<String, Any>? = null
+            private set
+
+        fun encrypted(encrypted: Boolean) = apply { this.encrypted = encrypted }
+        fun authenticated(authenticated: Boolean) = apply { this.authenticated = authenticated }
+        fun nonRepudiation(nonRepudiation: Boolean) = apply { this.nonRepudiation = nonRepudiation }
+        fun anonymousSender(anonymousSender: Boolean) = apply { this.anonymousSender = anonymousSender }
+        fun reWrappedInForward(reWrappedInForward: Boolean) = apply { this.reWrappedInForward = reWrappedInForward }
+        fun encryptedTo(encryptedTo: List<String>) = apply { this.encryptedTo = encryptedTo }
+        fun encryptedFrom(encryptedFrom: String) = apply { this.encryptedFrom = encryptedFrom }
+        fun signFrom(signFrom: String) = apply { this.signFrom = signFrom }
+        fun encAlgAuth(encAlgAuth: AuthCryptAlg) = apply { this.encAlgAuth = encAlgAuth }
+        fun encAlgAnon(encAlgAnon: AnonCryptAlg) = apply { this.encAlgAnon = encAlgAnon }
+        fun signAlg(signAlg: SignAlg) = apply { this.signAlg = signAlg }
+        fun signedMessage(signedMessage: Map<String, Any>) = apply { this.signedMessage = signedMessage }
+
+        fun build() = Metadata(this)
+    }
+}

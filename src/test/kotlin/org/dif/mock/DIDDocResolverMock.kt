@@ -19,9 +19,27 @@ class DIDDocResolverMock : DIDDocResolver {
                     "did:example:alice#key-2",
                     "did:example:alice#key-3"
                 ),
-                keyAgreements = listOf(),
+                keyAgreements = listOf(
+                    "did:example:alice#key-x25519-1",
+                ),
                 didCommServices = listOf(),
                 verificationMethods = listOf(
+                    VerificationMethod(
+                        id = "did:example:alice#key-x25519-1",
+                        controller = "did:example:alice#key-x25519-1",
+                        type = VerificationMethodType.JSON_WEB_KEY_2020,
+                        verificationMaterial = VerificationMaterial(
+                            VerificationMaterialFormat.JWK,
+                            """
+                                {
+                                   "kty":"OKP",
+                                   "crv":"X25519",
+                                   "x":"MQOV3AyIjJ_1azcXNa2TznwGFVABxnreQXyCHkAOezw"
+                                }
+                            """.trimIndent()
+                        )
+                    ),
+
                     VerificationMethod(
                         id = "did:example:alice#key-1",
                         controller = "did:example:alice#key-1",
@@ -67,6 +85,66 @@ class DIDDocResolverMock : DIDDocResolver {
                                    "crv":"secp256k1",
                                    "x":"aToW5EaTq5mlAf8C5ECYDSkqsJycrW-e1SQ6_GJcAOk",
                                    "y":"JAGX94caA21WKreXwYUaOCYTBMrqaX4KWIlsQZTHWCk"
+                                }
+                            """.trimIndent()
+                        )
+                    )
+                )
+            ),
+
+            DIDDoc(
+                did = "did:example:bob",
+                authentications = listOf(),
+                keyAgreements = listOf(
+                    "did:example:bob#key-x25519-1",
+                    "did:example:bob#key-x25519-2",
+                    "did:example:bob#key-x25519-3",
+                ),
+                didCommServices = listOf(),
+                verificationMethods = listOf(
+                    VerificationMethod(
+                        id = "did:example:bob#key-x25519-1",
+                        controller = "did:example:bob#key-x25519-1",
+                        type = VerificationMethodType.JSON_WEB_KEY_2020,
+                        verificationMaterial = VerificationMaterial(
+                            VerificationMaterialFormat.JWK,
+                            """
+                                {
+                                   "kty":"OKP",
+                                   "crv":"X25519",
+                                   "x":"8VUvYUsQU9VvLGhq9rzQXf7j4jQv2k4o0b10naykdEw"
+                                }
+                            """.trimIndent()
+                        )
+                    ),
+
+                    VerificationMethod(
+                        id = "did:example:bob#key-x25519-2",
+                        controller = "did:example:bob#key-x25519-2",
+                        type = VerificationMethodType.JSON_WEB_KEY_2020,
+                        verificationMaterial = VerificationMaterial(
+                            VerificationMaterialFormat.JWK,
+                            """
+                                {
+                                   "kty":"OKP",
+                                   "crv":"X25519",
+                                   "x":"_hGwmO_Uaqaf_PDVxlh4BK354fYocC9Ut9VZjKZphTg"
+                                }
+                            """.trimIndent()
+                        )
+                    ),
+
+                    VerificationMethod(
+                        id = "did:example:bob#key-x25519-3",
+                        controller = "did:example:bob#key-x25519-3",
+                        type = VerificationMethodType.JSON_WEB_KEY_2020,
+                        verificationMaterial = VerificationMaterial(
+                            VerificationMaterialFormat.JWK,
+                            """
+                                {
+                                   "kty":"OKP",
+                                   "crv":"X25519",
+                                   "x":"_cqvyjqdaZVAvCnQCbfJ8rhpDoi2F1uWmAgwGZf11Q4"
                                 }
                             """.trimIndent()
                         )
