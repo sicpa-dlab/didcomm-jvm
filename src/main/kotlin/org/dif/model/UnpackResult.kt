@@ -70,6 +70,7 @@ data class Metadata(
 
         var nonRepudiation: Boolean = false
             private set
+
         var anonymousSender: Boolean = false
             private set
 

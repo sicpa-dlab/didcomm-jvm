@@ -4,8 +4,8 @@ import com.nimbusds.jose.JWSObjectJSON
 import com.nimbusds.jose.util.JSONObjectUtils
 import org.dif.fixtures.JWM
 import org.dif.fixtures.JWS
-import org.dif.mock.DIDDocResolverMock
 import org.dif.mock.AliceSecretResolverMock
+import org.dif.mock.DIDDocResolverMock
 import org.dif.model.PackSignedParams
 import org.dif.model.UnpackParams
 import org.junit.jupiter.api.Test

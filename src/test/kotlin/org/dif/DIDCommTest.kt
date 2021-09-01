@@ -6,9 +6,9 @@ import org.dif.message.Attachment
 import org.dif.message.AttachmentDataBase64
 import org.dif.message.AttachmentDataJson
 import org.dif.message.Message
-import org.dif.mock.DIDDocResolverMock
 import org.dif.mock.AliceSecretResolverMock
 import org.dif.mock.BobSecretResolverMock
+import org.dif.mock.DIDDocResolverMock
 import org.dif.model.PackEncryptedParams
 import org.dif.model.PackPlaintextParams
 import org.dif.model.PackSignedParams
@@ -44,10 +44,10 @@ class DIDCommTest {
         )
 
         /**
-        val unpack = didComm.unpack(
-            UnpackParams.Builder(packedMsg.packedMessage).build()
-        )
-        **/
+         val unpack = didComm.unpack(
+         UnpackParams.Builder(packedMsg.packedMessage).build()
+         )
+         **/
         // TODO: assert attachments
     }
 

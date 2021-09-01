@@ -9,8 +9,8 @@ import org.dif.exceptions.MalformedMessageException
 import org.dif.fixtures.CustomProtocolBody
 import org.dif.fixtures.JWM
 import org.dif.message.Message
-import org.dif.mock.DIDDocResolverMock
 import org.dif.mock.AliceSecretResolverMock
+import org.dif.mock.DIDDocResolverMock
 import org.dif.model.PackPlaintextParams
 import org.dif.model.UnpackParams
 import org.junit.jupiter.api.Test
