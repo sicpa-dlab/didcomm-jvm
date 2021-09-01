@@ -17,6 +17,20 @@ class JWM {
             .createdTime(1516269022)
             .expiresTime(1516385931)
             .build()
+
+        val PLAINTEXT_MESSAGE_WITHOUT_BODY = """
+            {
+               "id":"1234567890",
+               "typ":"application/didcomm-plain+json",
+               "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+               "from":"did:example:alice",
+               "to":[
+                  "did:example:bob"
+               ],
+               "created_time":1516269022,
+               "expires_time":1516385931
+            }
+        """.trimIndent()
     }
 }
 
@@ -81,3 +95,5 @@ class JWS {
         )
     }
 }
+
+data class CustomProtocolBody(val id: String, val name: String, val custom: Boolean, val year: Number)

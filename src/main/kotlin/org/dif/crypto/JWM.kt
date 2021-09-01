@@ -3,12 +3,9 @@ package org.dif.crypto
 import com.nimbusds.jose.JWEObjectJSON
 import com.nimbusds.jose.JWSObjectJSON
 import com.nimbusds.jose.util.JSONObjectUtils
-import org.dif.exceptions.ParseException
 import org.dif.message.Message
 
-fun parse(str: String): ParseResult = try {
-    parse(JSONObjectUtils.parse(str))
-} catch (t: Throwable) { throw ParseException("An error occurred while parsing the message", t) }
+fun parse(str: String): ParseResult = parse(JSONObjectUtils.parse(str))
 
 fun parse(json: Map<String, Any>): ParseResult = when {
     json.containsKey("signatures") -> ParseResult.JWS(json)

@@ -2,6 +2,7 @@ package org.dif.message
 
 import com.nimbusds.jose.util.JSONObjectUtils
 import org.dif.common.Typ
+import org.dif.exceptions.MalformedMessageException
 
 data class Message(
     val id: String,
@@ -41,16 +42,23 @@ data class Message(
     companion object {
         fun builder(id: String, body: Map<String, Any>, type: String) = Builder(id, body, type)
 
-        fun parse(json: Map<String, Any>): Message = builder(
-            JSONObjectUtils.getString(json, "id"),
-            JSONObjectUtils.getJSONObject(json, "body"),
-            JSONObjectUtils.getString(json, "type")
-        )
-            .from(JSONObjectUtils.getString(json, "from"))
-            .to(JSONObjectUtils.getStringList(json, "to"))
-            .createdTime(JSONObjectUtils.getInt(json, "created_time"))
-            .expiresTime(JSONObjectUtils.getInt(json, "expires_time"))
-            .build()
+        fun parse(json: Map<String, Any>): Message = let {
+            val id = JSONObjectUtils.getString(json, "id")
+                ?: throw MalformedMessageException("The header \"id\" is missing")
+
+            val body = JSONObjectUtils.getJSONObject(json, "body")
+                ?: throw MalformedMessageException("The header \"body\" is missing")
+
+            val type = JSONObjectUtils.getString(json, "type")
+                ?: throw MalformedMessageException("The header \"type\" is missing")
+
+            builder(id, body, type)
+                .from(JSONObjectUtils.getString(json, "from"))
+                .to(JSONObjectUtils.getStringList(json, "to"))
+                .createdTime(JSONObjectUtils.getInt(json, "created_time"))
+                .expiresTime(JSONObjectUtils.getInt(json, "expires_time"))
+                .build()
+        }
     }
 
     class Builder(val id: String, val body: Map<String, Any>, val type: String) {
@@ -89,17 +97,17 @@ data class Message(
         var pthid: String? = null
             private set
 
-        fun from(from: String) = apply { this.from = from }
-        fun to(to: List<String>) = apply { this.to = to }
-        fun createdTime(createdTime: Int) = apply { this.createdTime = createdTime }
-        fun expiresTime(expiresTime: Int) = apply { this.expiresTime = expiresTime }
-        fun headers(headers: Map<String, Any>) = apply { this.headers = headers }
-        fun fromPrior(fromPrior: FromPrior) = apply { this.fromPrior = fromPrior }
-        fun attachments(attachments: List<Attachment>) = apply { this.attachments = attachments }
-        fun pleaseAck(pleaseAck: Boolean) = apply { this.pleaseAck = pleaseAck }
-        fun ack(ack: String) = apply { this.ack = ack }
-        fun thid(thid: String) = apply { this.thid = thid }
-        fun pthid(pthid: String) = apply { this.pthid = pthid }
+        fun from(from: String?) = apply { this.from = from }
+        fun to(to: List<String>?) = apply { this.to = to }
+        fun createdTime(createdTime: Int?) = apply { this.createdTime = createdTime }
+        fun expiresTime(expiresTime: Int?) = apply { this.expiresTime = expiresTime }
+        fun headers(headers: Map<String, Any>?) = apply { this.headers = headers }
+        fun fromPrior(fromPrior: FromPrior?) = apply { this.fromPrior = fromPrior }
+        fun attachments(attachments: List<Attachment>?) = apply { this.attachments = attachments }
+        fun pleaseAck(pleaseAck: Boolean?) = apply { this.pleaseAck = pleaseAck }
+        fun ack(ack: String?) = apply { this.ack = ack }
+        fun thid(thid: String?) = apply { this.thid = thid }
+        fun pthid(pthid: String?) = apply { this.pthid = pthid }
 
         fun build() = Message(this)
     }

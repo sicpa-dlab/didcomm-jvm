@@ -17,7 +17,9 @@ repositories {
 dependencies {
     implementation "com.nimbusds:nimbus-jose-jwt:${nimbusJoseJWTVersion}"
     implementation "com.google.crypto.tink:tink:${googleTinkVersion}"
-    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    testImplementation "org.jetbrains.kotlin:kotlin-test"
+    testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    testImplementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonKotlinVersion}"
 }
 
 test {

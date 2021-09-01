@@ -43,7 +43,7 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
      * @return Result of Pack Plaintext Operation.
      */
     fun packPlaintext(params: PackPlaintextParams): PackPlaintextResult {
-        return PackPlaintextResult("")
+        return PackPlaintextResult(params.message.toString())
     }
 
     /**
@@ -153,7 +153,7 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         return when (val parseResult = parse(params.packedMessage)) {
             is ParseResult.JWS -> parseResult.unpack(recipientKeySelector)
             is ParseResult.JWE -> TODO()
-            is ParseResult.JWM -> TODO()
+            is ParseResult.JWM -> parseResult.unpack()
         }
     }
 
@@ -173,5 +173,9 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
                 )
             )
         }
+    }
+
+    private fun ParseResult.JWM.unpack(): UnpackResult {
+        return UnpackResult(message, Metadata())
     }
 }
