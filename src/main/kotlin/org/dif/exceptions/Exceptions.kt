@@ -59,16 +59,16 @@ class UnsupportedJWKException(jwk: String) : DIDCommException("The JWK $jwk is u
 class UnsupportedAlgorithm(alg: String) : DIDCommException("The algorithm $alg is unsupported")
 
 /**
- * Signals that an error has been reached unexpectedly while parsing.
+ * Signals that packed message is malformed.
  *
  * @param message - the detail message.
  * @param cause - the cause of this.
  */
-class ParseException(message: String, cause: Throwable) : DIDCommException(message, cause)
+class MalformedMessageException(message: String, cause: Throwable? = null) : DIDCommException(message, cause)
 
 /**
- * Signals that packed message is malformed.
+ * Signals that crypto is incompatible
  *
  * @param message - the detail message.
  */
-class MalformedMessageException(message: String) : DIDCommException(message)
+class IncompatibleCryptoException(message: String) : DIDCommException(message)

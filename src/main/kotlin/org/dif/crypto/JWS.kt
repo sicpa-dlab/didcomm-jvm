@@ -15,6 +15,7 @@ import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.OctetKeyPair
 import com.nimbusds.jose.util.Base64URL
+import org.dif.common.SignAlg
 import org.dif.common.Typ
 import org.dif.crypto.key.Key
 import org.dif.exceptions.MalformedMessageException
@@ -44,20 +45,24 @@ fun sign(payload: String, key: Key): String {
         .serialize()
 }
 
-fun verify(jws: JWSObjectJSON, key: Key): Message {
+fun verify(jws: JWSObjectJSON, key: Key): VerifyResult {
     val jwk = key.jwk
 
-    val verifier = when (val alg = getJWSAlgorithm(jwk)) {
-        JWSAlgorithm.ES256 -> ECDSAVerifier(jwk.asKey<ECKey>())
-        JWSAlgorithm.ES256K -> ECDSAVerifier(jwk.asKey<ECKey>())
-        JWSAlgorithm.EdDSA -> Ed25519Verifier(jwk.asKey())
+    val (signAlg, verifier) = when (val alg = jws.header.algorithm) {
+        JWSAlgorithm.ES256 -> Pair(SignAlg.ES256, ECDSAVerifier(jwk.asKey<ECKey>()))
+        JWSAlgorithm.ES256K -> Pair(SignAlg.ES256K, ECDSAVerifier(jwk.asKey<ECKey>()))
+        JWSAlgorithm.EdDSA -> Pair(SignAlg.ED25519, Ed25519Verifier(jwk.asKey()))
         else -> throw UnsupportedAlgorithm(alg.name)
     }
 
     if (!jws.verify(verifier))
         throw MalformedMessageException("Invalid signature")
 
-    return Message.parse(jws.payload.toJSONObject())
+    return VerifyResult(
+        message = Message.parse(jws.payload.toJSONObject()),
+        signFrom = key.id,
+        signAlg = signAlg
+    )
 }
 
 private fun getJWSAlgorithm(jwk: JWK) = when (jwk) {
@@ -69,3 +74,9 @@ private fun getJWSAlgorithm(jwk: JWK) = when (jwk) {
     is OctetKeyPair -> JWSAlgorithm.EdDSA
     else -> throw UnsupportedJWKException(jwk.javaClass.name)
 }
+
+data class VerifyResult(
+    val message: Message,
+    val signFrom: String,
+    val signAlg: SignAlg
+)
