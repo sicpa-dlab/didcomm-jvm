@@ -161,7 +161,7 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
 
                 UnpackResult(
                     verify(message, key),
-                    Metadata(encrypted = false, authenticated = false, nonRepudiation = false, anonymousSender = false, reWrappedInForward = false, listOf())
+                    Metadata(encrypted = false, authenticated = false, nonRepudiation = true, anonymousSender = false, reWrappedInForward = false, listOf())
                 )
             }
 

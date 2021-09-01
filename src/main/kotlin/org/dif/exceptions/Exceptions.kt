@@ -23,11 +23,11 @@ class UnsupportedSecretTypeException(type: String) : DIDCommException("The secre
 open class DIDDocException(message: String) : DIDCommException(message)
 
 /**
- * This exception SHOULD be raised if DID Doc can not be found.
+ * This exception SHOULD be raised if DID Doc can not be resolved.
  *
  * @param did The did.
  */
-class DIDDocNotFoundException(did: String) : DIDDocException("The DID Doc $did is not found")
+class DIDDocNotResolvedException(did: String) : DIDDocException("The DID Doc $did is not resolved")
 
 /**
  * This exception SHOULD be raised if Secret can not be found.
