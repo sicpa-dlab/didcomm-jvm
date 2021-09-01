@@ -64,7 +64,7 @@ private fun ParseResult.JWE.authUnpack(keySelector: RecipientKeySelector, authCr
         ?: throw MalformedMessageException("JWE Unprotected Per-Recipient header must be present")
 
     val (from, to) = keySelector.authCryptKeys(sender, recipients)
-    val decrypted = authDecrypt(message, authCryptAlg, from, to)
+    val decrypted = authDecrypt(message, from, to)
 
     metadataBuilder
         .encryptedTo(recipients)
@@ -73,7 +73,7 @@ private fun ParseResult.JWE.authUnpack(keySelector: RecipientKeySelector, authCr
         .encrypted(true)
         .authenticated(true)
 
-    return when (val parseResult = parse(decrypted.message)) {
+    return when (val parseResult = parse(decrypted)) {
         is ParseResult.JWS -> parseResult.unpack(keySelector, metadataBuilder)
         is ParseResult.JWM -> parseResult.message
         else -> throw MalformedMessageException("Malformed Message")
@@ -85,7 +85,7 @@ private fun ParseResult.JWE.anonUnpack(keySelector: RecipientKeySelector, anonCr
         ?: throw MalformedMessageException("JWE Unprotected Per-Recipient header must be present")
 
     val to = keySelector.anonCryptKeys(recipients)
-    val decrypted = anonDecrypt(message, anonCryptAlg, to)
+    val decrypted = anonDecrypt(message, to)
 
     metadataBuilder
         .encryptedTo(recipients)
@@ -93,7 +93,7 @@ private fun ParseResult.JWE.anonUnpack(keySelector: RecipientKeySelector, anonCr
         .encAlgAnon(anonCryptAlg)
         .encrypted(true)
 
-    return when (val parseResult = parse(decrypted.message)) {
+    return when (val parseResult = parse(decrypted)) {
         is ParseResult.JWE -> parseResult.anonAuthUnpack(keySelector, metadataBuilder)
         is ParseResult.JWS -> parseResult.unpack(keySelector, metadataBuilder)
         is ParseResult.JWM -> parseResult.message

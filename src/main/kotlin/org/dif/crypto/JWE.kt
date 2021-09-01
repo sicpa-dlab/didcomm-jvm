@@ -94,7 +94,7 @@ fun anonEncrypt(payload: String, anon: AnonCryptAlg, to: List<Key>): EncryptResu
         .run { EncryptResult(serialize(), kids) }
 }
 
-fun authDecrypt(jwe: JWEObjectJSON, encAlgAuth: AuthCryptAlg, from: Key, to: List<Key>): DecryptResult {
+fun authDecrypt(jwe: JWEObjectJSON, from: Key, to: List<Key>): Map<String, Any> {
     val sender = from.jwk
     val recipients = to.map { Pair.of(UnprotectedHeader.Builder(it.id).build(), it.jwk) }
 
@@ -110,15 +110,10 @@ fun authDecrypt(jwe: JWEObjectJSON, encAlgAuth: AuthCryptAlg, from: Key, to: Lis
         throw MalformedMessageException("Decrypt is failed", t)
     }
 
-    return DecryptResult(
-        message = jwe.payload.toJSONObject(),
-        recipients = to.map { it.id },
-        encAlgAuth = encAlgAuth,
-        sender = from.id
-    )
+    return jwe.payload.toJSONObject()
 }
 
-fun anonDecrypt(jwe: JWEObjectJSON, encAlgAnon: AnonCryptAlg, to: List<Key>): DecryptResult {
+fun anonDecrypt(jwe: JWEObjectJSON, to: List<Key>): Map<String, Any> {
     val recipients = to.map { Pair.of(UnprotectedHeader.Builder(it.id).build(), it.jwk) }
 
     val decrypter = when (val recipient = recipients.first().right) {
@@ -133,11 +128,7 @@ fun anonDecrypt(jwe: JWEObjectJSON, encAlgAnon: AnonCryptAlg, to: List<Key>): De
         throw MalformedMessageException("Decrypt is failed", t)
     }
 
-    return DecryptResult(
-        message = jwe.payload.toJSONObject(),
-        recipients = to.map { it.id },
-        encAlgAnon = encAlgAnon
-    )
+    return jwe.payload.toJSONObject()
 }
 
 fun getCryptoAlg(jwe: JWEObjectJSON): Pair<AuthCryptAlg?, AnonCryptAlg?> {
@@ -162,11 +153,3 @@ fun getCryptoAlg(jwe: JWEObjectJSON): Pair<AuthCryptAlg?, AnonCryptAlg?> {
 }
 
 data class EncryptResult(val message: String, val recipients: List<String>)
-
-data class DecryptResult(
-    val message: Map<String, Any>,
-    val sender: String? = null,
-    val recipients: List<String>,
-    val encAlgAuth: AuthCryptAlg? = null,
-    val encAlgAnon: AnonCryptAlg? = null
-)
