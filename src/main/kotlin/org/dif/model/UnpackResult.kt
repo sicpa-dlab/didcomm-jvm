@@ -33,11 +33,11 @@ data class UnpackResult(val message: Message, val metadata: Metadata)
  * @property signedMessage      If the message has been signed, the JWS is returned for non-repudiation purposes.
  */
 data class Metadata(
-    val encrypted: Boolean,
-    val authenticated: Boolean,
-    val nonRepudiation: Boolean,
-    val anonymousSender: Boolean,
-    val reWrappedInForward: Boolean,
+    val encrypted: Boolean = false,
+    val authenticated: Boolean = false,
+    val nonRepudiation: Boolean = false,
+    val anonymousSender: Boolean = false,
+    val reWrappedInForward: Boolean = false,
     val encryptedTo: List<String>? = null,
     val encryptedFrom: String? = null,
     val signFrom: String? = null,

@@ -11,7 +11,6 @@ import org.dif.crypto.verify
 import org.dif.diddoc.DIDDoc
 import org.dif.diddoc.DIDDocResolver
 import org.dif.exceptions.MalformedMessageException
-import org.dif.message.Message
 import org.dif.model.Metadata
 import org.dif.model.PackEncryptedParams
 import org.dif.model.PackEncryptedResult
@@ -152,22 +151,26 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         val recipientKeySelector = RecipientKeySelector(didDocResolver, secretResolver)
 
         return when (val parseResult = parse(params.packedMessage)) {
-            is ParseResult.JWS -> let {
-                val message = parseResult.message
-                val kid = message.unprotectedHeader?.keyID
-                    ?: throw MalformedMessageException("JWS Unprotected Per-Signature header must be present")
+            is ParseResult.JWS -> parseResult.unpack(recipientKeySelector)
+            is ParseResult.JWE -> TODO()
+            is ParseResult.JWM -> TODO()
+        }
+    }
 
-                val key = recipientKeySelector.verifyKey(kid)
+    private fun ParseResult.JWS.unpack(keySelector: RecipientKeySelector): UnpackResult {
+        val kid = message.unprotectedHeader?.keyID
+            ?: throw MalformedMessageException("JWS Unprotected Per-Signature header must be present")
 
-                UnpackResult(
-                    verify(message, key),
-                    Metadata(encrypted = false, authenticated = false, nonRepudiation = true, anonymousSender = false, reWrappedInForward = false, listOf())
+        val key = keySelector.verifyKey(kid)
+        return verify(message, key).run {
+            UnpackResult(
+                message,
+                Metadata(
+                    signAlg = signAlg,
+                    signFrom = signFrom,
+                    nonRepudiation = true,
+                    signedMessage = rawMessage
                 )
-            }
-
-            else -> UnpackResult(
-                Message.builder("", mapOf("" to ""), "").build(),
-                Metadata(encrypted = false, authenticated = false, nonRepudiation = false, anonymousSender = false, reWrappedInForward = false, listOf())
             )
         }
     }
