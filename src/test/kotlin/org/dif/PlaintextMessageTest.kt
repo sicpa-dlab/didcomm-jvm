@@ -1,8 +1,12 @@
 package org.dif
 
 import com.fasterxml.jackson.databind.JavaType
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.dif.exceptions.MalformedMessageException
+import org.dif.fixtures.CustomProtocolBody
 import org.dif.fixtures.JWM
+import org.dif.message.Message
 import org.dif.mock.DIDDocResolverMock
 import org.dif.mock.SecretResolverMock
 import org.dif.model.PackPlaintextParams
@@ -11,10 +15,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
-import org.dif.fixtures.CustomProtocolBody
-import org.dif.message.Message
 
 class PlaintextMessageTest {
     @Test
