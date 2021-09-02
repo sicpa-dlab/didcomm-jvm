@@ -37,7 +37,8 @@ class RecipientKeySelector(private val didDocResolver: DIDDocResolver, private v
 
     fun findAnonCryptKeys(selector: List<String>): Sequence<Key> = findRecipientKeys(selector, null)
 
-    private fun findRecipientKeys(to: List<String>, curve: Curve?): Sequence<Key> = to.asSequence()
+    private fun findRecipientKeys(to: List<String>, curve: Curve?): Sequence<Key> = secretResolver.findKeys(to)
+        .asSequence()
         .filter { isDIDFragment(it) }
         .map { secretResolver.findKey(it).orElse(null) }
         .mapNotNull { Key.wrapSecret(it) }

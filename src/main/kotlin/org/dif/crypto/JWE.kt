@@ -97,16 +97,16 @@ fun authDecrypt(jwe: JWEObjectJSON, decryptByAllKeys: Boolean, from: Key, to: Se
     authDecryptForAllKeys(jwe, from, to.toList())
 } else {
     authDecryptForOneKey(jwe, from, to)
-        .mapNotNull { it }
-        .firstOrNull() ?: throw MalformedMessageException("Decrypt is failed")
+        .filterNotNull()
+        .firstOrNull() ?: throw MalformedMessageException("Decrypt failed")
 }
 
 fun anonDecrypt(jwe: JWEObjectJSON, decryptByAllKeys: Boolean, to: Sequence<Key>) = if (decryptByAllKeys) {
     anonDecryptForAllKeys(jwe, to.toList())
 } else {
     anonDecryptForOneKey(jwe, to)
-        .mapNotNull { it }
-        .firstOrNull() ?: throw MalformedMessageException("Decrypt is failed")
+        .filterNotNull()
+        .firstOrNull() ?: throw MalformedMessageException("Decrypt failed")
 }
 
 private fun authDecryptForOneKey(jwe: JWEObjectJSON, from: Key, to: Sequence<Key>) = to.map {
