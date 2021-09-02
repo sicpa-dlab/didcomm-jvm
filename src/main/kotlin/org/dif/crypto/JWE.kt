@@ -93,7 +93,39 @@ fun anonEncrypt(payload: String, anon: AnonCryptAlg, to: List<Key>): EncryptResu
         .run { EncryptResult(serialize(), kids) }
 }
 
-fun authDecrypt(jwe: JWEObjectJSON, from: Key, to: List<Key>): Map<String, Any> {
+fun authDecrypt(jwe: JWEObjectJSON, decryptByAllKeys: Boolean, from: Key, to: Sequence<Key>) = if (decryptByAllKeys) {
+    authDecryptForAllKeys(jwe, from, to.toList())
+} else {
+    authDecryptForOneKey(jwe, from, to)
+        .mapNotNull { it }
+        .firstOrNull() ?: throw MalformedMessageException("Decrypt is failed")
+}
+
+fun anonDecrypt(jwe: JWEObjectJSON, decryptByAllKeys: Boolean, to: Sequence<Key>) = if (decryptByAllKeys) {
+    anonDecryptForAllKeys(jwe, to.toList())
+} else {
+    anonDecryptForOneKey(jwe, to)
+        .mapNotNull { it }
+        .firstOrNull() ?: throw MalformedMessageException("Decrypt is failed")
+}
+
+private fun authDecryptForOneKey(jwe: JWEObjectJSON, from: Key, to: Sequence<Key>) = to.map {
+    try {
+        authDecryptForAllKeys(jwe, from, listOf(it))
+    } catch (e: MalformedMessageException) {
+        null
+    }
+}
+
+private fun anonDecryptForOneKey(jwe: JWEObjectJSON, to: Sequence<Key>) = to.map {
+    try {
+        anonDecryptForAllKeys(jwe, listOf(it))
+    } catch (e: MalformedMessageException) {
+        null
+    }
+}
+
+private fun authDecryptForAllKeys(jwe: JWEObjectJSON, from: Key, to: List<Key>): Map<String, Any> {
     val sender = from.jwk
     val recipients = to.map { Pair.of(UnprotectedHeader.Builder(it.id).build(), it.jwk) }
 
@@ -112,7 +144,7 @@ fun authDecrypt(jwe: JWEObjectJSON, from: Key, to: List<Key>): Map<String, Any> 
     return jwe.payload.toJSONObject()
 }
 
-fun anonDecrypt(jwe: JWEObjectJSON, to: List<Key>): Map<String, Any> {
+private fun anonDecryptForAllKeys(jwe: JWEObjectJSON, to: List<Key>): Map<String, Any> {
     val recipients = to.map { Pair.of(UnprotectedHeader.Builder(it.id).build(), it.jwk) }
 
     val decrypter = when (val recipient = recipients.first().right) {

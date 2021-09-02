@@ -1,6 +1,5 @@
 package org.dif.common
 
-
 /**
  * Encryption algorithms marker.
  */

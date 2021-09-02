@@ -11,29 +11,29 @@ import org.dif.utils.divideDIDFragment
 import org.dif.utils.isDIDFragment
 
 class SenderKeySelector(private val didDocResolver: DIDDocResolver, private val secretResolver: SecretResolver) {
-    fun signKey(selector: String): Key = Key.wrapSecret(
-        if (isDIDFragment(selector)) {
-            secretResolver.findKey(selector).orElseThrow { throw SecretNotFoundException(selector) }
+    fun findSigningKey(signFrom: String): Key = Key.wrapSecret(
+        if (isDIDFragment(signFrom)) {
+            secretResolver.findKey(signFrom).orElseThrow { throw SecretNotFoundException(signFrom) }
         } else {
-            val didDoc = didDocResolver.resolve(selector).orElseThrow { throw DIDDocNotResolvedException(selector) }
+            val didDoc = didDocResolver.resolve(signFrom).orElseThrow { throw DIDDocNotResolvedException(signFrom) }
 
             val authentication = didDoc.authentications.firstOrNull()
-                ?: throw DIDDocException("Authentication is not found in DID Doc '$selector'")
+                ?: throw DIDDocException("Authentication is not found in DID Doc '$signFrom'")
 
-            secretResolver.findKey(authentication).orElseThrow { throw SecretNotFoundException(selector) }
+            secretResolver.findKey(authentication).orElseThrow { throw SecretNotFoundException(signFrom) }
         }
     )
 
-    fun authCryptKeys(fromSelector: String, toSelector: String): Pair<Key, List<Key>> {
-        val (did) = divideDIDFragment(fromSelector)
+    fun findAuthCryptKeys(from: String, to: String): Pair<Key, List<Key>> {
+        val (did) = divideDIDFragment(from)
         val didDoc = didDocResolver.resolve(did).orElseThrow { throw DIDDocNotResolvedException(did) }
 
-        return if (isDIDFragment(fromSelector)) {
-            val sender = secretResolver.findKey(fromSelector)
+        return if (isDIDFragment(from)) {
+            val sender = secretResolver.findKey(from)
                 .map { Key.wrapSecret(it) }
-                .orElseThrow { throw SecretNotFoundException(fromSelector) }
+                .orElseThrow { throw SecretNotFoundException(from) }
 
-            val recipients = findRecipientKeys(toSelector, sender.curve)
+            val recipients = findRecipientKeys(to, sender.curve)
             Pair(sender, recipients)
         } else {
             didDoc.keyAgreements
@@ -42,25 +42,23 @@ class SenderKeySelector(private val didDocResolver: DIDDocResolver, private val 
                 .filter { it.isPresent }
                 .map { it.get() }
                 .map { Key.wrapSecret(it) }
-                .map { Pair(it, findRecipientKeys(toSelector, it.curve)) }
-                .find { it.second.isNotEmpty() }
-                ?: throw IncompatibleCryptoException("DID Doc does not contain compatible verification method")
+                .map { Pair(it, findRecipientKeys(to, it.curve)) }
+                .first { it.second.isNotEmpty() }
         }
     }
 
-    fun anonCryptKeys(selector: String): List<Key> = findRecipientKeys(selector, null)
-        .ifEmpty { throw IncompatibleCryptoException("DID Doc does not contain compatible verification method") }
+    fun findAnonCryptKeys(to: String): List<Key> = findRecipientKeys(to, null)
 
-    private fun findRecipientKeys(selector: String, curve: Curve?): List<Key> {
-        val (did) = divideDIDFragment(selector)
+    private fun findRecipientKeys(to: String, curve: Curve?): List<Key> {
+        val (did) = divideDIDFragment(to)
         val didDoc = didDocResolver.resolve(did).orElseThrow { throw DIDDocNotResolvedException(did) }
 
-        return if (isDIDFragment(selector)) {
-            val method = didDoc.findVerificationMethod(selector)
+        return if (isDIDFragment(to)) {
+            val method = didDoc.findVerificationMethod(to)
             val key = Key.wrapVerificationMethod(method)
 
             if (curve != null && curve != key.curve) {
-                throw IncompatibleCryptoException("The recipient `$selector` curve is not compatible to `${curve.name}`")
+                throw IncompatibleCryptoException("The recipient `$to` curve is not compatible to `${curve.name}`")
             }
 
             listOf(key)
@@ -69,6 +67,7 @@ class SenderKeySelector(private val didDocResolver: DIDDocResolver, private val 
                 .map { didDoc.findVerificationMethod(it) }
                 .map { Key.wrapVerificationMethod(it) }
                 .filter { curve?.equals(it.curve) ?: true }
+                .ifEmpty { throw IncompatibleCryptoException("DID Doc does not contain compatible 'keyAgreement' verification methods") }
         }
     }
 }

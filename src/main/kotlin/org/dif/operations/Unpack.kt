@@ -20,7 +20,7 @@ fun unpack(params: UnpackParams, keySelector: RecipientKeySelector): UnpackResul
 
     val msg = when (val parseResult = parse(params.packedMessage)) {
         is ParseResult.JWS -> parseResult.unpack(keySelector, metadataBuilder)
-        is ParseResult.JWE -> parseResult.unpack(keySelector, metadataBuilder)
+        is ParseResult.JWE -> parseResult.unpack(keySelector, params.expectDecryptByAllKeys, metadataBuilder)
         is ParseResult.JWM -> parseResult.message
     }
 
@@ -31,7 +31,7 @@ private fun ParseResult.JWS.unpack(keySelector: RecipientKeySelector, metadataBu
     val kid = message.unprotectedHeader?.keyID
         ?: throw MalformedMessageException("JWS Unprotected Per-Signature header must be present")
 
-    val key = keySelector.verifyKey(kid)
+    val key = keySelector.findVerificationKey(kid)
     val alg = getCryptoAlg(message)
     val message = verify(message, alg, key)
 
@@ -44,21 +44,21 @@ private fun ParseResult.JWS.unpack(keySelector: RecipientKeySelector, metadataBu
     return message
 }
 
-private fun ParseResult.JWE.unpack(keySelector: RecipientKeySelector, metadataBuilder: Metadata.Builder): Message =
+private fun ParseResult.JWE.unpack(keySelector: RecipientKeySelector, decryptByAllKeys: Boolean, metadataBuilder: Metadata.Builder): Message =
     when (val alg = getCryptoAlg(message)) {
-        is AuthCryptAlg -> authUnpack(keySelector, alg, metadataBuilder)
-        is AnonCryptAlg -> anonUnpack(keySelector, alg, metadataBuilder)
+        is AuthCryptAlg -> authUnpack(keySelector, alg, decryptByAllKeys, metadataBuilder)
+        is AnonCryptAlg -> anonUnpack(keySelector, alg, decryptByAllKeys, metadataBuilder)
     }
 
-private fun ParseResult.JWE.authUnpack(keySelector: RecipientKeySelector, authCryptAlg: AuthCryptAlg, metadataBuilder: Metadata.Builder): Message {
+private fun ParseResult.JWE.authUnpack(keySelector: RecipientKeySelector, authCryptAlg: AuthCryptAlg, decryptByAllKeys: Boolean, metadataBuilder: Metadata.Builder): Message {
     val sender = message.header?.senderKeyID
         ?: throw MalformedMessageException("The \"skid\" header must be present")
 
     val recipients = message.recipients?.mapNotNull { it?.header?.keyID }
         ?: throw MalformedMessageException("JWE Unprotected Per-Recipient header must be present")
 
-    val (from, to) = keySelector.authCryptKeys(sender, recipients)
-    val decrypted = authDecrypt(message, from, to)
+    val (from, to) = keySelector.finAuthCryptKeys(sender, recipients)
+    val decrypted = authDecrypt(message, decryptByAllKeys, from, to)
 
     metadataBuilder
         .encryptedTo(recipients)
@@ -74,12 +74,12 @@ private fun ParseResult.JWE.authUnpack(keySelector: RecipientKeySelector, authCr
     }
 }
 
-private fun ParseResult.JWE.anonUnpack(keySelector: RecipientKeySelector, anonCryptAlg: AnonCryptAlg, metadataBuilder: Metadata.Builder): Message {
+private fun ParseResult.JWE.anonUnpack(keySelector: RecipientKeySelector, anonCryptAlg: AnonCryptAlg, decryptByAllKeys: Boolean, metadataBuilder: Metadata.Builder): Message {
     val recipients = message.recipients?.mapNotNull { it?.header?.keyID }
         ?: throw MalformedMessageException("JWE Unprotected Per-Recipient header must be present")
 
-    val to = keySelector.anonCryptKeys(recipients)
-    val decrypted = anonDecrypt(message, to)
+    val to = keySelector.findAnonCryptKeys(recipients)
+    val decrypted = anonDecrypt(message, decryptByAllKeys, to)
 
     metadataBuilder
         .encryptedTo(recipients)
@@ -88,14 +88,14 @@ private fun ParseResult.JWE.anonUnpack(keySelector: RecipientKeySelector, anonCr
         .encrypted(true)
 
     return when (val parseResult = parse(decrypted)) {
-        is ParseResult.JWE -> parseResult.anonAuthUnpack(keySelector, metadataBuilder)
+        is ParseResult.JWE -> parseResult.anonAuthUnpack(keySelector, decryptByAllKeys, metadataBuilder)
         is ParseResult.JWS -> parseResult.unpack(keySelector, metadataBuilder)
         is ParseResult.JWM -> parseResult.message
     }
 }
 
-private fun ParseResult.JWE.anonAuthUnpack(keySelector: RecipientKeySelector, metadataBuilder: Metadata.Builder): Message =
+private fun ParseResult.JWE.anonAuthUnpack(keySelector: RecipientKeySelector, decryptByAllKeys: Boolean, metadataBuilder: Metadata.Builder): Message =
     when (val alg = getCryptoAlg(message)) {
-        is AuthCryptAlg -> authUnpack(keySelector, alg, metadataBuilder)
+        is AuthCryptAlg -> authUnpack(keySelector, alg, decryptByAllKeys, metadataBuilder)
         else -> throw MalformedMessageException("Malformed Message")
     }

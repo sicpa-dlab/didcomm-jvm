@@ -16,7 +16,7 @@ import org.dif.model.PackSignedResult
 import org.dif.model.UnpackParams
 import org.dif.model.UnpackResult
 import org.dif.operations.encrypt
-import org.dif.operations.protectedSenderIdNeeded
+import org.dif.operations.protectSenderIfNeeded
 import org.dif.operations.signIfNeeded
 import org.dif.operations.unpack
 import org.dif.secret.SecretResolver
@@ -73,10 +73,10 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         val secretResolver = params.secretResolver ?: this.secretResolver
         val senderKeySelector = SenderKeySelector(didDocResolver, secretResolver)
 
-        val key = senderKeySelector.signKey(params.signFrom)
+        val key = senderKeySelector.findSigningKey(params.signFrom)
         val msg = sign(params.message.toString(), key)
 
-        return PackSignedResult(msg, params.signFrom)
+        return PackSignedResult(msg, key.id)
     }
 
     /**
@@ -139,7 +139,7 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
 
         val payload = signIfNeeded(params, senderKeySelector)
         val encrypted = encrypt(params, payload, senderKeySelector)
-        val (msg, kids) = protectedSenderIdNeeded(params, encrypted, senderKeySelector)
+        val (msg, kids) = protectSenderIfNeeded(params, encrypted, senderKeySelector)
 
         return PackEncryptedResult(msg, kids, params.from, params.signFrom)
     }
