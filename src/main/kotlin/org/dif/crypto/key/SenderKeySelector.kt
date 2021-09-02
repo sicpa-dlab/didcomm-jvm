@@ -18,7 +18,7 @@ class SenderKeySelector(private val didDocResolver: DIDDocResolver, private val 
             val didDoc = didDocResolver.resolve(signFrom).orElseThrow { throw DIDDocNotResolvedException(signFrom) }
 
             val authentication = didDoc.authentications.firstOrNull()
-                ?: throw DIDDocException("Authentication is not found in DID Doc '$signFrom'")
+                ?: throw DIDDocException("The DID Doc '${didDoc.did}' does not contain compatible 'authentication' verification methods")
 
             secretResolver.findKey(authentication).orElseThrow { throw SecretNotFoundException(signFrom) }
         }
@@ -43,6 +43,7 @@ class SenderKeySelector(private val didDocResolver: DIDDocResolver, private val 
                 .map { it.get() }
                 .map { Key.wrapSecret(it) }
                 .map { Pair(it, findRecipientKeys(to, it.curve)) }
+                .ifEmpty { throw DIDDocException("The DID Doc '${didDoc.did}' does not contain compatible 'keyAgreement' verification methods") }
                 .first { it.second.isNotEmpty() }
         }
     }
@@ -58,16 +59,22 @@ class SenderKeySelector(private val didDocResolver: DIDDocResolver, private val 
             val key = Key.wrapVerificationMethod(method)
 
             if (curve != null && curve != key.curve) {
-                throw IncompatibleCryptoException("The recipient `$to` curve is not compatible to `${curve.name}`")
+                throw IncompatibleCryptoException("The recipient '$to' curve is not compatible to '${curve.name}'")
             }
 
             listOf(key)
         } else {
+            val selectedCurve = curve ?: didDoc.keyAgreements
+                .map { didDoc.findVerificationMethod(it) }
+                .map { Key.wrapVerificationMethod(it) }
+                .map { it.curve }
+                .firstOrNull()
+
             didDoc.keyAgreements
                 .map { didDoc.findVerificationMethod(it) }
                 .map { Key.wrapVerificationMethod(it) }
-                .filter { curve?.equals(it.curve) ?: true }
-                .ifEmpty { throw IncompatibleCryptoException("DID Doc does not contain compatible 'keyAgreement' verification methods") }
+                .filter { selectedCurve == it.curve }
+                .ifEmpty { throw DIDDocException("The DID Doc '${didDoc.did}' does not contain compatible 'keyAgreement' verification methods") }
         }
     }
 }

@@ -8,7 +8,7 @@ import org.dif.mock.AliceSecretResolverMock
 import org.dif.mock.DIDDocResolverMock
 import org.dif.model.PackSignedParams
 import org.dif.model.UnpackParams
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class SignedMessageTest {

@@ -57,6 +57,23 @@ class BobSecretResolverMock : SecretResolver {
                         }
                     """.trimIndent()
                 )
+            ),
+
+            Secret(
+                kid = "did:example:bob#key-p256-1",
+                type = VerificationMethodType.JSON_WEB_KEY_2020,
+                verificationMaterial = VerificationMaterial(
+                    VerificationMaterialFormat.JWK,
+                    """
+                        {
+                           "kty":"EC",
+                           "d":"WI1q-lIWtVfVgVLY5egjPq8xyPvUIxq4-tf-SFCBWhM",
+                           "crv":"P-256",
+                           "x":"DK14eQzIfr4QlobBwJHsWdyneea8T7jV5befZoP8XRs",
+                           "y":"UJDoME9cMag_afBFonNfJ2GDyaAF1wv6P4uJwCrk3V8"
+                        }
+                    """.trimIndent()
+                )
             )
         )
     )
@@ -64,6 +81,6 @@ class BobSecretResolverMock : SecretResolver {
     override fun findKey(kid: String): Optional<Secret> =
         secretResolver.findKey(kid)
 
-    override fun findKeys(kids: List<String>): List<Secret> =
+    override fun findKeys(kids: List<String>): Set<String> =
         secretResolver.findKeys(kids)
 }

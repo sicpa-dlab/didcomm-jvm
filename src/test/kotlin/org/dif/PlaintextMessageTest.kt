@@ -3,8 +3,6 @@ package org.dif
 import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.nimbusds.jose.jwk.Curve
-import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator
 import org.dif.exceptions.MalformedMessageException
 import org.dif.fixtures.CustomProtocolBody
 import org.dif.fixtures.JWM
@@ -13,9 +11,9 @@ import org.dif.mock.AliceSecretResolverMock
 import org.dif.mock.DIDDocResolverMock
 import org.dif.model.PackPlaintextParams
 import org.dif.model.UnpackParams
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 
 class PlaintextMessageTest {
@@ -40,7 +38,7 @@ class PlaintextMessageTest {
     fun `Test plaintext without body`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
-        val thrown: MalformedMessageException = assertThrows(MalformedMessageException::javaClass.name) {
+        val thrown = assertFailsWith<MalformedMessageException> {
             didComm.unpack(
                 UnpackParams.Builder(JWM.PLAINTEXT_MESSAGE_WITHOUT_BODY).build()
             )
@@ -77,13 +75,5 @@ class PlaintextMessageTest {
         val unpackedBody = unpacked.message.body
         val unpackedProtocolMessage = mapper.convertValue(unpackedBody, CustomProtocolBody::class.java)
         assertEquals(protocolMessage.toString(), unpackedProtocolMessage.toString())
-    }
-
-    @Test
-    fun generateKey() {
-        val ecKeyGenerator = OctetKeyPairGenerator(Curve.X25519)
-        println(ecKeyGenerator.generate())
-        println(ecKeyGenerator.generate())
-        println(ecKeyGenerator.generate())
     }
 }

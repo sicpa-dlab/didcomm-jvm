@@ -13,7 +13,7 @@ import org.dif.model.PackEncryptedParams
 import org.dif.model.PackPlaintextParams
 import org.dif.model.PackSignedParams
 import org.dif.model.UnpackParams
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -99,7 +99,7 @@ class DIDCommTest {
         }
     }
 
-    @Test()
+    @Test
     fun `Test non repudiable encryption message`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
@@ -125,7 +125,7 @@ class DIDCommTest {
         }
     }
 
-    @Test()
+    @Test
     fun `Test non repudiable encryption message for anonymous sender`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
@@ -152,7 +152,7 @@ class DIDCommTest {
         }
     }
 
-    @Test()
+    @Test
     fun `Test signed unencrypted message`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
@@ -166,7 +166,7 @@ class DIDCommTest {
         )
     }
 
-    @Test()
+    @Test
     fun `Test plaintext message`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 

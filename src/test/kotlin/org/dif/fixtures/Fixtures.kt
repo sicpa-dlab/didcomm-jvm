@@ -6,6 +6,9 @@ class JWM {
     companion object {
         const val ALICE_DID = "did:example:alice"
         const val BOB_DID = "did:example:bob"
+        const val CHARLIE_DID = "did:example:charlie"
+        const val NONA_DID = "did:example:nona"
+        const val ELLIE_DID = "did:example:ellie"
 
         private const val ID = "1234567890"
         private const val TYPE = "http://example.com/protocols/lets_do_lunch/1.0/proposal"

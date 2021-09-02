@@ -99,6 +99,7 @@ class DIDDocResolverMock : DIDDocResolver {
                     "did:example:bob#key-x25519-1",
                     "did:example:bob#key-x25519-2",
                     "did:example:bob#key-x25519-3",
+                    "did:example:bob#key-p256-1",
                 ),
                 didCommServices = listOf(),
                 verificationMethods = listOf(
@@ -148,8 +149,59 @@ class DIDDocResolverMock : DIDDocResolver {
                                 }
                             """.trimIndent()
                         )
+                    ),
+
+                    VerificationMethod(
+                        id = "did:example:bob#key-p256-1",
+                        controller = "did:example:bob#key-p256-1",
+                        type = VerificationMethodType.JSON_WEB_KEY_2020,
+                        verificationMaterial = VerificationMaterial(
+                            VerificationMaterialFormat.JWK,
+                            """
+                                {
+                                   "kty":"EC",
+                                   "crv":"P-256",
+                                   "x":"DK14eQzIfr4QlobBwJHsWdyneea8T7jV5befZoP8XRs",
+                                   "y":"UJDoME9cMag_afBFonNfJ2GDyaAF1wv6P4uJwCrk3V8"
+                                }
+                            """.trimIndent()
+                        )
                     )
                 )
+            ),
+
+            DIDDoc(
+                did = "did:example:charlie",
+                authentications = listOf(),
+                keyAgreements = listOf(
+                    "did:example:charlie#key-1",
+                ),
+                didCommServices = listOf(),
+                verificationMethods = listOf(
+                    VerificationMethod(
+                        id = "did:example:charlie#key-x25519-1",
+                        controller = "did:example:charlie#key-x25519-1",
+                        type = VerificationMethodType.JSON_WEB_KEY_2020,
+                        verificationMaterial = VerificationMaterial(
+                            VerificationMaterialFormat.JWK,
+                            """
+                                {
+                                   "kty":"OKP",
+                                   "crv":"X25519",
+                                   "x":"nTiVFj7DChMsETDdxd5dIzLAJbSQ4j4UG6ZU1ogLNlw"
+                                }
+                            """.trimIndent()
+                        )
+                    )
+                )
+            ),
+
+            DIDDoc(
+                did = "did:example:ellie",
+                authentications = listOf(),
+                keyAgreements = listOf(),
+                didCommServices = listOf(),
+                verificationMethods = listOf()
             )
         )
     )

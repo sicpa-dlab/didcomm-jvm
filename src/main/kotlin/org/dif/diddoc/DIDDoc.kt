@@ -28,7 +28,7 @@ data class DIDDoc(
     val didCommServices: List<DIDCommService>
 ) {
     fun findVerificationMethod(id: String): VerificationMethod = verificationMethods.find { it.id == id }
-        ?: throw DIDDocException("Verification method '$id' is not found in DID Doc '$did'")
+        ?: throw DIDDocException("Verification method '$id' not found in DID Doc '$did'")
 }
 
 /**

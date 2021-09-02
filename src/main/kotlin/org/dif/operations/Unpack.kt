@@ -57,7 +57,7 @@ private fun ParseResult.JWE.authUnpack(keySelector: RecipientKeySelector, authCr
     val recipients = message.recipients?.mapNotNull { it?.header?.keyID }
         ?: throw MalformedMessageException("JWE Unprotected Per-Recipient header must be present")
 
-    val (from, to) = keySelector.finAuthCryptKeys(sender, recipients)
+    val (from, to) = keySelector.findAuthCryptKeys(sender, recipients)
     val decrypted = authDecrypt(message, decryptByAllKeys, from, to)
 
     metadataBuilder

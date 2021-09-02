@@ -82,6 +82,6 @@ class AliceSecretResolverMock : SecretResolver {
     override fun findKey(kid: String): Optional<Secret> =
         secretResolver.findKey(kid)
 
-    override fun findKeys(kids: List<String>): List<Secret> =
+    override fun findKeys(kids: List<String>): Set<String> =
         secretResolver.findKeys(kids)
 }
