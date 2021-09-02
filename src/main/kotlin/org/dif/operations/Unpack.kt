@@ -14,8 +14,6 @@ import org.dif.message.Message
 import org.dif.model.Metadata
 import org.dif.model.UnpackParams
 import org.dif.model.UnpackResult
-import org.dif.utils.component1
-import org.dif.utils.component2
 
 fun unpack(params: UnpackParams, keySelector: RecipientKeySelector): UnpackResult {
     val metadataBuilder = Metadata.Builder()
@@ -46,15 +44,11 @@ private fun ParseResult.JWS.unpack(keySelector: RecipientKeySelector, metadataBu
     return message
 }
 
-private fun ParseResult.JWE.unpack(keySelector: RecipientKeySelector, metadataBuilder: Metadata.Builder): Message {
-    val (auth, anon) = getCryptoAlg(message)
-
-    return when {
-        auth != null -> authUnpack(keySelector, auth, metadataBuilder)
-        anon != null -> anonUnpack(keySelector, anon, metadataBuilder)
-        else -> throw MalformedMessageException("Malformed Message")
+private fun ParseResult.JWE.unpack(keySelector: RecipientKeySelector, metadataBuilder: Metadata.Builder): Message =
+    when (val alg = getCryptoAlg(message)) {
+        is AuthCryptAlg -> authUnpack(keySelector, alg, metadataBuilder)
+        is AnonCryptAlg -> anonUnpack(keySelector, alg, metadataBuilder)
     }
-}
 
 private fun ParseResult.JWE.authUnpack(keySelector: RecipientKeySelector, authCryptAlg: AuthCryptAlg, metadataBuilder: Metadata.Builder): Message {
     val sender = message.header?.senderKeyID
@@ -100,11 +94,8 @@ private fun ParseResult.JWE.anonUnpack(keySelector: RecipientKeySelector, anonCr
     }
 }
 
-private fun ParseResult.JWE.anonAuthUnpack(keySelector: RecipientKeySelector, metadataBuilder: Metadata.Builder): Message {
-    val (auth, _) = getCryptoAlg(message)
-
-    return when {
-        auth != null -> authUnpack(keySelector, auth, metadataBuilder)
+private fun ParseResult.JWE.anonAuthUnpack(keySelector: RecipientKeySelector, metadataBuilder: Metadata.Builder): Message =
+    when (val alg = getCryptoAlg(message)) {
+        is AuthCryptAlg -> authUnpack(keySelector, alg, metadataBuilder)
         else -> throw MalformedMessageException("Malformed Message")
     }
-}

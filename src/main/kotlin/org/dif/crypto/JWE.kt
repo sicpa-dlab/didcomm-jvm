@@ -21,14 +21,13 @@ import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jose.util.Pair
 import org.dif.common.AnonCryptAlg
 import org.dif.common.AuthCryptAlg
+import org.dif.common.CryptAlg
 import org.dif.common.Typ
 import org.dif.crypto.key.Key
 import org.dif.exceptions.MalformedMessageException
 import org.dif.exceptions.UnsupportedAlgorithm
 import org.dif.exceptions.UnsupportedJWKException
 import org.dif.utils.asKeys
-import org.dif.utils.component1
-import org.dif.utils.component2
 import java.security.MessageDigest
 
 fun authEncrypt(payload: String, auth: AuthCryptAlg, from: Key, to: List<Key>): EncryptResult {
@@ -72,9 +71,9 @@ fun anonEncrypt(payload: String, anon: AnonCryptAlg, to: List<Key>): EncryptResu
     val apv = Base64URL.encode(digest.digest(kids.joinToString(".").encodeToByteArray()))
 
     val (alg, enc) = when (anon) {
-        AnonCryptAlg.A256CBC_HS512_ECDH_ES_A256KW -> Pair.of(JWEAlgorithm.ECDH_ES_A256KW, EncryptionMethod.A256CBC_HS512)
-        AnonCryptAlg.XC20P_ECDH_ES_A256KW -> Pair.of(JWEAlgorithm.ECDH_ES_A256KW, EncryptionMethod.XC20P)
-        AnonCryptAlg.A256GCM_ECDH_ES_A256KW -> Pair.of(JWEAlgorithm.ECDH_ES_A256KW, EncryptionMethod.A256GCM)
+        AnonCryptAlg.A256CBC_HS512_ECDH_ES_A256KW -> Pair(JWEAlgorithm.ECDH_ES_A256KW, EncryptionMethod.A256CBC_HS512)
+        AnonCryptAlg.XC20P_ECDH_ES_A256KW -> Pair(JWEAlgorithm.ECDH_ES_A256KW, EncryptionMethod.XC20P)
+        AnonCryptAlg.A256GCM_ECDH_ES_A256KW -> Pair(JWEAlgorithm.ECDH_ES_A256KW, EncryptionMethod.A256GCM)
     }
 
     val jweHeader = JWEHeader.Builder(alg, enc)
@@ -131,22 +130,22 @@ fun anonDecrypt(jwe: JWEObjectJSON, to: List<Key>): Map<String, Any> {
     return jwe.payload.toJSONObject()
 }
 
-fun getCryptoAlg(jwe: JWEObjectJSON): Pair<AuthCryptAlg?, AnonCryptAlg?> {
+fun getCryptoAlg(jwe: JWEObjectJSON): CryptAlg {
     val alg = jwe.header.algorithm
     val enc = jwe.header.encryptionMethod
 
     return when {
         alg == JWEAlgorithm.ECDH_1PU_A256KW && enc == EncryptionMethod.A256CBC_HS512 ->
-            Pair.of(AuthCryptAlg.A256CBC_HS512_ECDH_1PU_A256KW, null)
+            AuthCryptAlg.A256CBC_HS512_ECDH_1PU_A256KW
 
         alg == JWEAlgorithm.ECDH_ES_A256KW && enc == EncryptionMethod.A256CBC_HS512 ->
-            Pair.of(null, AnonCryptAlg.A256CBC_HS512_ECDH_ES_A256KW)
+            AnonCryptAlg.A256CBC_HS512_ECDH_ES_A256KW
 
         alg == JWEAlgorithm.ECDH_ES_A256KW && enc == EncryptionMethod.XC20P ->
-            Pair.of(null, AnonCryptAlg.XC20P_ECDH_ES_A256KW)
+            AnonCryptAlg.XC20P_ECDH_ES_A256KW
 
         alg == JWEAlgorithm.ECDH_ES_A256KW && enc == EncryptionMethod.A256GCM ->
-            Pair.of(null, AnonCryptAlg.A256GCM_ECDH_ES_A256KW)
+            AnonCryptAlg.A256GCM_ECDH_ES_A256KW
 
         else -> throw UnsupportedAlgorithm("${alg.name}+${enc.name}")
     }
