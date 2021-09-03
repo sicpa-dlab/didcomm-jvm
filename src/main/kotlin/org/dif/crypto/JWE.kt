@@ -61,7 +61,7 @@ fun authEncrypt(payload: String, auth: AuthCryptAlg, from: Key, to: List<Key>): 
 
     return JWEObjectJSON(jweHeader, Payload(Base64URL.encode(payload)))
         .apply { encrypt(encryptor) }
-        .run { EncryptResult(serialize(), kids) }
+        .run { EncryptResult(serialize(), kids, from.id) }
 }
 
 fun anonEncrypt(payload: String, anon: AnonCryptAlg, to: List<Key>): EncryptResult {
@@ -183,4 +183,8 @@ fun getCryptoAlg(jwe: JWEObjectJSON): CryptAlg {
     }
 }
 
-data class EncryptResult(val message: String, val recipients: List<String>)
+data class EncryptResult(
+    val packedMessage: String,
+    val toKids: List<String>,
+    val fromKid: String? = null
+)
