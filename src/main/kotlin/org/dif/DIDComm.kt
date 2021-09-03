@@ -138,12 +138,10 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         val senderKeySelector = SenderKeySelector(didDocResolver, secretResolver)
 
         val (payload, signFrom) = signIfNeeded(params, senderKeySelector)
-        val (encryptedResult, recipientsKey) = encrypt(params, payload, senderKeySelector)
-        protectSenderIfNeeded(params, encryptedResult, recipientsKey)
+        val (encryptedResult, recipientKeys) = encrypt(params, payload, senderKeySelector)
+        val (packedMessage) = protectSenderIfNeeded(params, encryptedResult, recipientKeys)
 
-        return with(encryptedResult) {
-            PackEncryptedResult(packedMessage, toKids, fromKid, signFrom)
-        }
+        return PackEncryptedResult(packedMessage, encryptedResult.toKids, encryptedResult.fromKid, signFrom)
     }
 
     /**

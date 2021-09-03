@@ -164,6 +164,14 @@ class DIDCommTest {
         val unpack = didComm.unpack(
             UnpackParams.Builder(packResult.packedMessage).build()
         )
+
+        with(unpack.metadata) {
+            assertTrue { nonRepudiation }
+            assertFalse { encrypted }
+            assertFalse { authenticated }
+            assertFalse { anonymousSender }
+            assertFalse { reWrappedInForward }
+        }
     }
 
     @Test
@@ -178,5 +186,13 @@ class DIDCommTest {
         val unpack = didComm.unpack(
             UnpackParams.Builder(packResult.packedMessage).build()
         )
+
+        with(unpack.metadata) {
+            assertFalse { nonRepudiation }
+            assertFalse { encrypted }
+            assertFalse { authenticated }
+            assertFalse { anonymousSender }
+            assertFalse { reWrappedInForward }
+        }
     }
 }
