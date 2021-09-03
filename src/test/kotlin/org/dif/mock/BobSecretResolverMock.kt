@@ -19,9 +19,9 @@ class BobSecretResolverMock : SecretResolver {
                     """
                         {
                            "kty":"OKP",
-                           "d":"N7TYPU-m2QkGwSOKNmezn_fAULSyjaQvkIwH4qvPDJo",
+                           "d":"b9NnuOCB0hm7YGNvaE9DMhwH_wjZA1-gWD6dA0JWdL0",
                            "crv":"X25519",
-                           "x":"8VUvYUsQU9VvLGhq9rzQXf7j4jQv2k4o0b10naykdEw"
+                           "x":"GDTrI66K0pFfO54tlCSvfjjNapIs44dzpneBgyx0S3E"
                         }
                     """.trimIndent()
                 )
@@ -35,9 +35,9 @@ class BobSecretResolverMock : SecretResolver {
                     """
                         {
                            "kty":"OKP",
-                           "d":"j79M5MKnrNmaoQT_PY_JLb2oE4Hhs3CkfaBdCZ-5UrM",
+                           "d":"p-vteoF1gopny1HXywt76xz_uC83UUmrgszsI-ThBKk",
                            "crv":"X25519",
-                           "x":"_hGwmO_Uaqaf_PDVxlh4BK354fYocC9Ut9VZjKZphTg"
+                           "x":"UT9S3F5ep16KSNBBShU2wh3qSfqYjlasZimn0mB8_VM"
                         }
                     """.trimIndent()
                 )
@@ -51,9 +51,9 @@ class BobSecretResolverMock : SecretResolver {
                     """
                         {
                            "kty":"OKP",
-                           "d":"D89JUUz9wKFZ8dNJat3MYObtxgPFh3OJJpibVloMOqs",
+                           "d":"f9WJeuQXEItkGM8shN4dqFr5fLQLBasHnWZ-8dPaSo0",
                            "crv":"X25519",
-                           "x":"_cqvyjqdaZVAvCnQCbfJ8rhpDoi2F1uWmAgwGZf11Q4"
+                           "x":"82k2BTUiywKv49fKLZa-WwDi8RBf0tB0M8bvSAUQ3yY"
                         }
                     """.trimIndent()
                 )
@@ -67,10 +67,95 @@ class BobSecretResolverMock : SecretResolver {
                     """
                         {
                            "kty":"EC",
-                           "d":"WI1q-lIWtVfVgVLY5egjPq8xyPvUIxq4-tf-SFCBWhM",
+                           "d":"PgwHnlXxt8pwR6OCTUwwWx-P51BiLkFZyqHzquKddXQ",
                            "crv":"P-256",
-                           "x":"DK14eQzIfr4QlobBwJHsWdyneea8T7jV5befZoP8XRs",
-                           "y":"UJDoME9cMag_afBFonNfJ2GDyaAF1wv6P4uJwCrk3V8"
+                           "x":"FQVaTOksf-XsCUrt4J1L2UGvtWaDwpboVlqbKBY2AIo",
+                           "y":"6XFB9PYo7dyC5ViJSO9uXNYkxTJWn0d_mqJ__ZYhcNY"
+                        }
+                    """.trimIndent()
+                )
+            ),
+
+            Secret(
+                kid = "did:example:bob#key-p256-2",
+                type = VerificationMethodType.JSON_WEB_KEY_2020,
+                verificationMaterial = VerificationMaterial(
+                    VerificationMaterialFormat.JWK,
+                    """
+                        {
+                           "kty":"EC",
+                           "d":"agKz7HS8mIwqO40Q2dwm_Zi70IdYFtonN5sZecQoxYU",
+                           "crv":"P-256",
+                           "x":"n0yBsGrwGZup9ywKhzD4KoORGicilzIUyfcXb1CSwe0",
+                           "y":"ov0buZJ8GHzV128jmCw1CaFbajZoFFmiJDbMrceCXIw"
+                        }
+                    """.trimIndent()
+                )
+            ),
+
+            Secret(
+                kid = "did:example:bob#key-p384-1",
+                type = VerificationMethodType.JSON_WEB_KEY_2020,
+                verificationMaterial = VerificationMaterial(
+                    VerificationMaterialFormat.JWK,
+                    """
+                        {
+                           "kty":"EC",
+                           "d":"ajqcWbYA0UDBKfAhkSkeiVjMMt8l-5rcknvEv9t_Os6M8s-HisdywvNCX4CGd_xY",
+                           "crv":"P-384",
+                           "x":"MvnE_OwKoTcJVfHyTX-DLSRhhNwlu5LNoQ5UWD9Jmgtdxp_kpjsMuTTBnxg5RF_Y",
+                           "y":"X_3HJBcKFQEG35PZbEOBn8u9_z8V1F9V1Kv-Vh0aSzmH-y9aOuDJUE3D4Hvmi5l7"
+                        }
+                    """.trimIndent()
+                )
+            ),
+
+            Secret(
+                kid = "did:example:bob#key-p384-2",
+                type = VerificationMethodType.JSON_WEB_KEY_2020,
+                verificationMaterial = VerificationMaterial(
+                    VerificationMaterialFormat.JWK,
+                    """
+                        {
+                           "kty":"EC",
+                           "d":"OiwhRotK188BtbQy0XBO8PljSKYI6CCD-nE_ZUzK7o81tk3imDOuQ-jrSWaIkI-T",
+                           "crv":"P-384",
+                           "x":"2x3HOTvR8e-Tu6U4UqMd1wUWsNXMD0RgIunZTMcZsS-zWOwDgsrhYVHmv3k_DjV3",
+                           "y":"W9LLaBjlWYcXUxOf6ECSfcXKaC3-K9z4hCoP0PS87Q_4ExMgIwxVCXUEB6nf0GDd"
+                        }
+                    """.trimIndent()
+                )
+            ),
+
+            Secret(
+                kid = "did:example:bob#key-p521-1",
+                type = VerificationMethodType.JSON_WEB_KEY_2020,
+                verificationMaterial = VerificationMaterial(
+                    VerificationMaterialFormat.JWK,
+                    """
+                        {
+                           "kty":"EC",
+                           "d":"AV5ocjvy7PkPgNrSuvCxtG70NMj6iTabvvjSLbsdd8OdI9HlXYlFR7RdBbgLUTruvaIRhjEAE9gNTH6rWUIdfuj6",
+                           "crv":"P-521",
+                           "x":"Af9O5THFENlqQbh2Ehipt1Yf4gAd9RCa3QzPktfcgUIFADMc4kAaYVViTaDOuvVS2vMS1KZe0D5kXedSXPQ3QbHi",
+                           "y":"ATZVigRQ7UdGsQ9j-omyff6JIeeUv3CBWYsZ0l6x3C_SYqhqVV7dEG-TafCCNiIxs8qeUiXQ8cHWVclqkH4Lo1qH"
+                        }
+                    """.trimIndent()
+                )
+            ),
+
+            Secret(
+                kid = "did:example:bob#key-p521-2",
+                type = VerificationMethodType.JSON_WEB_KEY_2020,
+                verificationMaterial = VerificationMaterial(
+                    VerificationMaterialFormat.JWK,
+                    """
+                        {
+                           "kty":"EC",
+                           "d":"ABixMEZHsyT7SRw-lY5HxdNOofTZLlwBHwPEJ3spEMC2sWN1RZQylZuvoyOBGJnPxg4-H_iVhNWf_OtgYODrYhCk",
+                           "crv":"P-521",
+                           "x":"ATp_WxCfIK_SriBoStmA0QrJc2pUR1djpen0VdpmogtnKxJbitiPq-HJXYXDKriXfVnkrl2i952MsIOMfD2j0Ots",
+                           "y":"AEJipR0Dc-aBZYDqN51SKHYSWs9hM58SmRY1MxgXANgZrPaq1EeGMGOjkbLMEJtBThdjXhkS5VlXMkF0cYhZELiH"
                         }
                     """.trimIndent()
                 )
