@@ -1,7 +1,7 @@
 package org.dif.crypto.key
 
 import org.dif.exceptions.DIDDocException
-import org.dif.exceptions.DIDDocNotResolvedException
+import org.dif.exceptions.DIDUrlNotFoundException
 import org.dif.exceptions.IncompatibleCryptoException
 import org.dif.exceptions.SecretNotFoundException
 import org.dif.fixtures.JWM
@@ -82,14 +82,13 @@ class RecipientKeySelectorTest {
     @Test
     fun `Test DID is passed to methods`() {
         val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
-        val expected = "'DID URL' was excepted"
 
         run {
             val actual = assertFailsWith<IllegalStateException> {
                 recipientKeySelector.findVerificationKey(JWM.ALICE_DID)
             }
 
-            assertEquals(expected, actual.message)
+            assertEquals("'DID URL' is expected as a signature verification key. Got: did:example:alice", actual.message)
         }
 
         run {
@@ -97,7 +96,7 @@ class RecipientKeySelectorTest {
                 recipientKeySelector.findAuthCryptKeys(JWM.ALICE_DID, listOf(JWM.BOB_DID))
             }
 
-            assertEquals(expected, actual.message)
+            assertEquals("'DID URL' is expected as a sender key. Got: did:example:alice", actual.message)
         }
 
         run {
@@ -105,7 +104,7 @@ class RecipientKeySelectorTest {
                 recipientKeySelector.findAnonCryptKeys(listOf(JWM.BOB_DID))
             }
 
-            assertEquals(expected, actual.message)
+            assertEquals("'DID URL' is expected as a recipient key. Got: did:example:bob", actual.message)
         }
     }
 
@@ -162,10 +161,10 @@ class RecipientKeySelectorTest {
         val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
         val did = JWM.NONA_DID
         val didUrl = "$did#key-1"
-        val expected = "The DID Doc '$did' not resolved"
+        val expected = "The DID URL '$did' not found"
 
         run {
-            val actual = assertFailsWith<DIDDocNotResolvedException> {
+            val actual = assertFailsWith<DIDUrlNotFoundException> {
                 recipientKeySelector.findVerificationKey(didUrl)
             }
 
@@ -173,7 +172,7 @@ class RecipientKeySelectorTest {
         }
 
         run {
-            val actual = assertFailsWith<DIDDocNotResolvedException> {
+            val actual = assertFailsWith<DIDUrlNotFoundException> {
                 recipientKeySelector.findAuthCryptKeys(didUrl, listOf())
             }
 

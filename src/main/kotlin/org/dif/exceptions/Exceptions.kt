@@ -30,6 +30,13 @@ open class DIDDocException(message: String) : DIDCommException(message)
 class DIDDocNotResolvedException(did: String) : DIDDocException("The DID Doc '$did' not resolved")
 
 /**
+ * This exception SHOULD be raised if DID URL not founded.
+ *
+ * @param didUrl The did url.
+ */
+class DIDUrlNotFoundException(didUrl: String) : DIDDocException("The DID URL '$didUrl' not found")
+
+/**
  * This exception SHOULD be raised if Secret can not be found.
  *
  * @param kid The Key Identifier.

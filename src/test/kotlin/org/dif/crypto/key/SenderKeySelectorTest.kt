@@ -124,6 +124,22 @@ class SenderKeySelectorTest {
     }
 
     @Test
+    fun `Test find second type auth key`() {
+        val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
+        val expectedSenderKey = "did:example:alice#key-p256-1"
+        val expectedRecipientKeys = listOf(
+            "did:example:bob#key-p256-1",
+            "did:example:bob#key-p256-2"
+        )
+
+        val (sender) = senderKeySelector.findAuthCryptKeys(JWM.ALICE_DID, "did:example:bob#key-p256-2")
+        assertEquals(expectedSenderKey, sender.id)
+
+        val (_, recipients) = senderKeySelector.findAuthCryptKeys("did:example:alice#key-p256-1", JWM.BOB_DID)
+        assertContentEquals(expectedRecipientKeys, recipients.map { it.id })
+    }
+
+    @Test
     fun `Test signing key not found by DID`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
 
@@ -248,19 +264,19 @@ class SenderKeySelectorTest {
         }
 
         run {
-            val actual = assertFailsWith<DIDDocException> {
+            val actual = assertFailsWith<IncompatibleCryptoException> {
                 senderKeySelector.findAuthCryptKeys(JWM.ELLIE_DID, JWM.BOB_DID)
             }
 
-            assertEquals("The DID Doc '${JWM.ELLIE_DID}' does not contain compatible 'keyAgreement' verification methods", actual.message)
+            assertEquals("The DID Docs '${JWM.ELLIE_DID}' and '${JWM.BOB_DID}' do not contain compatible 'keyAgreement' verification methods", actual.message)
         }
 
         run {
-            val actual = assertFailsWith<DIDDocException> {
+            val actual = assertFailsWith<IncompatibleCryptoException> {
                 senderKeySelector.findAuthCryptKeys(JWM.ALICE_DID, JWM.ELLIE_DID)
             }
 
-            assertEquals("The DID Doc '${JWM.ELLIE_DID}' does not contain compatible 'keyAgreement' verification methods", actual.message)
+            assertEquals("The DID Docs '${JWM.ALICE_DID}' and '${JWM.ELLIE_DID}' do not contain compatible 'keyAgreement' verification methods", actual.message)
         }
     }
 
@@ -271,11 +287,11 @@ class SenderKeySelectorTest {
         val charlieDIDUrl = "did:example:charlie#key-x25519-1"
 
         run {
-            val actual = assertFailsWith<DIDDocException> {
+            val actual = assertFailsWith<IncompatibleCryptoException> {
                 senderKeySelector.findAuthCryptKeys(JWM.CHARLIE_DID, bobDIDUrl)
             }
 
-            assertEquals("The DID Doc '${JWM.CHARLIE_DID}' does not contain compatible 'keyAgreement' verification methods", actual.message)
+            assertEquals("The DID Docs '${JWM.CHARLIE_DID}' and '${JWM.BOB_DID}' do not contain compatible 'keyAgreement' verification methods", actual.message)
         }
 
         run {
