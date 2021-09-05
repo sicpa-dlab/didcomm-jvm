@@ -29,12 +29,11 @@ class SignedMessageTest {
             val expected = JWSObjectJSON.parse(test.expected)
             val signed = JWSObjectJSON.parse(packed.packedMessage)
 
-            assertEquals(expected.payload.toBase64URL().toString(), signed.payload.toBase64URL().toString())
             assertEquals(expected.header.toString(), signed.header.toString())
 
             assertEquals(
-                JSONObjectUtils.toJSONStringForWeb(JWM.PLAINTEXT_MESSAGE.toJSONObject()),
-                JSONObjectUtils.toJSONStringForWeb(unpacked.message.toJSONObject())
+                JSONObjectUtils.toJSONString(JWM.PLAINTEXT_MESSAGE.toJSONObject()),
+                JSONObjectUtils.toJSONString(unpacked.message.toJSONObject())
             )
         }
     }
