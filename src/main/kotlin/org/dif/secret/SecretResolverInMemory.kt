@@ -8,6 +8,6 @@ class SecretResolverInMemory(private val secrets: Map<String, Secret>) : SecretR
     override fun findKey(kid: String): Optional<Secret> =
         Optional.ofNullable(secrets[kid])
 
-    override fun findKeys(kids: List<String>): List<Secret> =
-        kids.mapNotNull { findKey(it).orElse(null) }
+    override fun findKeys(kids: List<String>): Set<String> =
+        kids.intersect(this.secrets.keys)
 }

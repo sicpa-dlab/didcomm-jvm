@@ -21,5 +21,5 @@ interface SecretResolver {
      * @param kids  The key IDs find private keys for
      * @return A possible empty list of all private keys that have one of the given keyIDs.
      */
-    fun findKeys(kids: List<String>): List<Secret>
+    fun findKeys(kids: List<String>): Set<String>
 }

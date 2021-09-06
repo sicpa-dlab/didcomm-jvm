@@ -7,19 +7,19 @@ import org.dif.exceptions.MalformedMessageException
 import org.dif.fixtures.CustomProtocolBody
 import org.dif.fixtures.JWM
 import org.dif.message.Message
+import org.dif.mock.AliceSecretResolverMock
 import org.dif.mock.DIDDocResolverMock
-import org.dif.mock.SecretResolverMock
 import org.dif.model.PackPlaintextParams
 import org.dif.model.UnpackParams
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 
 class PlaintextMessageTest {
     @Test
     fun `Test pack unpack plaintext message`() {
-        val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
+        val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val packed = didComm.packPlaintext(
             PackPlaintextParams.builder(JWM.PLAINTEXT_MESSAGE).build()
@@ -36,9 +36,9 @@ class PlaintextMessageTest {
 
     @Test
     fun `Test plaintext without body`() {
-        val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
+        val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
-        val thrown: MalformedMessageException = assertThrows(MalformedMessageException::javaClass.name) {
+        val thrown = assertFailsWith<MalformedMessageException> {
             didComm.unpack(
                 UnpackParams.Builder(JWM.PLAINTEXT_MESSAGE_WITHOUT_BODY).build()
             )
@@ -60,7 +60,7 @@ class PlaintextMessageTest {
             .expiresTime(2)
             .build()
 
-        val didComm = DIDComm(DIDDocResolverMock(), SecretResolverMock())
+        val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val packed = didComm.packPlaintext(
             PackPlaintextParams.builder(message).build()

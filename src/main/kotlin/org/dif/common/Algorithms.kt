@@ -1,9 +1,14 @@
 package org.dif.common
 
 /**
+ * Encryption algorithms marker.
+ */
+sealed interface CryptAlg
+
+/**
  * Algorithms for anonymous encryption.
  */
-enum class AnonCryptAlg {
+enum class AnonCryptAlg : CryptAlg {
     /**
      * A256CBC_HS512_ECDH_ES_A256KW: AES256-CBC + HMAC-SHA512 with a 512 bit key content encryption,
      * ECDH-ES key agreement with A256KW key wrapping
@@ -26,7 +31,7 @@ enum class AnonCryptAlg {
 /**
  * Algorithms for authentication encryption.
  */
-enum class AuthCryptAlg {
+enum class AuthCryptAlg : CryptAlg {
     /**
      * A256CBC_HS512_ECDH_1PU_A256KW: AES256-CBC + HMAC-SHA512 with a 512 bit key content encryption,
      * ECDH-1PU key agreement with A256KW key wrapping

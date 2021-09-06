@@ -8,7 +8,7 @@ import org.dif.secret.SecretResolver
 import org.dif.secret.SecretResolverInMemory
 import java.util.Optional
 
-class SecretResolverMock : SecretResolver {
+class AliceSecretResolverMock : SecretResolver {
     private val secretResolver = SecretResolverInMemory(
         listOf(
             Secret(
@@ -59,6 +59,56 @@ class SecretResolverMock : SecretResolver {
                         }
                     """.trimIndent()
                 )
+            ),
+
+            Secret(
+                kid = "did:example:alice#key-x25519-1",
+                type = VerificationMethodType.JSON_WEB_KEY_2020,
+                verificationMaterial = VerificationMaterial(
+                    VerificationMaterialFormat.JWK,
+                    """
+                        {
+                           "kty":"OKP",
+                           "d":"r-jK2cO3taR8LQnJB1_ikLBTAnOtShJOsHXRUWT-aZA",
+                           "crv":"X25519",
+                           "x":"avH0O2Y4tqLAq8y9zpianr8ajii5m4F_mICrzNlatXs"
+                        }
+                    """.trimIndent()
+                )
+            ),
+
+            Secret(
+                kid = "did:example:alice#key-p256-1",
+                type = VerificationMethodType.JSON_WEB_KEY_2020,
+                verificationMaterial = VerificationMaterial(
+                    VerificationMaterialFormat.JWK,
+                    """
+                        {
+                           "kty":"EC",
+                           "d":"sB0bYtpaXyp-h17dDpMx91N3Du1AdN4z1FUq02GbmLw",
+                           "crv":"P-256",
+                           "x":"L0crjMN1g0Ih4sYAJ_nGoHUck2cloltUpUVQDhF2nHE",
+                           "y":"SxYgE7CmEJYi7IDhgK5jI4ZiajO8jPRZDldVhqFpYoo"
+                        }
+                    """.trimIndent()
+                )
+            ),
+
+            Secret(
+                kid = "did:example:alice#key-p521-1",
+                type = VerificationMethodType.JSON_WEB_KEY_2020,
+                verificationMaterial = VerificationMaterial(
+                    VerificationMaterialFormat.JWK,
+                    """
+                        {
+                           "kty":"EC",
+                           "d":"AQCQKE7rZpxPnX9RgjXxeywrAMp1fJsyFe4cir1gWj-8t8xWaM_E2qBkTTzyjbRBu-JPXHe_auT850iYmE34SkWi",
+                           "crv":"P-521",
+                           "x":"AHBEVPRhAv-WHDEvxVM9S0px9WxxwHL641Pemgk9sDdxvli9VpKCBdra5gg_4kupBDhz__AlaBgKOC_15J2Byptz",
+                           "y":"AciGcHJCD_yMikQvlmqpkBbVqqbg93mMVcgvXBYAQPP-u9AF7adybwZrNfHWCKAQwGF9ugd0Zhg7mLMEszIONFRk"
+                        }
+                    """.trimIndent()
+                )
             )
         )
     )
@@ -66,6 +116,6 @@ class SecretResolverMock : SecretResolver {
     override fun findKey(kid: String): Optional<Secret> =
         secretResolver.findKey(kid)
 
-    override fun findKeys(kids: List<String>): List<Secret> =
+    override fun findKeys(kids: List<String>): Set<String> =
         secretResolver.findKeys(kids)
 }

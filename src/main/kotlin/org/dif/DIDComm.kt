@@ -2,16 +2,11 @@ package org.dif
 
 import org.dif.common.AnonCryptAlg
 import org.dif.common.AuthCryptAlg
-import org.dif.crypto.ParseResult
 import org.dif.crypto.key.RecipientKeySelector
 import org.dif.crypto.key.SenderKeySelector
-import org.dif.crypto.parse
 import org.dif.crypto.sign
-import org.dif.crypto.verify
 import org.dif.diddoc.DIDDoc
 import org.dif.diddoc.DIDDocResolver
-import org.dif.exceptions.MalformedMessageException
-import org.dif.model.Metadata
 import org.dif.model.PackEncryptedParams
 import org.dif.model.PackEncryptedResult
 import org.dif.model.PackPlaintextParams
@@ -20,6 +15,10 @@ import org.dif.model.PackSignedParams
 import org.dif.model.PackSignedResult
 import org.dif.model.UnpackParams
 import org.dif.model.UnpackResult
+import org.dif.operations.encrypt
+import org.dif.operations.protectSenderIfNeeded
+import org.dif.operations.signIfNeeded
+import org.dif.operations.unpack
 import org.dif.secret.SecretResolver
 
 /**
@@ -74,10 +73,10 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         val secretResolver = params.secretResolver ?: this.secretResolver
         val senderKeySelector = SenderKeySelector(didDocResolver, secretResolver)
 
-        val key = senderKeySelector.signKey(params.signFrom)
+        val key = senderKeySelector.findSigningKey(params.signFrom)
         val msg = sign(params.message.toString(), key)
 
-        return PackSignedResult(msg, params.signFrom)
+        return PackSignedResult(msg, key.id)
     }
 
     /**
@@ -134,7 +133,15 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
      * @return Result of pack encrypted operation.
      */
     fun packEncrypted(params: PackEncryptedParams): PackEncryptedResult {
-        return PackEncryptedResult("", listOf(), "")
+        val didDocResolver = params.didDocResolver ?: this.didDocResolver
+        val secretResolver = params.secretResolver ?: this.secretResolver
+        val senderKeySelector = SenderKeySelector(didDocResolver, secretResolver)
+
+        val (payload, signFrom) = signIfNeeded(params, senderKeySelector)
+        val (encryptedResult, recipientKeys) = encrypt(params, payload, senderKeySelector)
+        val (packedMessage) = protectSenderIfNeeded(params, encryptedResult, recipientKeys)
+
+        return PackEncryptedResult(packedMessage, encryptedResult.toKids, encryptedResult.fromKid, signFrom)
     }
 
     /**
@@ -150,32 +157,6 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         val secretResolver = params.secretResolver ?: this.secretResolver
         val recipientKeySelector = RecipientKeySelector(didDocResolver, secretResolver)
 
-        return when (val parseResult = parse(params.packedMessage)) {
-            is ParseResult.JWS -> parseResult.unpack(recipientKeySelector)
-            is ParseResult.JWE -> TODO()
-            is ParseResult.JWM -> parseResult.unpack()
-        }
-    }
-
-    private fun ParseResult.JWS.unpack(keySelector: RecipientKeySelector): UnpackResult {
-        val kid = message.unprotectedHeader?.keyID
-            ?: throw MalformedMessageException("JWS Unprotected Per-Signature header must be present")
-
-        val key = keySelector.verifyKey(kid)
-        return verify(message, key).run {
-            UnpackResult(
-                message,
-                Metadata(
-                    signAlg = signAlg,
-                    signFrom = signFrom,
-                    nonRepudiation = true,
-                    signedMessage = rawMessage
-                )
-            )
-        }
-    }
-
-    private fun ParseResult.JWM.unpack(): UnpackResult {
-        return UnpackResult(message, Metadata())
+        return unpack(params, recipientKeySelector)
     }
 }

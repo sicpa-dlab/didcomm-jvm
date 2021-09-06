@@ -45,25 +45,28 @@ fun sign(payload: String, key: Key): String {
         .serialize()
 }
 
-fun verify(jws: JWSObjectJSON, key: Key): VerifyResult {
+fun verify(jws: JWSObjectJSON, signAlg: SignAlg, key: Key): Message {
     val jwk = key.jwk
 
-    val (signAlg, verifier) = when (val alg = jws.header.algorithm) {
-        JWSAlgorithm.ES256 -> Pair(SignAlg.ES256, ECDSAVerifier(jwk.asKey<ECKey>()))
-        JWSAlgorithm.ES256K -> Pair(SignAlg.ES256K, ECDSAVerifier(jwk.asKey<ECKey>()))
-        JWSAlgorithm.EdDSA -> Pair(SignAlg.ED25519, Ed25519Verifier(jwk.asKey()))
-        else -> throw UnsupportedAlgorithm(alg.name)
+    val verifier = when (signAlg) {
+        SignAlg.ES256 -> ECDSAVerifier(jwk.asKey<ECKey>())
+        SignAlg.ES256K -> ECDSAVerifier(jwk.asKey<ECKey>())
+        SignAlg.ED25519 -> Ed25519Verifier(jwk.asKey())
     }
 
     if (!jws.verify(verifier))
         throw MalformedMessageException("Invalid signature")
 
-    return VerifyResult(
-        message = Message.parse(jws.payload.toJSONObject()),
-        signFrom = key.id,
-        signAlg = signAlg
-    )
+    return Message.parse(jws.payload.toJSONObject())
 }
+
+fun getCryptoAlg(jws: JWSObjectJSON): SignAlg =
+    when (val alg = jws.header.algorithm) {
+        JWSAlgorithm.ES256 -> SignAlg.ES256
+        JWSAlgorithm.ES256K -> SignAlg.ES256K
+        JWSAlgorithm.EdDSA -> SignAlg.ED25519
+        else -> throw UnsupportedAlgorithm(alg.name)
+    }
 
 private fun getJWSAlgorithm(jwk: JWK) = when (jwk) {
     is ECKey -> when (jwk.curve) {
@@ -74,9 +77,3 @@ private fun getJWSAlgorithm(jwk: JWK) = when (jwk) {
     is OctetKeyPair -> JWSAlgorithm.EdDSA
     else -> throw UnsupportedJWKException(jwk.javaClass.name)
 }
-
-data class VerifyResult(
-    val message: Message,
-    val signFrom: String,
-    val signAlg: SignAlg
-)

@@ -27,14 +27,21 @@ open class DIDDocException(message: String) : DIDCommException(message)
  *
  * @param did The did.
  */
-class DIDDocNotResolvedException(did: String) : DIDDocException("The DID Doc $did is not resolved")
+class DIDDocNotResolvedException(did: String) : DIDDocException("The DID Doc '$did' not resolved")
+
+/**
+ * This exception SHOULD be raised if DID URL not founded.
+ *
+ * @param didUrl The did url.
+ */
+class DIDUrlNotFoundException(didUrl: String) : DIDDocException("The DID URL '$didUrl' not found")
 
 /**
  * This exception SHOULD be raised if Secret can not be found.
  *
  * @param kid The Key Identifier.
  */
-class SecretNotFoundException(kid: String) : DIDCommException("The Secret Doc $kid is not found")
+class SecretNotFoundException(kid: String) : DIDCommException("The Secret '$kid' not found")
 
 /**
  * This exception SHOULD be raised if curve is not supported.
