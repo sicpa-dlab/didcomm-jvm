@@ -61,13 +61,13 @@ private fun ParseResult.JWE.authUnpack(keySelector: RecipientKeySelector, authCr
     val decrypted = authDecrypt(message, decryptByAllKeys, from, to)
 
     metadataBuilder
-        .encryptedTo(recipients)
-        .encryptedFrom(sender)
+        .encryptedTo(decrypted.toKids)
+        .encryptedFrom(decrypted.fromKid)
         .encAlgAuth(authCryptAlg)
         .encrypted(true)
         .authenticated(true)
 
-    return when (val parseResult = parse(decrypted)) {
+    return when (val parseResult = parse(decrypted.unpackedMessage)) {
         is ParseResult.JWS -> parseResult.unpack(keySelector, metadataBuilder)
         is ParseResult.JWM -> parseResult.message
         else -> throw MalformedMessageException("Malformed Message")
@@ -82,12 +82,12 @@ private fun ParseResult.JWE.anonUnpack(keySelector: RecipientKeySelector, anonCr
     val decrypted = anonDecrypt(message, decryptByAllKeys, to)
 
     metadataBuilder
-        .encryptedTo(recipients)
+        .encryptedTo(decrypted.toKids)
         .anonymousSender(true)
         .encAlgAnon(anonCryptAlg)
         .encrypted(true)
 
-    return when (val parseResult = parse(decrypted)) {
+    return when (val parseResult = parse(decrypted.unpackedMessage)) {
         is ParseResult.JWE -> parseResult.anonAuthUnpack(keySelector, decryptByAllKeys, metadataBuilder)
         is ParseResult.JWS -> parseResult.unpack(keySelector, metadataBuilder)
         is ParseResult.JWM -> parseResult.message

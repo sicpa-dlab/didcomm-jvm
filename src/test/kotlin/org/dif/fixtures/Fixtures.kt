@@ -3,8 +3,12 @@ package org.dif.fixtures
 import org.dif.common.AnonCryptAlg
 import org.dif.common.AuthCryptAlg
 import org.dif.common.SignAlg
+import org.dif.exceptions.DIDCommException
+import org.dif.exceptions.MalformedMessageException
 import org.dif.message.Message
 import org.dif.model.Metadata
+import org.dif.model.UnpackParams
+import kotlin.reflect.KClass
 
 class JWM {
     data class WrongMessage(val json: String, val expectedMessage: String)
@@ -404,9 +408,15 @@ class JWS {
 
 class JWE {
     data class TestVector(val message: String, val expectedMetadata: Metadata)
+    data class NegativeTestVector<T : Throwable>(
+        val packedMessage: String,
+        val expectedThrow: KClass<T>,
+        val expectedMessage: String,
+        val unpackParams: UnpackParams = UnpackParams.Builder(packedMessage).build()
+    )
 
     companion object {
-        val TEST_VECTORS = listOf<TestVector>(
+        val TEST_VECTORS = listOf(
             TestVector(
                 message =
                 """
@@ -648,6 +658,53 @@ class JWE {
                     signAlg = SignAlg.ED25519,
                     signedMessage = mapOf()
                 )
+            )
+        )
+
+        val BOB_DAMAGED_MESSAGE = """
+                {
+                   "ciphertext":"KWS7gJU7TbyJlcT9dPkCw-ohNigGaHSukR9MUqFM0THbCTCNkY-g5tahBFyszlKIKXs7qOtqzYyWbPou2q77XlAeYs93IhF6NvaIjyNqYklvj-OtJt9W2Pj5CLOMdsR0C30wchGoXd6wEQZY4ttbzpxYznqPmJ0b9KW6ZP-l4_DSRYe9B-1oSWMNmqMPwluKbtguC-riy356Xbu2C9ShfWmpmjz1HyJWQhZfczuwkWWlE63g26FMskIZZd_jGpEhPFHKUXCFwbuiw_Iy3R0BIzmXXdK_w7PZMMPbaxssl2UeJmLQgCAP8j8TukxV96EKa6rGgULvlo7qibjJqsS5j03bnbxkuxwbfyu3OxwgVzFWlyHbUH6p",
+                   "protected":"eyJlcGsiOnsia3R5IjoiT0tQIiwiY3J2IjoiWDI1NTE5IiwieCI6IkpIanNtSVJaQWFCMHpSR193TlhMVjJyUGdnRjAwaGRIYlc1cmo4ZzBJMjQifSwiYXB2IjoiTmNzdUFuclJmUEs2OUEtcmtaMEw5WFdVRzRqTXZOQzNaZzc0QlB6NTNQQSIsInR5cCI6ImFwcGxpY2F0aW9uL2RpZGNvbW0tZW5jcnlwdGVkK2pzb24iLCJlbmMiOiJYQzIwUCIsImFsZyI6IkVDREgtRVMrQTI1NktXIn0",
+                   "recipients":[
+                      {
+                         "encrypted_key":"3n1olyBR3nY7ZGAprOx-b7wYAKza6cvOYjNwVg3miTnbLwPP_FmE1a",
+                         "header":{
+                            "kid":"did:example:bob#key-x25519-1"
+                         }
+                      },
+                      {
+                         "encrypted_key":"j5eSzn3kCrIkhQAWPnEwrFPMW6hG0zF_y37gUvvc5gvlzsuNX4hXrQ",
+                         "header":{
+                            "kid":"did:example:bob#key-x25519-2"
+                         }
+                      },
+                      {
+                         "encrypted_key":"TEWlqlq-ao7Lbynf0oZYhxs7ZB39SUWBCK4qjqQqfeItfwmNyDm73A",
+                         "header":{
+                            "kid":"did:example:bob#key-x25519-3"
+                         }
+                      }
+                   ],
+                   "tag":"6ylC_iAs4JvDQzXeY6MuYQ",
+                   "iv":"ESpmcyGiZpRjc5urDela21TOOTW8Wqd1"
+                }
+        """.trimIndent()
+
+        val NEGATIVE_TEST_VECTORS = listOf(
+            NegativeTestVector(
+                packedMessage = "{}",
+                expectedThrow = DIDCommException::class,
+                expectedMessage = "The header \"id\" is missing"
+            ),
+
+            NegativeTestVector(
+                packedMessage = BOB_DAMAGED_MESSAGE,
+                expectedThrow = MalformedMessageException::class,
+                expectedMessage = "Decrypt is failed",
+                unpackParams = UnpackParams
+                    .Builder(BOB_DAMAGED_MESSAGE)
+                    .expectDecryptByAllKeys(true)
+                    .build()
             )
         )
     }
