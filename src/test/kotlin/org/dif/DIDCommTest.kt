@@ -1,10 +1,7 @@
 package org.dif
 
-import org.dif.common.JSONObject
 import org.dif.fixtures.JWM
 import org.dif.message.Attachment
-import org.dif.message.AttachmentDataBase64
-import org.dif.message.AttachmentDataJson
 import org.dif.message.Message
 import org.dif.mock.AliceSecretResolverMock
 import org.dif.mock.BobSecretResolverMock
@@ -14,20 +11,21 @@ import org.dif.model.PackPlaintextParams
 import org.dif.model.PackSignedParams
 import org.dif.model.UnpackParams
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class DIDCommTest {
     @Test
-    fun `Test message with attachments message`() {
+    fun `Test encrypt message with attachments`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val attachments = listOf(
-            Attachment.builder("1", AttachmentDataBase64("SGVsbG8sIHdvcmxk"))
+            Attachment.builder("1", Attachment.Data.Base64("SGVsbG8sIHdvcmxk"))
                 .mediaType("text/plain")
                 .build(),
 
-            Attachment.builder("2", AttachmentDataJson(JSONObject(mapOf("foo" to "bar"))))
+            Attachment.builder("2", Attachment.Data.Json(mapOf("foo" to "bar")))
                 .description("The second attachment")
                 .mediaType("application/json")
                 .build()
@@ -43,12 +41,13 @@ class DIDCommTest {
             PackEncryptedParams.builder(msg, JWM.BOB_DID).build()
         )
 
-        /**
-         val unpack = didComm.unpack(
-         UnpackParams.Builder(packedMsg.packedMessage).build()
-         )
-         **/
-        // TODO: assert attachments
+        val unpack = didComm.unpack(
+            UnpackParams.Builder(packedMsg.packedMessage)
+                .secretResolver(BobSecretResolverMock())
+                .build()
+        )
+
+        assertEquals(msg, unpack.message)
     }
 
     @Test

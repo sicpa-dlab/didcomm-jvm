@@ -300,13 +300,47 @@ class DIDDocResolverMock : DIDDocResolver {
                 did = "did:example:charlie",
                 authentications = listOf(),
                 keyAgreements = listOf(
-                    "did:example:charlie#key-1",
+                    "did:example:charlie#key-x25519-1",
+                    "did:example:charlie#key-x25519-2",
+                    "did:example:charlie#key-x25519-3",
                 ),
                 didCommServices = listOf(),
                 verificationMethods = listOf(
                     VerificationMethod(
                         id = "did:example:charlie#key-x25519-1",
                         controller = "did:example:charlie#key-x25519-1",
+                        type = VerificationMethodType.JSON_WEB_KEY_2020,
+                        verificationMaterial = VerificationMaterial(
+                            VerificationMaterialFormat.JWK,
+                            """
+                                {
+                                   "kty":"OKP",
+                                   "crv":"X25519",
+                                   "x":"nTiVFj7DChMsETDdxd5dIzLAJbSQ4j4UG6ZU1ogLNlw"
+                                }
+                            """.trimIndent()
+                        )
+                    ),
+
+                    VerificationMethod(
+                        id = "did:example:charlie#key-x25519-2",
+                        controller = "did:example:charlie#key-x25519-2",
+                        type = VerificationMethodType.JSON_WEB_KEY_2020,
+                        verificationMaterial = VerificationMaterial(
+                            VerificationMaterialFormat.JWK,
+                            """
+                                {
+                                   "kty":"OKP",
+                                   "crv":"X25519",
+                                   "x":"nTiVFj7DChMsETDdxd5dIzLAJbSQ4j4UG6ZU1ogLNlw"
+                                }
+                            """.trimIndent()
+                        )
+                    ),
+
+                    VerificationMethod(
+                        id = "did:example:charlie#key-x25519-3",
+                        controller = "did:example:charlie#key-x25519-3",
                         type = VerificationMethodType.JSON_WEB_KEY_2020,
                         verificationMaterial = VerificationMaterial(
                             VerificationMaterialFormat.JWK,

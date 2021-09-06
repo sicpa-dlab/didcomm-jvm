@@ -18,7 +18,7 @@ data class UnpackParams(
     val didDocResolver: DIDDocResolver?,
     val secretResolver: SecretResolver?,
 ) {
-    private constructor(builder: Builder) : this(
+    constructor(builder: Builder) : this(
         builder.packedMessage,
         builder.expectNonRepudiation,
         builder.expectEncrypted,

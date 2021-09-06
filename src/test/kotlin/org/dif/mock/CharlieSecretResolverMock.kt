@@ -26,6 +26,22 @@ class CharlieSecretResolverMock : SecretResolver {
                     """.trimIndent()
                 )
             ),
+
+            Secret(
+                kid = "did:example:charlie#key-x25519-3",
+                type = VerificationMethodType.JSON_WEB_KEY_2020,
+                verificationMaterial = VerificationMaterial(
+                    VerificationMaterialFormat.JWK,
+                    """
+                        {
+                           "kty":"OKP",
+                           "d":"Z-BsgFe-eCvhuZlCBX5BV2XiDE2M92gkaORCe68YdZI",
+                           "crv":"X25519",
+                           "x":"nTiVFj7DChMsETDdxd5dIzLAJbSQ4j4UG6ZU1ogLNlw"
+                        }
+                    """.trimIndent()
+                )
+            ),
         )
     )
 

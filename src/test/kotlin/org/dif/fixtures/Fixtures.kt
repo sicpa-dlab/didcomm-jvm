@@ -3,10 +3,27 @@ package org.dif.fixtures
 import org.dif.common.AnonCryptAlg
 import org.dif.common.AuthCryptAlg
 import org.dif.common.SignAlg
+import org.dif.exceptions.DIDCommException
+import org.dif.exceptions.MalformedMessageException
 import org.dif.message.Message
 import org.dif.model.Metadata
+import org.dif.model.UnpackParams
+import kotlin.reflect.KClass
 
 class JWM {
+    data class WrongMessage(val json: String, val expectedMessage: String)
+
+    data class ExpectedAttachmentData(
+        val isJson: Boolean = false,
+        val isLinks: Boolean = false,
+        val isBase64: Boolean = false,
+    )
+
+    data class CorrectAttachment(
+        val json: String,
+        val expectedAttachmentData: List<ExpectedAttachmentData>
+    )
+
     companion object {
         const val ALICE_DID = "did:example:alice"
         const val BOB_DID = "did:example:bob"
@@ -38,6 +55,292 @@ class JWM {
                "expires_time":1516385931
             }
         """.trimIndent()
+
+        val CORRECT_ATTACHMENTS: List<CorrectAttachment> = listOf(
+            CorrectAttachment(
+                json = """
+                    {
+                       "id":"1234567890",
+                       "typ":"application/didcomm-plain+json",
+                       "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                       "body":{},
+                       "attachments": [{ 
+                            "id": "23",
+                            "data": {
+                                "links": ["1", "2", "3"],
+                                "hash": "qwerty"
+                            }
+                       }]
+                     }
+                """.trimIndent(),
+                expectedAttachmentData = listOf(
+                    ExpectedAttachmentData(isLinks = true)
+                )
+            ),
+
+            CorrectAttachment(
+                json = """
+                    {
+                       "id":"1234567890",
+                       "typ":"application/didcomm-plain+json",
+                       "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                       "body":{},
+                       "attachments": [{ 
+                            "id": "23",
+                            "data": {
+                                "base64": "qwerty"
+                            }
+                       }]
+                     }
+                """.trimIndent(),
+                expectedAttachmentData = listOf(
+                    ExpectedAttachmentData(isBase64 = true)
+                )
+            ),
+
+            CorrectAttachment(
+                json = """
+                    {
+                       "id":"1234567890",
+                       "typ":"application/didcomm-plain+json",
+                       "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                       "body":{},
+                       "attachments": [{ 
+                            "id": "23",
+                            "data": {
+                                "json": {
+                                    "foo": "bar",
+                                    "links": [2, 3]
+                                }
+                            }
+                       }]
+                     }
+                """.trimIndent(),
+                expectedAttachmentData = listOf(
+                    ExpectedAttachmentData(isJson = true)
+                )
+            ),
+
+            CorrectAttachment(
+                json = """
+                    {
+                       "id":"1234567890",
+                       "typ":"application/didcomm-plain+json",
+                       "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                       "body":{
+                          
+                       },
+                       "attachments":[
+                          {
+                             "id":"23",
+                             "data":{
+                                "json":{
+                                   "foo":"bar",
+                                   "links":[
+                                      2,
+                                      3
+                                   ]
+                                }
+                             }
+                          },
+                          {
+                             "id":"23",
+                             "data":{
+                                "base64":"qwerty"
+                             }
+                          },
+                          {
+                             "id":"23",
+                             "data":{
+                                "links":[
+                                   "1",
+                                   "2",
+                                   "3"
+                                ],
+                                "hash":"qwerty"
+                             }
+                          }
+                       ]
+                    }
+                """.trimIndent(),
+                expectedAttachmentData = listOf(
+                    ExpectedAttachmentData(isJson = true),
+                    ExpectedAttachmentData(isBase64 = true),
+                    ExpectedAttachmentData(isLinks = true)
+                )
+            ),
+
+            CorrectAttachment(
+                json = """
+                    {
+                       "id":"1234567890",
+                       "typ":"application/didcomm-plain+json",
+                       "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                       "body":{},
+                       "attachments": [{ 
+                            "id": "23",
+                            "data": {
+                                "links": ["1", "2", "3"],
+                                "hash": "qwerty"
+                            }
+                       }, { 
+                            "id": "23",
+                            "data": {
+                                "base64": "qwerty"
+                            }
+                       }, { 
+                            "id": "23",
+                            "data": {
+                                "links": ["1", "2", "3"],
+                                "hash": "qwerty"
+                            }
+                       }]
+                     }
+                """.trimIndent(),
+                expectedAttachmentData = listOf(
+                    ExpectedAttachmentData(isLinks = true),
+                    ExpectedAttachmentData(isBase64 = true),
+                    ExpectedAttachmentData(isLinks = true)
+                )
+            )
+        )
+
+        val WRONG_ATTACHMENTS: List<WrongMessage> = listOf(
+            WrongMessage(
+                """
+                    {
+                       "id":"1234567890",
+                       "typ":"application/didcomm-plain+json",
+                       "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                       "body":{},
+                       "attachments": [{}]
+                     }
+                """.trimIndent(),
+                "The header \"id\" is missing"
+            ),
+
+            WrongMessage(
+                """
+                    {
+                       "id":"1234567890",
+                       "typ":"application/didcomm-plain+json",
+                       "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                       "body":{},
+                       "attachments": [{ 
+                            "id": "23"
+                       }]
+                     }
+                """.trimIndent(),
+                "The header \"data\" is missing"
+            ),
+
+            WrongMessage(
+                """
+                    {
+                       "id":"1234567890",
+                       "typ":"application/didcomm-plain+json",
+                       "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                       "body":{},
+                       "attachments": [{ 
+                            "id": "23",
+                            "data": {}
+                       }]
+                     }
+                """.trimIndent(),
+                "Unknown attachment data"
+            ),
+
+            WrongMessage(
+                """
+                    {
+                       "id":"1234567890",
+                       "typ":"application/didcomm-plain+json",
+                       "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                       "body":{},
+                       "attachments": [{ 
+                            "id": "23",
+                            "data": {
+                                "links": ["231", "212"]
+                            }
+                       }]
+                     }
+                """.trimIndent(),
+                "The header \"hash\" is missing"
+            ),
+
+            WrongMessage(
+                """
+                    {
+                       "id":"1234567890",
+                       "typ":"application/didcomm-plain+json",
+                       "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                       "body":{},
+                       "attachments": "131"
+                     }
+                """.trimIndent(),
+                "The expected type of header 'attachments' is 'JSONArray'. Got 'String'"
+            ),
+
+            WrongMessage(
+                """
+                    {
+                       "id":"1234567890",
+                       "typ":"application/didcomm-plain+json",
+                       "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                       "body":{},
+                       "attachments": [2131]
+                     }
+                """.trimIndent(),
+                "The expected type of header 'attachments' is 'Map'. Got 'Long'"
+            ),
+
+            WrongMessage(
+                """
+                    {
+                       "id":"1234567890",
+                       "typ":"application/didcomm-plain+json",
+                       "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                       "body":{},
+                       "attachments": [{
+                           "id": 2 
+                       }]
+                     }
+                """.trimIndent(),
+                "The expected type of header 'id' is 'String'. Got 'Long'"
+            ),
+
+            WrongMessage(
+                """
+                    {
+                       "id":"1234567890",
+                       "typ":"application/didcomm-plain+json",
+                       "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                       "body":{},
+                       "attachments": [{
+                           "id": "1",
+                           "data": null
+                       }]
+                     }
+                """.trimIndent(),
+                "The header \"data\" is missing"
+            ),
+
+            WrongMessage(
+                """
+                    {
+                       "id":"1234567890",
+                       "typ":"application/didcomm-plain+json",
+                       "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                       "body":{},
+                       "attachments": [{
+                           "id": "1",
+                           "data": "null"
+                       }]
+                     }
+                """.trimIndent(),
+                "The expected type of header 'data' is 'Map'. Got 'String'"
+            )
+        )
     }
 }
 
@@ -105,9 +408,15 @@ class JWS {
 
 class JWE {
     data class TestVector(val message: String, val expectedMetadata: Metadata)
+    data class NegativeTestVector<T : Throwable>(
+        val packedMessage: String,
+        val expectedThrow: KClass<T>,
+        val expectedMessage: String,
+        val unpackParams: UnpackParams = UnpackParams.Builder(packedMessage).build()
+    )
 
     companion object {
-        val TEST_VECTORS = listOf<TestVector>(
+        val TEST_VECTORS = listOf(
             TestVector(
                 message =
                 """
@@ -349,6 +658,53 @@ class JWE {
                     signAlg = SignAlg.ED25519,
                     signedMessage = mapOf()
                 )
+            )
+        )
+
+        val BOB_DAMAGED_MESSAGE = """
+                {
+                   "ciphertext":"KWS7gJU7TbyJlcT9dPkCw-ohNigGaHSukR9MUqFM0THbCTCNkY-g5tahBFyszlKIKXs7qOtqzYyWbPou2q77XlAeYs93IhF6NvaIjyNqYklvj-OtJt9W2Pj5CLOMdsR0C30wchGoXd6wEQZY4ttbzpxYznqPmJ0b9KW6ZP-l4_DSRYe9B-1oSWMNmqMPwluKbtguC-riy356Xbu2C9ShfWmpmjz1HyJWQhZfczuwkWWlE63g26FMskIZZd_jGpEhPFHKUXCFwbuiw_Iy3R0BIzmXXdK_w7PZMMPbaxssl2UeJmLQgCAP8j8TukxV96EKa6rGgULvlo7qibjJqsS5j03bnbxkuxwbfyu3OxwgVzFWlyHbUH6p",
+                   "protected":"eyJlcGsiOnsia3R5IjoiT0tQIiwiY3J2IjoiWDI1NTE5IiwieCI6IkpIanNtSVJaQWFCMHpSR193TlhMVjJyUGdnRjAwaGRIYlc1cmo4ZzBJMjQifSwiYXB2IjoiTmNzdUFuclJmUEs2OUEtcmtaMEw5WFdVRzRqTXZOQzNaZzc0QlB6NTNQQSIsInR5cCI6ImFwcGxpY2F0aW9uL2RpZGNvbW0tZW5jcnlwdGVkK2pzb24iLCJlbmMiOiJYQzIwUCIsImFsZyI6IkVDREgtRVMrQTI1NktXIn0",
+                   "recipients":[
+                      {
+                         "encrypted_key":"3n1olyBR3nY7ZGAprOx-b7wYAKza6cvOYjNwVg3miTnbLwPP_FmE1a",
+                         "header":{
+                            "kid":"did:example:bob#key-x25519-1"
+                         }
+                      },
+                      {
+                         "encrypted_key":"j5eSzn3kCrIkhQAWPnEwrFPMW6hG0zF_y37gUvvc5gvlzsuNX4hXrQ",
+                         "header":{
+                            "kid":"did:example:bob#key-x25519-2"
+                         }
+                      },
+                      {
+                         "encrypted_key":"TEWlqlq-ao7Lbynf0oZYhxs7ZB39SUWBCK4qjqQqfeItfwmNyDm73A",
+                         "header":{
+                            "kid":"did:example:bob#key-x25519-3"
+                         }
+                      }
+                   ],
+                   "tag":"6ylC_iAs4JvDQzXeY6MuYQ",
+                   "iv":"ESpmcyGiZpRjc5urDela21TOOTW8Wqd1"
+                }
+        """.trimIndent()
+
+        val NEGATIVE_TEST_VECTORS = listOf(
+            NegativeTestVector(
+                packedMessage = "{}",
+                expectedThrow = DIDCommException::class,
+                expectedMessage = "The header \"id\" is missing"
+            ),
+
+            NegativeTestVector(
+                packedMessage = BOB_DAMAGED_MESSAGE,
+                expectedThrow = MalformedMessageException::class,
+                expectedMessage = "Decrypt is failed",
+                unpackParams = UnpackParams
+                    .Builder(BOB_DAMAGED_MESSAGE)
+                    .expectDecryptByAllKeys(true)
+                    .build()
             )
         )
     }
