@@ -2,6 +2,7 @@ package org.dif.message
 
 import org.dif.exceptions.MalformedMessageException
 import org.dif.utils.getTyped
+import org.dif.utils.getTypedArray
 import org.dif.utils.toJSONString
 
 data class Attachment(
@@ -35,7 +36,9 @@ data class Attachment(
         ) : Data {
             companion object {
                 fun parse(json: Map<String, Any?>): Links {
-                    val links = json.getTyped<List<String>>(Header.Links)
+                    val links = json.getTypedArray<String>(Header.Links)
+                        ?.filterNotNull()
+                        ?.toList()
                         ?: throw MalformedMessageException("The header \"${Header.Links}\" is missing")
 
                     val hash = json.getTyped<String>(Header.Hash)
@@ -135,7 +138,7 @@ data class Attachment(
 
         fun builder(id: String, data: Data) = Builder(id, data)
 
-        fun parse(attachments: Array<Map<String, Any?>>?): List<Attachment>? =
+        fun parse(attachments: Array<Map<String, Any?>?>?): List<Attachment>? =
             attachments?.mapNotNull { parse(it) }
 
         private fun parse(json: Map<String, Any?>?): Attachment? = json?.let {
@@ -203,7 +206,7 @@ data class Attachment(
         Header.Format to format,
         Header.LastmodTime to lastModTime,
         Header.ByteCount to byteCount,
-    )
+    ).filterValues { it != null }
 
     override fun toString(): String =
         toJSONObject().toJSONString()

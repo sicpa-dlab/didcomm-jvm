@@ -9,7 +9,7 @@ import org.dif.utils.toJSONString
 
 data class Message(
     val id: String,
-    val body: Map<String, Any>,
+    val body: Map<String, Any?>,
     val type: String,
     val typ: Typ,
     val from: String?,
@@ -25,6 +25,8 @@ data class Message(
     val customHeaders: Map<String, Any?>,
 ) {
     inline fun <reified T> customHeader(name: String) = customHeaders.getTyped<T>(name)
+
+    inline fun <reified T> customHeaderArray(name: String) = customHeaders.getTypedArray<T>(name)
 
     private constructor(builder: Builder) : this(
         builder.id,
@@ -81,7 +83,7 @@ data class Message(
             Header.Pthid
         )
 
-        fun builder(id: String, body: Map<String, Any>, type: String) = Builder(id, body, type)
+        fun builder(id: String, body: Map<String, Any?>, type: String) = Builder(id, body, type)
 
         fun parse(json: Map<String, Any>): Message = let {
             val id = json.getTyped<String>(Header.Id)
@@ -116,7 +118,7 @@ data class Message(
         }
     }
 
-    class Builder(val id: String, val body: Map<String, Any>, val type: String) {
+    class Builder(val id: String, val body: Map<String, Any?>, val type: String) {
         var typ: Typ = Typ.Plaintext
 
         var from: String? = null

@@ -105,7 +105,7 @@ data class FromPrior(
         Header.Iat to iat,
         Header.Jti to jti,
         Header.IssKid to issKid,
-    )
+    ).filterValues { it != null }
 
     override fun toString(): String =
         toJSONObject().toJSONString()
