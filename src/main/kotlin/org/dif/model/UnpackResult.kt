@@ -104,8 +104,8 @@ data class Metadata(
         fun anonymousSender(anonymousSender: Boolean) = apply { this.anonymousSender = anonymousSender }
         fun reWrappedInForward(reWrappedInForward: Boolean) = apply { this.reWrappedInForward = reWrappedInForward }
         fun encryptedTo(encryptedTo: List<String>) = apply { this.encryptedTo = encryptedTo }
-        fun encryptedFrom(encryptedFrom: String) = apply { this.encryptedFrom = encryptedFrom }
-        fun signFrom(signFrom: String) = apply { this.signFrom = signFrom }
+        fun encryptedFrom(encryptedFrom: String?) = apply { this.encryptedFrom = encryptedFrom }
+        fun signFrom(signFrom: String?) = apply { this.signFrom = signFrom }
         fun encAlgAuth(encAlgAuth: AuthCryptAlg) = apply { this.encAlgAuth = encAlgAuth }
         fun encAlgAnon(encAlgAnon: AnonCryptAlg) = apply { this.encAlgAnon = encAlgAnon }
         fun signAlg(signAlg: SignAlg) = apply { this.signAlg = signAlg }
