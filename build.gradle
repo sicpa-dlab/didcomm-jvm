@@ -8,6 +8,7 @@ version = "${version}"
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
     flatDir {
         // TODO remove when contribution will be merged to upstream
         dir "lib"
@@ -17,6 +18,7 @@ repositories {
 dependencies {
     implementation "com.nimbusds:nimbus-jose-jwt:${nimbusJoseJWTVersion}"
     implementation "com.google.crypto.tink:tink:${googleTinkVersion}"
+    implementation "com.github.multiformats:java-multibase:${multibaseVersion}"
     testImplementation "org.jetbrains.kotlin:kotlin-test"
     testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     testImplementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonKotlinVersion}"

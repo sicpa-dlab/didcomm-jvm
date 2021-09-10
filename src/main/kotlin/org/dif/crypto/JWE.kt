@@ -25,8 +25,7 @@ import org.dif.common.CryptAlg
 import org.dif.common.Typ
 import org.dif.crypto.key.Key
 import org.dif.exceptions.MalformedMessageException
-import org.dif.exceptions.UnsupportedAlgorithm
-import org.dif.exceptions.UnsupportedJWKException
+import org.dif.exceptions.UnsupportedException
 import org.dif.utils.asKeys
 import java.security.MessageDigest
 
@@ -56,7 +55,7 @@ fun authEncrypt(payload: String, auth: AuthCryptAlg, from: Key, to: List<Key>): 
     val encryptor = when (sender) {
         is ECKey -> ECDH1PUEncrypterMulti(sender, recipients.asKeys())
         is OctetKeyPair -> ECDH1PUX25519EncrypterMulti(sender, recipients.asKeys())
-        else -> throw UnsupportedJWKException(sender.javaClass.name)
+        else -> throw UnsupportedException.JWK(sender.javaClass.name)
     }
 
     return JWEObjectJSON(jweHeader, Payload(Base64URL.encode(payload)))
@@ -85,7 +84,7 @@ fun anonEncrypt(payload: String, anon: AnonCryptAlg, to: List<Key>): EncryptResu
     val encryptor = when (val recipient = recipients.first().right) {
         is ECKey -> ECDHEncrypterMulti(recipients.asKeys())
         is OctetKeyPair -> X25519EncrypterMulti(recipients.asKeys())
-        else -> throw UnsupportedJWKException(recipient.javaClass.name)
+        else -> throw UnsupportedException.JWK(recipient.javaClass.name)
     }
 
     return JWEObjectJSON(jweHeader, Payload(Base64URL.encode(payload)))
@@ -132,7 +131,7 @@ private fun authDecryptForAllKeys(jwe: JWEObjectJSON, from: Key, to: List<Key>):
     val decrypter = when (sender) {
         is ECKey -> ECDH1PUDecrypterMulti(sender, recipients.asKeys())
         is OctetKeyPair -> ECDH1PUX25519DecrypterMulti(sender, recipients.asKeys())
-        else -> throw UnsupportedJWKException(sender.javaClass.name)
+        else -> throw UnsupportedException.JWK(sender.javaClass.name)
     }
 
     try {
@@ -150,7 +149,7 @@ private fun anonDecryptForAllKeys(jwe: JWEObjectJSON, to: List<Key>): DecryptRes
     val decrypter = when (val recipient = recipients.first().right) {
         is ECKey -> ECDHDecrypterMulti(recipients.asKeys())
         is OctetKeyPair -> X25519DecrypterMulti(recipients.asKeys())
-        else -> throw UnsupportedJWKException(recipient.javaClass.name)
+        else -> throw UnsupportedException.JWK(recipient.javaClass.name)
     }
 
     try {
@@ -179,7 +178,7 @@ fun getCryptoAlg(jwe: JWEObjectJSON): CryptAlg {
         alg == JWEAlgorithm.ECDH_ES_A256KW && enc == EncryptionMethod.A256GCM ->
             AnonCryptAlg.A256GCM_ECDH_ES_A256KW
 
-        else -> throw UnsupportedAlgorithm("${alg.name}+${enc.name}")
+        else -> throw UnsupportedException.Algorithm("${alg.name}+${enc.name}")
     }
 }
 

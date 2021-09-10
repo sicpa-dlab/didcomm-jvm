@@ -19,9 +19,7 @@ import org.dif.common.SignAlg
 import org.dif.common.Typ
 import org.dif.crypto.key.Key
 import org.dif.exceptions.MalformedMessageException
-import org.dif.exceptions.UnsupportedAlgorithm
-import org.dif.exceptions.UnsupportedCurveException
-import org.dif.exceptions.UnsupportedJWKException
+import org.dif.exceptions.UnsupportedException
 import org.dif.message.Message
 import org.dif.utils.asKey
 
@@ -33,7 +31,7 @@ fun sign(payload: String, key: Key): String {
         JWSAlgorithm.ES256 -> ECDSASigner(jwk.asKey<ECKey>())
         JWSAlgorithm.ES256K -> ECDSASigner(jwk.asKey<ECKey>())
         JWSAlgorithm.EdDSA -> Ed25519Signer(jwk.asKey())
-        else -> throw UnsupportedAlgorithm(alg.name)
+        else -> throw UnsupportedException.Algorithm(alg.name)
     }
 
     val jwsHeader = JWSHeader.Builder(alg)
@@ -65,15 +63,15 @@ fun getCryptoAlg(jws: JWSObjectJSON): SignAlg =
         JWSAlgorithm.ES256 -> SignAlg.ES256
         JWSAlgorithm.ES256K -> SignAlg.ES256K
         JWSAlgorithm.EdDSA -> SignAlg.ED25519
-        else -> throw UnsupportedAlgorithm(alg.name)
+        else -> throw UnsupportedException.Algorithm(alg.name)
     }
 
 private fun getJWSAlgorithm(jwk: JWK) = when (jwk) {
     is ECKey -> when (jwk.curve) {
         Curve.P_256 -> JWSAlgorithm.ES256
         Curve.SECP256K1 -> JWSAlgorithm.ES256K
-        else -> throw UnsupportedCurveException(jwk.curve.name)
+        else -> throw UnsupportedException.Curve(jwk.curve.name)
     }
     is OctetKeyPair -> JWSAlgorithm.EdDSA
-    else -> throw UnsupportedJWKException(jwk.javaClass.name)
+    else -> throw UnsupportedException.JWK(jwk.javaClass.name)
 }
