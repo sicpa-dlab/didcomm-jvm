@@ -5,6 +5,7 @@ import org.dif.message.Attachment
 import org.dif.message.Message
 import org.dif.mock.AliceSecretResolverMock
 import org.dif.mock.BobSecretResolverMock
+import org.dif.mock.CharlieSecretResolverMock
 import org.dif.mock.DIDDocResolverMock
 import org.dif.model.PackEncryptedParams
 import org.dif.model.PackPlaintextParams
@@ -193,5 +194,67 @@ class DIDCommTest {
             assertFalse { anonymousSender }
             assertFalse { reWrappedInForward }
         }
+    }
+
+    @Test
+    fun `Test multi recipient support`() {
+        val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
+
+        val packResultBob = didComm.packEncrypted(
+            PackEncryptedParams.builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID)
+                .protectSenderId(true)
+                .signFrom(JWM.ALICE_DID)
+                .from(JWM.ALICE_DID)
+                .build()
+        )
+
+        val unpackBob = didComm.unpack(
+            UnpackParams.Builder(packResultBob.packedMessage)
+                .secretResolver(BobSecretResolverMock())
+                .build()
+        )
+
+        with(unpackBob.metadata) {
+            assertTrue { encrypted }
+            assertTrue { authenticated }
+            assertTrue { nonRepudiation }
+            assertTrue { anonymousSender }
+            assertFalse { reWrappedInForward }
+        }
+
+        val packResultCharlie = didComm.packEncrypted(
+            PackEncryptedParams.builder(JWM.PLAINTEXT_MESSAGE, JWM.CHARLIE_DID)
+                .protectSenderId(true)
+                .signFrom(JWM.ALICE_DID)
+                .from(JWM.ALICE_DID)
+                .build()
+        )
+
+        val unpackCharlie = didComm.unpack(
+            UnpackParams.Builder(packResultCharlie.packedMessage)
+                .secretResolver(CharlieSecretResolverMock())
+                .build()
+        )
+
+        with(unpackCharlie.metadata) {
+            assertTrue { encrypted }
+            assertTrue { authenticated }
+            assertTrue { nonRepudiation }
+            assertTrue { anonymousSender }
+            assertFalse { reWrappedInForward }
+        }
+
+        assert(unpackBob.message == unpackCharlie.message)
+        assert(unpackBob.metadata.encrypted == unpackCharlie.metadata.encrypted)
+        assert(unpackBob.metadata.authenticated == unpackCharlie.metadata.authenticated)
+        assert(unpackBob.metadata.nonRepudiation == unpackCharlie.metadata.nonRepudiation)
+        assert(unpackBob.metadata.anonymousSender == unpackCharlie.metadata.anonymousSender)
+        assert(unpackBob.metadata.reWrappedInForward == unpackCharlie.metadata.reWrappedInForward)
+        assert(unpackBob.metadata.encryptedFrom == unpackCharlie.metadata.encryptedFrom)
+        assert(unpackBob.metadata.signFrom == unpackCharlie.metadata.signFrom)
+        assert(unpackBob.metadata.encAlgAuth == unpackCharlie.metadata.encAlgAuth)
+        assert(unpackBob.metadata.encAlgAnon == unpackCharlie.metadata.encAlgAnon)
+        assert(unpackBob.metadata.signAlg == unpackCharlie.metadata.signAlg)
+        assert(unpackBob.metadata.signedMessage == unpackCharlie.metadata.signedMessage)
     }
 }
