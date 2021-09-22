@@ -7,6 +7,7 @@ import org.dif.crypto.key.SenderKeySelector
 import org.dif.crypto.sign
 import org.dif.diddoc.DIDDoc
 import org.dif.diddoc.DIDDocResolver
+import org.dif.exceptions.MalformedMessageException
 import org.dif.model.PackEncryptedParams
 import org.dif.model.PackEncryptedResult
 import org.dif.model.PackPlaintextParams
@@ -20,6 +21,7 @@ import org.dif.operations.protectSenderIfNeeded
 import org.dif.operations.signIfNeeded
 import org.dif.operations.unpack
 import org.dif.secret.SecretResolver
+import java.text.ParseException
 
 /**
  * DID Comm operations
@@ -157,6 +159,12 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         val secretResolver = params.secretResolver ?: this.secretResolver
         val recipientKeySelector = RecipientKeySelector(didDocResolver, secretResolver)
 
-        return unpack(params, recipientKeySelector)
+        try {
+            return unpack(params, recipientKeySelector)
+        } catch (e: IllegalArgumentException) {
+            throw MalformedMessageException(e.localizedMessage, e)
+        } catch (e: ParseException) {
+            throw MalformedMessageException(e.localizedMessage, e)
+        }
     }
 }

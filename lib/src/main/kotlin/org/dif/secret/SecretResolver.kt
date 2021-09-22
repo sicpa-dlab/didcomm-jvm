@@ -7,7 +7,7 @@ import java.util.Optional
  */
 interface SecretResolver {
     /**
-     * Finds d private key identified by the given key ID.
+     * Finds a private key identified by the given key ID.
      *
      * @param kid   The key ID identifying a private key.
      * @return The private key or {@code null} of there is no key for the given key ID.
