@@ -13,4 +13,4 @@ dependencyResolutionManagement {
 rootProject.name = 'didcomm'
 
 include ':lib'
-include ':android'
+//include ':android'

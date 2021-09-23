@@ -6,7 +6,7 @@ plugins {
 group = 'org.dif'
 version = "${version}"
 
-java {
+kotlin {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
