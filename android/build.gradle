@@ -1,0 +1,63 @@
+plugins {
+    // TODO switch to com.android.library
+    //      (that will require exploration of the issue: by some
+    //      reason jUnit5 is not coming up for the tests,
+    //      so older jUnit is used)
+    id 'com.android.application'
+    id 'kotlin-android'
+    id "de.mannodermaus.android-junit5"  // jUnit5 for android
+}
+
+android {
+    compileSdk 31
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 31
+
+        // TODO set that properly
+        versionCode 1
+        versionName "1.0"
+
+        // jUnit5 for android instrumented tests
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
+    }
+
+    sourceSets {
+        androidTest {
+            kotlin.srcDirs += "../lib/src/test/kotlin"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+
+dependencies {
+    // project dependnecies
+    androidTestImplementation "com.nimbusds:nimbus-jose-jwt:${nimbusJoseJWTVersion}"
+    androidTestImplementation "com.google.crypto.tink:tink:${googleTinkVersion}"
+    // project itself
+    androidTestImplementation project(':lib')
+
+    // test dependencies
+    androidTestImplementation "org.jetbrains.kotlin:kotlin-test"
+    androidTestImplementation "com.fasterxml.jackson.core:jackson-databind:2.11.1"
+    androidTestImplementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8"
+
+    // jUnit5 support
+    // Jupiter API & Test Runner
+    androidTestImplementation "androidx.test:runner:1.4.0"
+    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.8.0"
+    //androidTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.8.0"
+    // The instrumentation test companion libraries
+    androidTestImplementation "de.mannodermaus.junit5:android-test-core:1.3.0"
+    androidTestRuntimeOnly "de.mannodermaus.junit5:android-test-runner:1.3.0"
+}
