@@ -2,9 +2,11 @@ package org.dif.message
 
 import org.dif.common.Typ
 import org.dif.exceptions.DIDCommException
+import org.dif.exceptions.DIDCommIllegalArgumentException
 import org.dif.exceptions.MalformedMessageException
 import org.dif.utils.getTyped
 import org.dif.utils.getTypedArray
+import org.dif.utils.isDIDFragment
 import org.dif.utils.toJSONString
 
 data class Message(
@@ -154,8 +156,17 @@ data class Message(
         var pthid: String? = null
             private set
 
-        fun from(from: String?) = apply { this.from = from }
-        fun to(to: List<String>?) = apply { this.to = to }
+        fun from(from: String?) = apply {
+            if (from != null && isDIDFragment(from))
+                throw DIDCommIllegalArgumentException(from)
+            this.from = from
+        }
+
+        fun to(to: List<String>?) = apply {
+            if (to != null && to.any { to -> isDIDFragment(to) })
+                throw DIDCommIllegalArgumentException(to.toString())
+            this.to = to
+        }
         fun createdTime(createdTime: Long?) = apply { this.createdTime = createdTime }
         fun expiresTime(expiresTime: Long?) = apply { this.expiresTime = expiresTime }
         fun fromPrior(fromPrior: FromPrior?) = apply { this.fromPrior = fromPrior }

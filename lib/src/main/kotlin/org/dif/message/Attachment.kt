@@ -4,6 +4,7 @@ import org.dif.exceptions.MalformedMessageException
 import org.dif.utils.getTyped
 import org.dif.utils.getTypedArray
 import org.dif.utils.toJSONString
+import java.lang.IllegalArgumentException
 
 data class Attachment(
     val id: String,
@@ -66,6 +67,12 @@ data class Attachment(
                 fun parse(json: Map<String, Any?>): Base64 {
                     val base64 = json.getTyped<String>(Header.Base64)
                         ?: throw MalformedMessageException("The header \"${Header.Base64}\" is missing")
+
+                    try {
+                        java.util.Base64.getDecoder().decode(base64)
+                    } catch (e: IllegalArgumentException) {
+                        throw MalformedMessageException("The header \"${Header.Base64}\" is not Base64 encoded", e)
+                    }
 
                     val hash = json.getTyped<String>(Header.Hash)
                     val jws = json.getTyped<Map<String, Any>>(Header.Jws)

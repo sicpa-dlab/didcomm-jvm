@@ -16,6 +16,14 @@ open class DIDCommException(message: String, cause: Throwable? = null) : Throwab
 class UnsupportedSecretTypeException(type: String) : DIDCommException("The secret type $type is unsupported")
 
 /**
+ * This exception SHOULD be raised if argument is illegal.
+ *
+ * @param argument illegal argument.
+ */
+class DIDCommIllegalArgumentException(argument: String) :
+    DIDCommException("The argument $argument is not valid")
+
+/**
  * The base exception for DID Doc errors
  *
  * @param message - the detail message.
