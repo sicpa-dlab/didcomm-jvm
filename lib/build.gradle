@@ -1,17 +1,14 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version "${kotlinJvm}"
+    id 'org.jetbrains.kotlin.jvm'
     id "org.jlleitschuh.gradle.ktlint" version "${ktlintGradle}"
 }
 
 group = 'org.dif'
 version = "${version}"
 
-repositories {
-    mavenCentral()
-    flatDir {
-        // TODO remove when contribution will be merged to upstream
-        dir "libs"
-    }
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 dependencies {

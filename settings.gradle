@@ -1,3 +1,16 @@
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        flatDir {
+            // TODO remove when contribution will be merged to upstream
+            dir "lib/libs"
+        }
+    }
+}
 
 rootProject.name = 'didcomm'
 
+include ':lib'
+include ':android'
