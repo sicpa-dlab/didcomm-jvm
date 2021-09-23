@@ -8,11 +8,6 @@ import org.dif.secret.SecretResolver
  */
 data class UnpackParams(
     val packedMessage: String,
-    val expectNonRepudiation: Boolean,
-    val expectEncrypted: Boolean,
-    val expectAuthenticated: Boolean,
-    val expectAnonymousSender: Boolean,
-    val expectSignedByEncrypter: Boolean,
     val expectDecryptByAllKeys: Boolean,
     val unwrapReWrappingForward: Boolean,
     val didDocResolver: DIDDocResolver?,
@@ -20,11 +15,6 @@ data class UnpackParams(
 ) {
     constructor(builder: Builder) : this(
         builder.packedMessage,
-        builder.expectNonRepudiation,
-        builder.expectEncrypted,
-        builder.expectAuthenticated,
-        builder.expectAnonymousSender,
-        builder.expectSignedByEncrypter,
         builder.expectDecryptByAllKeys,
         builder.unwrapReWrappingForward,
         builder.didDocResolver,
@@ -37,21 +27,6 @@ data class UnpackParams(
      * @property packedMessage packed DIDComm message as JSON string to be unpacked.
      */
     class Builder(val packedMessage: String) {
-        var expectNonRepudiation: Boolean = false
-            private set
-
-        var expectEncrypted: Boolean = false
-            private set
-
-        var expectAuthenticated: Boolean = false
-            private set
-
-        var expectAnonymousSender: Boolean = false
-            private set
-
-        var expectSignedByEncrypter: Boolean = true
-            private set
-
         var expectDecryptByAllKeys: Boolean = false
             private set
 
@@ -65,51 +40,6 @@ data class UnpackParams(
             private set
 
         /**
-         * Sets [expectNonRepudiation] parameter.
-         *
-         * @param expectNonRepudiation Whether the message must be signed by the sender. Not expected by default.
-         *
-         * @return This builder.
-         */
-        fun expectNonRepudiation(expectNonRepudiation: Boolean) = apply { this.expectNonRepudiation = expectNonRepudiation }
-
-        /**
-         * Sets [expectEncrypted] parameter.
-         *
-         * @param expectEncrypted Whether the message must be encrypted by the sender. Not expected by default.
-         *
-         * @return This builder.
-         */
-        fun expectEncrypted(expectEncrypted: Boolean) = apply { this.expectEncrypted = expectEncrypted }
-
-        /**
-         * Sets [expectAuthenticated] parameter.
-         *
-         * @param expectAuthenticated Whether the message must be authenticated by the sender. Not expected by default.
-         *
-         * @return This builder.
-         */
-        fun expectAuthenticated(expectAuthenticated: Boolean) = apply { this.expectAuthenticated = expectAuthenticated }
-
-        /**
-         * Sets [expectAnonymousSender] parameter.
-         *
-         * @param expectAnonymousSender Whether the sender ID must be protected. Not expected by default.
-         *
-         * @return This builder.
-         */
-        fun expectAnonymousSender(expectAnonymousSender: Boolean) = apply { this.expectAnonymousSender = expectAnonymousSender }
-
-        /**
-         * Sets [expectSignedByEncrypter] parameter.
-         *
-         * @param expectSignedByEncrypter Whether the same DID must be used for encryption and signing. True by default.
-         *
-         * @return This builder.
-         */
-        fun expectSignedByEncrypter(expectSignedByEncrypter: Boolean) = apply { this.expectSignedByEncrypter = expectSignedByEncrypter }
-
-        /**
          * Sets [expectDecryptByAllKeys] parameter.
          *
          * @param expectDecryptByAllKeys Whether the message must be decryptable by all keys
@@ -117,7 +47,8 @@ data class UnpackParams(
          *
          * @return This builder.
          */
-        fun expectDecryptByAllKeys(expectDecryptByAllKeys: Boolean) = apply { this.expectDecryptByAllKeys = expectDecryptByAllKeys }
+        fun expectDecryptByAllKeys(expectDecryptByAllKeys: Boolean) =
+            apply { this.expectDecryptByAllKeys = expectDecryptByAllKeys }
 
         /**
          * Sets [unwrapReWrappingForward] parameter.
@@ -128,7 +59,8 @@ data class UnpackParams(
          *                                and the unpacked message will be returned instead of unpacked Forward.
          * @return This builder.
          */
-        fun unwrapReWrappingForward(unwrapReWrappingForward: Boolean) = apply { this.unwrapReWrappingForward = unwrapReWrappingForward }
+        fun unwrapReWrappingForward(unwrapReWrappingForward: Boolean) =
+            apply { this.unwrapReWrappingForward = unwrapReWrappingForward }
 
         /**
          * Sets Optional DIDDoc resolver that can override a default DIDDoc resolver.

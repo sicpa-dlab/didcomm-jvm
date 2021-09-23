@@ -222,8 +222,10 @@ class DIDCommTest {
             assertFalse { reWrappedInForward }
         }
 
+        val message = JWM.PLAINTEXT_MESSAGE.copy(to = listOf(JWM.CHARLIE_DID))
+
         val packResultCharlie = didComm.packEncrypted(
-            PackEncryptedParams.builder(JWM.PLAINTEXT_MESSAGE, JWM.CHARLIE_DID)
+            PackEncryptedParams.builder(message, JWM.CHARLIE_DID)
                 .protectSenderId(true)
                 .signFrom(JWM.ALICE_DID)
                 .from(JWM.ALICE_DID)
@@ -244,17 +246,11 @@ class DIDCommTest {
             assertFalse { reWrappedInForward }
         }
 
-        assert(unpackBob.message == unpackCharlie.message)
-        assert(unpackBob.metadata.encrypted == unpackCharlie.metadata.encrypted)
-        assert(unpackBob.metadata.authenticated == unpackCharlie.metadata.authenticated)
-        assert(unpackBob.metadata.nonRepudiation == unpackCharlie.metadata.nonRepudiation)
-        assert(unpackBob.metadata.anonymousSender == unpackCharlie.metadata.anonymousSender)
-        assert(unpackBob.metadata.reWrappedInForward == unpackCharlie.metadata.reWrappedInForward)
-        assert(unpackBob.metadata.encryptedFrom == unpackCharlie.metadata.encryptedFrom)
-        assert(unpackBob.metadata.signFrom == unpackCharlie.metadata.signFrom)
-        assert(unpackBob.metadata.encAlgAuth == unpackCharlie.metadata.encAlgAuth)
-        assert(unpackBob.metadata.encAlgAnon == unpackCharlie.metadata.encAlgAnon)
-        assert(unpackBob.metadata.signAlg == unpackCharlie.metadata.signAlg)
-        assert(unpackBob.metadata.signedMessage == unpackCharlie.metadata.signedMessage)
+        val unpackMessageBob = unpackBob.message.copy(to = null)
+        val unpackMessageCharlie = unpackCharlie.message.copy(to = null)
+        val unpackMetadataBob = unpackBob.metadata.copy(encryptedTo = null, signedMessage = null)
+        val unpackMetadataCharlie = unpackCharlie.metadata.copy(encryptedTo = null, signedMessage = null)
+        assertEquals(unpackMessageBob, unpackMessageCharlie)
+        assertEquals(unpackMetadataBob, unpackMetadataCharlie)
     }
 }

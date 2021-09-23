@@ -3,8 +3,10 @@ package org.dif.model
 import org.dif.common.AnonCryptAlg
 import org.dif.common.AuthCryptAlg
 import org.dif.diddoc.DIDDocResolver
+import org.dif.exceptions.DIDCommIllegalArgumentException
 import org.dif.message.Message
 import org.dif.secret.SecretResolver
+import org.dif.utils.isDID
 
 /**
  * Pack Encrypted Message Parameters
@@ -169,6 +171,23 @@ data class PackEncryptedParams(
          *
          * @return Pack Encrypted Message Parameters
          */
-        fun build() = PackEncryptedParams(this)
+        fun build(): PackEncryptedParams {
+            if (!isDID(to))
+                throw DIDCommIllegalArgumentException(to)
+
+            if (this.from != null && !isDID(this.from!!))
+                throw DIDCommIllegalArgumentException(from!!)
+
+            if (this.signFrom != null && !isDID(this.signFrom!!))
+                throw DIDCommIllegalArgumentException(signFrom!!)
+
+            if (this.from != null && this.message.from != this.from)
+                throw DIDCommIllegalArgumentException(from!!)
+
+            if (this.message.to != null && !this.message.to.contains(this.to))
+                throw DIDCommIllegalArgumentException(to)
+
+            return PackEncryptedParams(this)
+        }
     }
 }

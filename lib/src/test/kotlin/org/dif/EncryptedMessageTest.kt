@@ -61,8 +61,10 @@ class EncryptedMessageTest {
     fun `Test decrypt message for part of the keys`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
+        val message = JWM.PLAINTEXT_MESSAGE.copy(to = listOf(JWM.CHARLIE_DID))
+
         val packed = didComm.packEncrypted(
-            PackEncryptedParams.Builder(JWM.PLAINTEXT_MESSAGE, JWM.CHARLIE_DID)
+            PackEncryptedParams.Builder(message, JWM.CHARLIE_DID)
                 .from(JWM.ALICE_DID)
                 .build()
         )
