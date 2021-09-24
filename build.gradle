@@ -1,35 +1,22 @@
-plugins {
-    id 'org.jetbrains.kotlin.jvm' version "${kotlinJvm}"
-    id "org.jlleitschuh.gradle.ktlint" version "${ktlintGradle}"
-}
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
 
-group = 'org.dif'
-version = "${version}"
+    dependencies {
+        //classpath "com.android.tools.build:gradle:7.0.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinJvm}"
 
-repositories {
-    mavenCentral()
-    flatDir {
-        // TODO remove when contribution will be merged to upstream
-        dir "lib"
+        // jUnit 5 support
+        classpath("de.mannodermaus.gradle.plugins:android-junit5:${mannodermausJUnit5}")
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
     }
 }
 
-dependencies {
-    implementation "com.nimbusds:nimbus-jose-jwt:${nimbusJoseJWTVersion}"
-    implementation "com.google.crypto.tink:tink:${googleTinkVersion}"
-    testImplementation "org.jetbrains.kotlin:kotlin-test"
-    testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
-    testImplementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonKotlinVersion}"
-}
-
-test {
-    useJUnitPlatform()
-}
-
-compileKotlin {
-    kotlinOptions.jvmTarget = "${jvmTarget}"
-}
-
-compileTestKotlin {
-    kotlinOptions.jvmTarget = "${jvmTarget}"
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
