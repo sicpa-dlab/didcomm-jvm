@@ -2,9 +2,10 @@ plugins {
     id 'java-library'
     id 'org.jetbrains.kotlin.jvm'
     id "org.jlleitschuh.gradle.ktlint" version "${ktlintGradle}"
+    id "me.champeau.jmh" version "0.6.6"
 }
 
-group = 'org.dif'
+group = "org.dif"
 version = "${version}"
 
 kotlin {
@@ -34,4 +35,15 @@ compileTestKotlin {
 
 jar {
     baseName "${rootProject.name}"
+}
+
+// TODO tune settings
+jmh {
+    benchmarkMode = ["all"]
+    warmupIterations = 0
+    operationsPerInvocation = 1000
+    timeUnit = 'ms'
+    iterations = 1
+    fork = 1
+    includeTests = true
 }
