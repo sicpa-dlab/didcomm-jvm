@@ -71,7 +71,7 @@ data class Attachment(
                     try {
                         java.util.Base64.getDecoder().decode(base64)
                     } catch (e: IllegalArgumentException) {
-                        throw MalformedMessageException("The header \"${Header.Base64}\" is not Base64 encoded", e)
+                        throw MalformedMessageException("The header \"base64\" is not Base64 encoded")
                     }
 
                     val hash = json.getTyped<String>(Header.Hash)
