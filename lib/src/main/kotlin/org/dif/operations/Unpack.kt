@@ -60,6 +60,8 @@ private fun ParseResult.JWE.authUnpack(
     decryptByAllKeys: Boolean,
     metadataBuilder: Metadata.Builder
 ): Message {
+//    TODO Validations
+
     val sender = message.header?.senderKeyID
         ?: message.header.agreementPartyUInfo.decodeToString()
         ?: throw MalformedMessageException("The \"skid\" header must be present")
