@@ -61,7 +61,7 @@ data class PackSignedParams(
          * @return Pack Signed Message Parameters
          */
         fun build(): PackSignedParams {
-            val didFrom = divideDIDFragment(this.signFrom)[0]
+            val didFrom = divideDIDFragment(this.signFrom).first()
             if (this.message.from != didFrom)
                 throw DIDCommIllegalArgumentException(didFrom)
             return PackSignedParams(this)
