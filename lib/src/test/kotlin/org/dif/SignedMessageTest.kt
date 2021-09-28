@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 class SignedMessageTest {
 
     @Test
-    fun `Test signed message test vectors`() {
+    fun `Test_signed_message_test_vectors`() {
         for (test in JWS.TEST_VECTORS) {
             val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 

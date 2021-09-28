@@ -14,7 +14,7 @@ import kotlin.test.assertFailsWith
 
 class RecipientKeySelectorTest {
     @Test
-    fun `Test find verification key`() {
+    fun `Test_find_verification_key`() {
         val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
         val expected = "did:example:alice#key-2"
         val key = recipientKeySelector.findVerificationKey(expected)
@@ -22,7 +22,7 @@ class RecipientKeySelectorTest {
     }
 
     @Test
-    fun `Test find anon crypto keys`() {
+    fun `Test_find_anon_crypto_keys`() {
         val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
 
         val expected = listOf(
@@ -36,7 +36,7 @@ class RecipientKeySelectorTest {
     }
 
     @Test
-    fun `Test find second anon crypto key`() {
+    fun `Test_find_second_anon_crypto_key`() {
         val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
 
         val recipient = listOf(
@@ -54,7 +54,7 @@ class RecipientKeySelectorTest {
     }
 
     @Test
-    fun `Test find auth crypto keys`() {
+    fun `Test_find_auth_crypto_keys`() {
         val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
 
         val sender = "did:example:alice#key-x25519-1"
@@ -80,7 +80,7 @@ class RecipientKeySelectorTest {
     }
 
     @Test
-    fun `Test DID is passed to methods`() {
+    fun `Test_DID_is_passed_to_methods`() {
         val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
 
         run {
@@ -109,7 +109,7 @@ class RecipientKeySelectorTest {
     }
 
     @Test
-    fun `Test key not found`() {
+    fun `Test_key_not_found`() {
         val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
         val didUrl = "did:example:bob#key-x25519-4"
         val expected = "The Secret '$didUrl' not found"
@@ -134,7 +134,7 @@ class RecipientKeySelectorTest {
     }
 
     @Test
-    fun `Test verification method not found`() {
+    fun `Test_verification_method_not_found`() {
         val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
         val expected = "Verification method 'did:example:bob#key-4' not found in DID Doc 'did:example:bob'"
         val didUrl = "did:example:bob#key-4"
@@ -157,7 +157,7 @@ class RecipientKeySelectorTest {
     }
 
     @Test
-    fun `Test DID Doc not resolved`() {
+    fun `Test_DID_Doc_not_resolved`() {
         val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
         val did = JWM.NONA_DID
         val didUrl = "$did#key-1"
@@ -181,7 +181,7 @@ class RecipientKeySelectorTest {
     }
 
     @Test
-    fun `Test empty DID Doc`() {
+    fun `Test_empty_DID_Doc`() {
         val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
         val didUrl = "${JWM.ELLIE_DID}#key-2"
         val expected = "Verification method '$didUrl' not found in DID Doc 'did:example:ellie'"
@@ -204,7 +204,7 @@ class RecipientKeySelectorTest {
     }
 
     @Test
-    fun `Test incompatible Crypto`() {
+    fun `Test_incompatible_Crypto`() {
         val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
         val bobDIDUrl = "did:example:bob#key-p256-1"
         val charlieDIDUrl = "did:example:charlie#key-x25519-1"
