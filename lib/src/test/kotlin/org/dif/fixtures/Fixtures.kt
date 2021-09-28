@@ -968,7 +968,7 @@ class JWE {
             NegativeTestVector(
                 packedMessage = "",
                 expectedThrow = DIDCommException::class,
-                expectedMessage = "Message cannot be parsed"
+                expectedMessage = "Invalid JSON: Unexpected token  at position 0."
             ),
 
             NegativeTestVector(

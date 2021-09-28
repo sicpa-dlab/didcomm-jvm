@@ -6,7 +6,6 @@ import org.dif.diddoc.DIDDocResolver
 import org.dif.exceptions.DIDCommIllegalArgumentException
 import org.dif.message.Message
 import org.dif.secret.SecretResolver
-import org.dif.utils.divideDIDFragment
 import org.dif.utils.isDID
 
 /**
@@ -185,7 +184,7 @@ data class PackEncryptedParams(
             if (this.from != null && this.message.from != this.from)
                 throw DIDCommIllegalArgumentException(from!!)
 
-            if (this.message.to != null && !this.message.to.contains(divideDIDFragment(this.to).first()))
+            if (this.message.to != null && !this.message.to.contains(this.to))
                 throw DIDCommIllegalArgumentException(to)
 
             return PackEncryptedParams(this)

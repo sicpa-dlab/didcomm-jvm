@@ -1,6 +1,5 @@
 package org.dif.crypto
 
-import com.nimbusds.jose.JOSEException
 import com.nimbusds.jose.JOSEObjectType
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
@@ -19,7 +18,6 @@ import com.nimbusds.jose.util.Base64URL
 import org.dif.common.SignAlg
 import org.dif.common.Typ
 import org.dif.crypto.key.Key
-import org.dif.exceptions.DIDCommException
 import org.dif.exceptions.MalformedMessageException
 import org.dif.exceptions.UnsupportedAlgorithm
 import org.dif.exceptions.UnsupportedCurveException
@@ -31,15 +29,11 @@ fun sign(payload: String, key: Key): String {
     val jwk = key.jwk
     val alg = getJWSAlgorithm(jwk)
 
-    val signer = try {
-        when (alg) {
-            JWSAlgorithm.ES256 -> ECDSASigner(jwk.asKey<ECKey>())
-            JWSAlgorithm.ES256K -> ECDSASigner(jwk.asKey<ECKey>())
-            JWSAlgorithm.EdDSA -> Ed25519Signer(jwk.asKey())
-            else -> throw UnsupportedAlgorithm(alg.name)
-        }
-    } catch (e: JOSEException) {
-        throw UnsupportedAlgorithm(alg.name)
+    val signer = when (alg) {
+        JWSAlgorithm.ES256 -> ECDSASigner(jwk.asKey<ECKey>())
+        JWSAlgorithm.ES256K -> ECDSASigner(jwk.asKey<ECKey>())
+        JWSAlgorithm.EdDSA -> Ed25519Signer(jwk.asKey())
+        else -> throw UnsupportedAlgorithm(alg.name)
     }
 
     val jwsHeader = JWSHeader.Builder(alg)
@@ -47,27 +41,17 @@ fun sign(payload: String, key: Key): String {
         .build()
 
     return JWSObjectJSON(jwsHeader, Payload(Base64URL.encode(payload)))
-        .apply {
-            try {
-                sign(UnprotectedHeader.Builder(key.id).build(), signer)
-            } catch (e: JOSEException) {
-                throw DIDCommException("JWS cannot be signed", e)
-            }
-        }
+        .apply { sign(UnprotectedHeader.Builder(key.id).build(), signer) }
         .serialize()
 }
 
 fun verify(jws: JWSObjectJSON, signAlg: SignAlg, key: Key): Message {
     val jwk = key.jwk
 
-    val verifier = try {
-        when (signAlg) {
-            SignAlg.ES256 -> ECDSAVerifier(jwk.asKey<ECKey>())
-            SignAlg.ES256K -> ECDSAVerifier(jwk.asKey<ECKey>())
-            SignAlg.ED25519 -> Ed25519Verifier(jwk.asKey())
-        }
-    } catch (e: JOSEException) {
-        throw UnsupportedAlgorithm(signAlg.name)
+    val verifier = when (signAlg) {
+        SignAlg.ES256 -> ECDSAVerifier(jwk.asKey<ECKey>())
+        SignAlg.ES256K -> ECDSAVerifier(jwk.asKey<ECKey>())
+        SignAlg.ED25519 -> Ed25519Verifier(jwk.asKey())
     }
 
     if (!jws.verify(verifier))
