@@ -173,19 +173,23 @@ data class PackEncryptedParams(
          * @return Pack Encrypted Message Parameters
          */
         fun build(): PackEncryptedParams {
+            val from = this.from
+            val to = this.to
+            val signFrom = this.signFrom
+
             if (!isDID(to))
                 throw DIDCommIllegalArgumentException(to)
 
-            if (this.from != null && !isDID(this.from!!))
-                throw DIDCommIllegalArgumentException(from!!)
+            if (from != null && !isDID(from))
+                throw DIDCommIllegalArgumentException(from)
 
-            if (this.signFrom != null && !isDID(this.signFrom!!))
-                throw DIDCommIllegalArgumentException(signFrom!!)
+            if (signFrom != null && !isDID(signFrom))
+                throw DIDCommIllegalArgumentException(signFrom)
 
-            if (this.from != null && this.message.from != this.from)
-                throw DIDCommIllegalArgumentException(from!!)
+            if (from != null && this.message.from != from)
+                throw DIDCommIllegalArgumentException(from)
 
-            if (this.message.to != null && !this.message.to.contains(divideDIDFragment(this.to).first()))
+            if (this.message.to != null && !this.message.to.contains(divideDIDFragment(to).first()))
                 throw DIDCommIllegalArgumentException(to)
 
             return PackEncryptedParams(this)
