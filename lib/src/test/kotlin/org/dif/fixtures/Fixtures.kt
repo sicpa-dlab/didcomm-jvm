@@ -342,24 +342,6 @@ class JWM {
                      }
                 """.trimIndent(),
                 "The expected type of header 'data' is 'Map'. Got 'String'"
-            ),
-
-            WrongMessage(
-                """
-                    {
-                       "id":"1234567890",
-                       "typ":"application/didcomm-plain+json",
-                       "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
-                       "body":{},
-                       "attachments": [{
-                            "id": "23",
-                            "data": {
-                                "base64": "qwerty\\\\"
-                            }
-                       }]
-                     }
-                """.trimIndent(),
-                "The header \"base64\" is not Base64 encoded"
             )
         )
     }

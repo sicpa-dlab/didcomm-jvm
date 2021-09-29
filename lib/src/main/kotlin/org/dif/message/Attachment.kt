@@ -4,7 +4,6 @@ import org.dif.exceptions.MalformedMessageException
 import org.dif.utils.getTyped
 import org.dif.utils.getTypedArray
 import org.dif.utils.toJSONString
-import java.lang.IllegalArgumentException
 
 data class Attachment(
     val id: String,

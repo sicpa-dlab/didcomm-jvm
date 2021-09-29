@@ -186,11 +186,11 @@ data class PackEncryptedParams(
             if (signFrom != null && !isDID(signFrom))
                 throw DIDCommIllegalArgumentException(signFrom)
 
-            if (from != null && this.message.from != from)
-                throw DIDCommIllegalArgumentException(from)
-
             if (this.message.to != null && !this.message.to.contains(divideDIDFragment(to).first()))
                 throw DIDCommIllegalArgumentException(to)
+
+            if (from != null && this.message.from != null && this.message.from != divideDIDFragment(from).first())
+                throw DIDCommIllegalArgumentException(from)
 
             return PackEncryptedParams(this)
         }

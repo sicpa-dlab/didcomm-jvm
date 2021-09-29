@@ -31,7 +31,6 @@ import org.dif.exceptions.UnsupportedAlgorithm
 import org.dif.exceptions.UnsupportedCurveException
 import org.dif.exceptions.UnsupportedJWKException
 import org.dif.utils.asKeys
-import java.lang.Exception
 import java.lang.NullPointerException
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException

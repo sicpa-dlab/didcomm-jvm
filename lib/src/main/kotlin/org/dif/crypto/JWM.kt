@@ -7,7 +7,6 @@ import com.nimbusds.jose.util.JSONObjectUtils
 import org.dif.exceptions.DIDCommException
 import org.dif.exceptions.MalformedMessageException
 import org.dif.message.Message
-import java.lang.Exception
 import java.lang.IllegalArgumentException
 import java.text.ParseException
 
