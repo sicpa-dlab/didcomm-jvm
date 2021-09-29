@@ -46,9 +46,9 @@ jar {
 
 // TODO tune settings
 jmh {
-    benchmarkMode = ["thrpt", "ss"]
+    benchmarkMode = ["thrpt", "avgt"]
     warmupIterations = 0
-    operationsPerInvocation = 1000
+    operationsPerInvocation = 1
     timeUnit = 'ms'
     iterations = 1
     fork = 1

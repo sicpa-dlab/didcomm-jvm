@@ -1,5 +1,7 @@
 package org.dif.fixtures
 
+import kotlin.system.measureTimeMillis
+
 import org.dif.DIDComm
 import org.dif.fixtures.JWM
 import org.dif.mock.AliceSecretResolverMock
@@ -9,6 +11,23 @@ import org.dif.model.PackSignedParams
 import org.dif.model.PackEncryptedParams
 import org.dif.model.PackEncryptedResult
 import org.dif.model.UnpackParams
+
+
+class BenchRes(
+    val operations: Int,
+    val timeInMs: Long,
+    val opName: String = "noname",
+) {
+    val avrg = timeInMs.toFloat() / operations
+    val thrpt = 1 / avrg
+
+    fun toStr(): String {
+        return String.format(
+            "benchmark of %-45s took %7s ms, %7s ops, %10s ops/ms, %7s mss/op",
+            "'${this.opName}'", this.timeInMs, operations, this.thrpt, this.avrg
+        )
+    }
+}
 
 
 class BenchCommon {
@@ -42,6 +61,17 @@ class BenchCommon {
                 .signFrom(JWM.ALICE_DID)
                 .build()
         )
+
+        fun measure_naive(
+            aFun: () -> Unit, N : Int = 1000, aFunName : String = "noname"
+        ): BenchRes {
+            val timeInMs = measureTimeMillis {
+                for (i in 1..N) {
+                    aFun()
+                }
+            }
+            return BenchRes(N, timeInMs, aFunName)
+        }
 
         fun pack_signed(didComm: DIDComm = didComm_def) {
             didComm.packSigned(

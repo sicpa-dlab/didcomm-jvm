@@ -1,26 +1,23 @@
 package org.dif
 
-import org.dif.fixtures.BenchCommon
 import org.junit.jupiter.api.Disabled;
-import kotlin.system.measureTimeMillis
 import kotlin.test.Test
+import java.util.logging.Logger
+
+import org.dif.fixtures.BenchCommon
+import org.dif.fixtures.BenchRes
 
 @Disabled("Benchmark disabled for CI")
 class DIDCommBenchmarkJVMNaive {
 
     companion object {
-       private const val log_tag = "BenchLog"
+        val logger = Logger.getLogger("DIDCommBenchmarkJVMNaive")
     }
 
     fun measure(aFun: () -> Unit, N : Int = 1000, aFunName : String = "noname") {
-        val timeInMs = measureTimeMillis {
-            for (i in 1..N) {
-                aFun()
-            }
-        }
-        val thrpt = N.toFloat() / timeInMs
-        val avrg = timeInMs.toFloat() / N
-        println("The operation '$aFunName' took $timeInMs ms, ops $N, $thrpt ops/ms, $avrg mss/op")
+        val benchRes : BenchRes = BenchCommon.measure_naive(aFun, N, aFunName)
+        // logger.info(benchRes.toStr())
+        println(benchRes.toStr())
     }
 
     @Test

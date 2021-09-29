@@ -1,21 +1,15 @@
 package org.dif.benchmark
 
-import kotlin.system.measureTimeMillis
-
 import android.util.Log
-import androidx.benchmark.junit4.BenchmarkRule
-import androidx.benchmark.junit4.measureRepeated
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-
+import org.junit.jupiter.api.Disabled;
+import kotlin.test.Test
 
 import org.dif.fixtures.BenchCommon
+import org.dif.fixtures.BenchRes
 
 
+// TODO looks like that doesn't work in android
 @Disabled("Benchmark disabled for CI")
-@RunWith(AndroidJUnit4::class)
 class DIDCommBenchmarkAndroidNaive {
 
     companion object {
@@ -26,14 +20,8 @@ class DIDCommBenchmarkAndroidNaive {
     //val benchmarkRule = BenchmarkRule()
 
     fun measure(aFun: () -> Unit, N : Int = 1000, aFunName : String = "noname") {
-        val timeInMs = measureTimeMillis {
-            for (i in 1..N) {
-                aFun()
-            }
-        }
-        val thrpt = N.toFloat() / timeInMs
-        val avrg = timeInMs.toFloat() / N
-        Log.d(log_tag, "The operation '$aFunName' took $timeInMs ms, ops $N, $thrpt ops/ms, $avrg mss/op")
+        val benchRes : BenchRes = BenchCommon.measure_naive(aFun, N, aFunName)
+        Log.i(log_tag, benchRes.toStr())
     }
 
     @Test
