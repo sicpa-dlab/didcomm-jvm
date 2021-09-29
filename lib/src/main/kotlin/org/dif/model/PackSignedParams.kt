@@ -1,8 +1,10 @@
 package org.dif.model
 
 import org.dif.diddoc.DIDDocResolver
+import org.dif.exceptions.DIDCommIllegalArgumentException
 import org.dif.message.Message
 import org.dif.secret.SecretResolver
+import org.dif.utils.divideDIDFragment
 
 /**
  * Pack Signed Message Parameters
@@ -58,6 +60,11 @@ data class PackSignedParams(
          *
          * @return Pack Signed Message Parameters
          */
-        fun build() = PackSignedParams(this)
+        fun build(): PackSignedParams {
+            val didFrom = divideDIDFragment(this.signFrom).first()
+            if (this.message.from != didFrom)
+                throw DIDCommIllegalArgumentException(didFrom)
+            return PackSignedParams(this)
+        }
     }
 }

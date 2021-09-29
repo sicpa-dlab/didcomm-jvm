@@ -3,8 +3,11 @@ package org.dif.model
 import org.dif.common.AnonCryptAlg
 import org.dif.common.AuthCryptAlg
 import org.dif.diddoc.DIDDocResolver
+import org.dif.exceptions.DIDCommIllegalArgumentException
 import org.dif.message.Message
 import org.dif.secret.SecretResolver
+import org.dif.utils.divideDIDFragment
+import org.dif.utils.isDID
 
 /**
  * Pack Encrypted Message Parameters
@@ -169,6 +172,27 @@ data class PackEncryptedParams(
          *
          * @return Pack Encrypted Message Parameters
          */
-        fun build() = PackEncryptedParams(this)
+        fun build(): PackEncryptedParams {
+            val from = this.from
+            val to = this.to
+            val signFrom = this.signFrom
+
+            if (!isDID(to))
+                throw DIDCommIllegalArgumentException(to)
+
+            if (from != null && !isDID(from))
+                throw DIDCommIllegalArgumentException(from)
+
+            if (signFrom != null && !isDID(signFrom))
+                throw DIDCommIllegalArgumentException(signFrom)
+
+            if (from != null && this.message.from != from)
+                throw DIDCommIllegalArgumentException(from)
+
+            if (this.message.to != null && !this.message.to.contains(divideDIDFragment(to).first()))
+                throw DIDCommIllegalArgumentException(to)
+
+            return PackEncryptedParams(this)
+        }
     }
 }

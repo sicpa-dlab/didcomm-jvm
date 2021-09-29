@@ -4,10 +4,14 @@ import org.dif.common.AnonCryptAlg
 import org.dif.common.AuthCryptAlg
 import org.dif.common.SignAlg
 import org.dif.exceptions.DIDCommException
+import org.dif.exceptions.DIDDocException
+import org.dif.exceptions.IncompatibleCryptoException
 import org.dif.exceptions.MalformedMessageException
+import org.dif.exceptions.UnsupportedAlgorithm
 import org.dif.message.Message
 import org.dif.model.Metadata
 import org.dif.model.UnpackParams
+import java.text.ParseException
 import kotlin.reflect.KClass
 
 class JWM {
@@ -450,7 +454,11 @@ class JWE {
                 expectedMetadata = Metadata(
                     encrypted = true,
                     anonymousSender = true,
-                    encryptedTo = listOf("did:example:bob#key-x25519-1", "did:example:bob#key-x25519-2", "did:example:bob#key-x25519-3"),
+                    encryptedTo = listOf(
+                        "did:example:bob#key-x25519-1",
+                        "did:example:bob#key-x25519-2",
+                        "did:example:bob#key-x25519-3"
+                    ),
                     encAlgAnon = AnonCryptAlg.XC20P_ECDH_ES_A256KW
                 )
             ),
@@ -580,7 +588,11 @@ class JWE {
                 expectedMetadata = Metadata(
                     encrypted = true,
                     authenticated = true,
-                    encryptedTo = listOf("did:example:bob#key-x25519-1", "did:example:bob#key-x25519-2", "did:example:bob#key-x25519-3"),
+                    encryptedTo = listOf(
+                        "did:example:bob#key-x25519-1",
+                        "did:example:bob#key-x25519-2",
+                        "did:example:bob#key-x25519-3"
+                    ),
                     encryptedFrom = "did:example:alice#key-x25519-1",
                     encAlgAuth = AuthCryptAlg.A256CBC_HS512_ECDH_1PU_A256KW
                 )
@@ -690,7 +702,258 @@ class JWE {
                 }
         """.trimIndent()
 
+        val BOB_MESSAGE_WITHOUT_RECIPIENTS = """
+                {
+                   "ciphertext":"912eTUDRKTzhUUqxosPogT1bs9w9wv4s4HmoWkaeU9Uj92V4ENpk-_ZPNSvPyXYLfFj0nc9V2-ux5jq8hqUd17WJpXEM1ReMUjtnTqeUzVa7_xtfkbfhaOZdL8OfgNquPDH1bYcBshN9O9lMT0V52gmGaAB45k4I2PNHcc0A5XWzditCYi8wOkPDm5A7pA39Au5uUNiFQjRYDrz1YvJwV9cdca54vYsBfV1q4c8ncQsv5tNnFYQ1s4rAG7RbyWdAjkC89kE_hIoRRkWZhFyNSfdvRtlUJDlM19uml7lwBWWPnqkmQ3ubiBGmVct3pjrcDvjissOw8Dwkn4E1V1gafec-jDBy4Rndai_RdGjnXjMJs7nRv3Ot",
+                   "protected":"eyJlcGsiOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJFczdpUDNFaExDSGxBclAwS2NZRmNxRXlCYXByMks2WU9BOVc4ZU84YXU4IiwieSI6Ik42QWw3RVR3Q2RwQzZOamRlY3IyS1hBZzFVZVp5X3VmSFJRS3A5RzZLR2sifSwiYXB2Ijoiei1McXB2VlhEYl9zR1luM21qUUxwdXUyQ1FMZXdZdVpvVFdPSVhQSDNGTSIsInR5cCI6ImFwcGxpY2F0aW9uL2RpZGNvbW0tZW5jcnlwdGVkK2pzb24iLCJlbmMiOiJYQzIwUCIsImFsZyI6IkVDREgtRVMrQTI1NktXIn0",
+                   "tag":"t8ioLvZhsCp7A93jvdf3wA",
+                   "iv":"JrIpD5q5ifMq6PT06pYh6QhCQ6LgnGpF"
+                }
+        """.trimIndent()
+
+        val BOB_MESSAGE_WITHOUT_PROTECTED_HEADER = """
+                {
+                   "ciphertext":"912eTUDRKTzhUUqxosPogT1bs9w9wv4s4HmoWkaeU9Uj92V4ENpk-_ZPNSvPyXYLfFj0nc9V2-ux5jq8hqUd17WJpXEM1ReMUjtnTqeUzVa7_xtfkbfhaOZdL8OfgNquPDH1bYcBshN9O9lMT0V52gmGaAB45k4I2PNHcc0A5XWzditCYi8wOkPDm5A7pA39Au5uUNiFQjRYDrz1YvJwV9cdca54vYsBfV1q4c8ncQsv5tNnFYQ1s4rAG7RbyWdAjkC89kE_hIoRRkWZhFyNSfdvRtlUJDlM19uml7lwBWWPnqkmQ3ubiBGmVct3pjrcDvjissOw8Dwkn4E1V1gafec-jDBy4Rndai_RdGjnXjMJs7nRv3Ot",
+                   "recipients":[
+                      {
+                         "encrypted_key":"G-UFZ1ebuhlWZTrMj214YcEvHl6hyfsFtWv4hj-NPNi9gpi99rRs3Q",
+                         "header":{
+                            "kid":"did:example:bob#key-p256-1"
+                         }
+                      },
+                      {
+                         "encrypted_key":"gVdbFdXAxEgrtj9Uw2xiEucQukpiAOA3Jp7Ecmb6L7G5c3IIcAAHgQ",
+                         "header":{
+                            "kid":"did:example:bob#key-p256-2"
+                         }
+                      }
+                   ],
+                   "tag":"t8ioLvZhsCp7A93jvdf3wA",
+                   "iv":"JrIpD5q5ifMq6PT06pYh6QhCQ6LgnGpF"
+                }
+        """.trimIndent()
+
+        val BOB_MESSAGE_WITHOUT_CIPHERTEXT = """
+                {
+                   "protected":"eyJlcGsiOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJFczdpUDNFaExDSGxBclAwS2NZRmNxRXlCYXByMks2WU9BOVc4ZU84YXU4IiwieSI6Ik42QWw3RVR3Q2RwQzZOamRlY3IyS1hBZzFVZVp5X3VmSFJRS3A5RzZLR2sifSwiYXB2Ijoiei1McXB2VlhEYl9zR1luM21qUUxwdXUyQ1FMZXdZdVpvVFdPSVhQSDNGTSIsInR5cCI6ImFwcGxpY2F0aW9uL2RpZGNvbW0tZW5jcnlwdGVkK2pzb24iLCJlbmMiOiJYQzIwUCIsImFsZyI6IkVDREgtRVMrQTI1NktXIn0",
+                   "recipients":[
+                      {
+                         "encrypted_key":"G-UFZ1ebuhlWZTrMj214YcEvHl6hyfsFtWv4hj-NPNi9gpi99rRs3Q",
+                         "header":{
+                            "kid":"did:example:bob#key-p256-1"
+                         }
+                      },
+                      {
+                         "encrypted_key":"gVdbFdXAxEgrtj9Uw2xiEucQukpiAOA3Jp7Ecmb6L7G5c3IIcAAHgQ",
+                         "header":{
+                            "kid":"did:example:bob#key-p256-2"
+                         }
+                      }
+                   ],
+                   "tag":"t8ioLvZhsCp7A93jvdf3wA",
+                   "iv":"JrIpD5q5ifMq6PT06pYh6QhCQ6LgnGpF"
+                }
+        """.trimIndent()
+
+        val BOB_MESSAGE_WITHOUT_TAG = """
+                {
+                   "ciphertext":"912eTUDRKTzhUUqxosPogT1bs9w9wv4s4HmoWkaeU9Uj92V4ENpk-_ZPNSvPyXYLfFj0nc9V2-ux5jq8hqUd17WJpXEM1ReMUjtnTqeUzVa7_xtfkbfhaOZdL8OfgNquPDH1bYcBshN9O9lMT0V52gmGaAB45k4I2PNHcc0A5XWzditCYi8wOkPDm5A7pA39Au5uUNiFQjRYDrz1YvJwV9cdca54vYsBfV1q4c8ncQsv5tNnFYQ1s4rAG7RbyWdAjkC89kE_hIoRRkWZhFyNSfdvRtlUJDlM19uml7lwBWWPnqkmQ3ubiBGmVct3pjrcDvjissOw8Dwkn4E1V1gafec-jDBy4Rndai_RdGjnXjMJs7nRv3Ot",
+                   "protected":"eyJlcGsiOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJFczdpUDNFaExDSGxBclAwS2NZRmNxRXlCYXByMks2WU9BOVc4ZU84YXU4IiwieSI6Ik42QWw3RVR3Q2RwQzZOamRlY3IyS1hBZzFVZVp5X3VmSFJRS3A5RzZLR2sifSwiYXB2Ijoiei1McXB2VlhEYl9zR1luM21qUUxwdXUyQ1FMZXdZdVpvVFdPSVhQSDNGTSIsInR5cCI6ImFwcGxpY2F0aW9uL2RpZGNvbW0tZW5jcnlwdGVkK2pzb24iLCJlbmMiOiJYQzIwUCIsImFsZyI6IkVDREgtRVMrQTI1NktXIn0",
+                   "recipients":[
+                      {
+                         "encrypted_key":"G-UFZ1ebuhlWZTrMj214YcEvHl6hyfsFtWv4hj-NPNi9gpi99rRs3Q",
+                         "header":{
+                            "kid":"did:example:bob#key-p256-1"
+                         }
+                      },
+                      {
+                         "encrypted_key":"gVdbFdXAxEgrtj9Uw2xiEucQukpiAOA3Jp7Ecmb6L7G5c3IIcAAHgQ",
+                         "header":{
+                            "kid":"did:example:bob#key-p256-2"
+                         }
+                      }
+                   ],
+                   "iv":"JrIpD5q5ifMq6PT06pYh6QhCQ6LgnGpF"
+                }
+        """.trimIndent()
+
+        val BOB_MESSAGE_WITHOUT_IV = """
+                {
+                   "ciphertext":"912eTUDRKTzhUUqxosPogT1bs9w9wv4s4HmoWkaeU9Uj92V4ENpk-_ZPNSvPyXYLfFj0nc9V2-ux5jq8hqUd17WJpXEM1ReMUjtnTqeUzVa7_xtfkbfhaOZdL8OfgNquPDH1bYcBshN9O9lMT0V52gmGaAB45k4I2PNHcc0A5XWzditCYi8wOkPDm5A7pA39Au5uUNiFQjRYDrz1YvJwV9cdca54vYsBfV1q4c8ncQsv5tNnFYQ1s4rAG7RbyWdAjkC89kE_hIoRRkWZhFyNSfdvRtlUJDlM19uml7lwBWWPnqkmQ3ubiBGmVct3pjrcDvjissOw8Dwkn4E1V1gafec-jDBy4Rndai_RdGjnXjMJs7nRv3Ot",
+                   "protected":"eyJlcGsiOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJFczdpUDNFaExDSGxBclAwS2NZRmNxRXlCYXByMks2WU9BOVc4ZU84YXU4IiwieSI6Ik42QWw3RVR3Q2RwQzZOamRlY3IyS1hBZzFVZVp5X3VmSFJRS3A5RzZLR2sifSwiYXB2Ijoiei1McXB2VlhEYl9zR1luM21qUUxwdXUyQ1FMZXdZdVpvVFdPSVhQSDNGTSIsInR5cCI6ImFwcGxpY2F0aW9uL2RpZGNvbW0tZW5jcnlwdGVkK2pzb24iLCJlbmMiOiJYQzIwUCIsImFsZyI6IkVDREgtRVMrQTI1NktXIn0",
+                   "recipients":[
+                      {
+                         "encrypted_key":"G-UFZ1ebuhlWZTrMj214YcEvHl6hyfsFtWv4hj-NPNi9gpi99rRs3Q",
+                         "header":{
+                            "kid":"did:example:bob#key-p256-1"
+                         }
+                      },
+                      {
+                         "encrypted_key":"gVdbFdXAxEgrtj9Uw2xiEucQukpiAOA3Jp7Ecmb6L7G5c3IIcAAHgQ",
+                         "header":{
+                            "kid":"did:example:bob#key-p256-2"
+                         }
+                      }
+                   ],
+                   "tag":"t8ioLvZhsCp7A93jvdf3wA"
+                }
+        """.trimIndent()
+
+        val BOB_MESSAGE_UNSUPPORTED_ALG_HEADER = """
+                {
+                   "ciphertext":"912eTUDRKTzhUUqxosPogT1bs9w9wv4s4HmoWkaeU9Uj92V4ENpk-_ZPNSvPyXYLfFj0nc9V2-ux5jq8hqUd17WJpXEM1ReMUjtnTqeUzVa7_xtfkbfhaOZdL8OfgNquPDH1bYcBshN9O9lMT0V52gmGaAB45k4I2PNHcc0A5XWzditCYi8wOkPDm5A7pA39Au5uUNiFQjRYDrz1YvJwV9cdca54vYsBfV1q4c8ncQsv5tNnFYQ1s4rAG7RbyWdAjkC89kE_hIoRRkWZhFyNSfdvRtlUJDlM19uml7lwBWWPnqkmQ3ubiBGmVct3pjrcDvjissOw8Dwkn4E1V1gafec-jDBy4Rndai_RdGjnXjMJs7nRv3Ot",
+                   "protected":"eyJlcGsiOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJFczdpUDNFaExDSGxBclAwS2NZRmNxRXlCYXByMks2WU9BOVc4ZU84YXU4IiwieSI6Ik42QWw3RVR3Q2RwQzZOamRlY3IyS1hBZzFVZVp5X3VmSFJRS3A5RzZLR2sifSwiYXB2Ijoiei1McXB2VlhEYl9zR1luM21qUUxwdXUyQ1FMZXdZdVpvVFdPSVhQSDNGTSIsInR5cCI6ImFwcGxpY2F0aW9uL2RpZGNvbW0tZW5jcnlwdGVkK2pzb24iLCJlbmMiOiJYQzIwUCIsImFsZyI6IkVDREgtRVMrQTI1NUtXIn0=",
+                   "recipients":[
+                      {
+                         "encrypted_key":"G-UFZ1ebuhlWZTrMj214YcEvHl6hyfsFtWv4hj-NPNi9gpi99rRs3Q",
+                         "header":{
+                            "kid":"did:example:bob#key-p256-1"
+                         }
+                      },
+                      {
+                         "encrypted_key":"gVdbFdXAxEgrtj9Uw2xiEucQukpiAOA3Jp7Ecmb6L7G5c3IIcAAHgQ",
+                         "header":{
+                            "kid":"did:example:bob#key-p256-2"
+                         }
+                      }
+                   ],
+                   "tag":"t8ioLvZhsCp7A93jvdf3wA",
+                   "iv":"JrIpD5q5ifMq6PT06pYh6QhCQ6LgnGpF"
+                }
+        """.trimIndent()
+
+        val BOB_MESSAGE_UNSUPPORTED_ENC_HEADER = """
+                {
+                   "ciphertext":"912eTUDRKTzhUUqxosPogT1bs9w9wv4s4HmoWkaeU9Uj92V4ENpk-_ZPNSvPyXYLfFj0nc9V2-ux5jq8hqUd17WJpXEM1ReMUjtnTqeUzVa7_xtfkbfhaOZdL8OfgNquPDH1bYcBshN9O9lMT0V52gmGaAB45k4I2PNHcc0A5XWzditCYi8wOkPDm5A7pA39Au5uUNiFQjRYDrz1YvJwV9cdca54vYsBfV1q4c8ncQsv5tNnFYQ1s4rAG7RbyWdAjkC89kE_hIoRRkWZhFyNSfdvRtlUJDlM19uml7lwBWWPnqkmQ3ubiBGmVct3pjrcDvjissOw8Dwkn4E1V1gafec-jDBy4Rndai_RdGjnXjMJs7nRv3Ot",
+                   "protected":"eyJlcGsiOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJFczdpUDNFaExDSGxBclAwS2NZRmNxRXlCYXByMks2WU9BOVc4ZU84YXU4IiwieSI6Ik42QWw3RVR3Q2RwQzZOamRlY3IyS1hBZzFVZVp5X3VmSFJRS3A5RzZLR2sifSwiYXB2Ijoiei1McXB2VlhEYl9zR1luM21qUUxwdXUyQ1FMZXdZdVpvVFdPSVhQSDNGTSIsInR5cCI6ImFwcGxpY2F0aW9uL2RpZGNvbW0tZW5jcnlwdGVkK2pzb24iLCJlbmMiOiJYQzIwMiIsImFsZyI6IkVDREgtRVMrQTI1NktXIn0=",
+                   "recipients":[
+                      {
+                         "encrypted_key":"G-UFZ1ebuhlWZTrMj214YcEvHl6hyfsFtWv4hj-NPNi9gpi99rRs3Q",
+                         "header":{
+                            "kid":"did:example:bob#key-p256-1"
+                         }
+                      },
+                      {
+                         "encrypted_key":"gVdbFdXAxEgrtj9Uw2xiEucQukpiAOA3Jp7Ecmb6L7G5c3IIcAAHgQ",
+                         "header":{
+                            "kid":"did:example:bob#key-p256-2"
+                         }
+                      }
+                   ],
+                   "tag":"t8ioLvZhsCp7A93jvdf3wA",
+                   "iv":"JrIpD5q5ifMq6PT06pYh6QhCQ6LgnGpF"
+                }
+        """.trimIndent()
+
+        val BOB_ANON_MESSAGE_RECIPIENT_KEY_IS_INVALID = """
+                {
+                   "ciphertext":"KWS7gJU7TbyJlcT9dPkCw-ohNigGaHSukR9MUqFM0THbCTCNkY-g5tahBFyszlKIKXs7qOtqzYyWbPou2q77XlAeYs93IhF6NvaIjyNqYklvj-OtJt9W2Pj5CLOMdsR0C30wchGoXd6wEQZY4ttbzpxYznqPmJ0b9KW6ZP-l4_DSRYe9B-1oSWMNmqMPwluKbtguC-riy356Xbu2C9ShfWmpmjz1HyJWQhZfczuwkWWlE63g26FMskIZZd_jGpEhPFHKUXCFwbuiw_Iy3R0BIzmXXdK_w7PZMMPbaxssl2UeJmLQgCAP8j8TukxV96EKa6rGgULvlo7qibjJqsS5j03bnbxkuxwbfyu3OxwgVzFWlyHbUH6p",
+                   "protected":"eyJlcGsiOnsia3R5IjoiT0tQIiwiY3J2IjoiWDI1NTE5IiwieCI6IkpIanNtSVJaQWFCMHpSR193TlhMVjJyUGdnRjAwaGRIYlc1cmo4ZzBJMjQifSwiYXB2IjoiTmNzdUFuclJmUEs2OUEtcmtaMEw5WFdVRzRqTXZOQzNaZzc0QlB6NTNQQSIsInR5cCI6ImFwcGxpY2F0aW9uL2RpZGNvbW0tZW5jcnlwdGVkK2pzb24iLCJlbmMiOiJYQzIwUCIsImFsZyI6IkVDREgtRVMrQTI1NktXIn0",
+                   "recipients":[
+                      {
+                         "encrypted_key":"3n1olyBR3nY7ZGAprOx-\b7wYAKza6cvOYjNwVg3miTnbLwPP_FmE1A",
+                         "header":{
+                            "kid":"did:example:bob#key-x25519-1"
+                         }
+                      },
+                      {
+                         "encrypted_key":"j5eSzn3kCrIkhQAWPnEwrFPMW6hG0zF_y37gUvvc5gvlzsuNX4hXrQ",
+                         "header":{
+                            "kid":"did:example:bob#key-x25519-2"
+                         }
+                      },
+                      {
+                         "encrypted_key":"TEWlqlq-ao7Lbynf0oZYhxs7ZB39SUWBCK4qjqQqfeItfwmNyDm73A",
+                         "header":{
+                            "kid":"did:example:bob#key-x25519-3"
+                         }
+                      }
+                   ],
+                   "tag":"6ylC_iAs4JvDQzXeY6MuYQ",
+                   "iv":"ESpmcyGiZpRjc5urDela21TOOTW8Wqd1"
+                }
+        """.trimIndent()
+
+        val MESSAGE_ALICE_SKID_NOT_FOUND = """
+                {
+                   "ciphertext":"MJezmxJ8DzUB01rMjiW6JViSaUhsZBhMvYtezkhmwts1qXWtDB63i4-FHZP6cJSyCI7eU-gqH8lBXO_UVuviWIqnIUrTRLaumanZ4q1dNKAnxNL-dHmb3coOqSvy3ZZn6W17lsVudjw7hUUpMbeMbQ5W8GokK9ZCGaaWnqAzd1ZcuGXDuemWeA8BerQsfQw_IQm-aUKancldedHSGrOjVWgozVL97MH966j3i9CJc3k9jS9xDuE0owoWVZa7SxTmhl1PDetmzLnYIIIt-peJtNYGdpd-FcYxIFycQNRUoFEr77h4GBTLbC-vqbQHJC1vW4O2LEKhnhOAVlGyDYkNbA4DSL-LMwKxenQXRARsKSIMn7z-ZIqTE-VCNj9vbtgR",
+                   "protected":"eyJlcGsiOnsia3R5IjoiT0tQIiwiY3J2IjoiWDI1NTE5IiwieCI6IkdGY01vcEpsamY0cExaZmNoNGFfR2hUTV9ZQWY2aU5JMWRXREd5VkNhdzAifSwiYXB2IjoiTmNzdUFuclJmUEs2OUEtcmtaMEw5WFdVRzRqTXZOQzNaZzc0QlB6NTNQQSIsInNraWQiOiJkaWQ6ZXhhbXBsZTphbGljZSNrZXkteDI1NTE5LTUiLCJhcHUiOiJaR2xrT21WNFlXMXdiR1U2WVd4cFkyVWphMlY1TFhneU5UVXhPUzB4IiwidHlwIjoiYXBwbGljYXRpb24vZGlkY29tbS1lbmNyeXB0ZWQranNvbiIsImVuYyI6IkEyNTZDQkMtSFM1MTIiLCJhbGciOiJFQ0RILTFQVStBMjU2S1cifQ==",
+                   "recipients":[
+                      {
+                         "encrypted_key":"o0FJASHkQKhnFo_rTMHTI9qTm_m2mkJp-wv96mKyT5TP7QjBDuiQ0AMKaPI_RLLB7jpyE-Q80Mwos7CvwbMJDhIEBnk2qHVB",
+                         "header":{
+                            "kid":"did:example:bob#key-x25519-1"
+                         }
+                      },
+                      {
+                         "encrypted_key":"rYlafW0XkNd8kaXCqVbtGJ9GhwBC3lZ9AihHK4B6J6V2kT7vjbSYuIpr1IlAjvxYQOw08yqEJNIwrPpB0ouDzKqk98FVN7rK",
+                         "header":{
+                            "kid":"did:example:bob#key-x25519-2"
+                         }
+                      },
+                      {
+                         "encrypted_key":"aqfxMY2sV-njsVo-_9Ke9QbOf6hxhGrUVh_m-h_Aq530w3e_4IokChfKWG1tVJvXYv_AffY7vxj0k5aIfKZUxiNmBwC_QsNo",
+                         "header":{
+                            "kid":"did:example:bob#key-x25519-3"
+                         }
+                      }
+                   ],
+                   "tag":"uYeo7IsZjN7AnvBjUZE5lNryNENbf6_zew_VC-d4b3U",
+                   "iv":"o02OXDQ6_-sKz2PX_6oyJg"
+                }
+        """.trimIndent()
+
+        val MESSAGE_ALICE_AND_BOB_KEYS_FROM_DIFFERENT_CURVES = """
+                {
+                   "ciphertext":"MJezmxJ8DzUB01rMjiW6JViSaUhsZBhMvYtezkhmwts1qXWtDB63i4-FHZP6cJSyCI7eU-gqH8lBXO_UVuviWIqnIUrTRLaumanZ4q1dNKAnxNL-dHmb3coOqSvy3ZZn6W17lsVudjw7hUUpMbeMbQ5W8GokK9ZCGaaWnqAzd1ZcuGXDuemWeA8BerQsfQw_IQm-aUKancldedHSGrOjVWgozVL97MH966j3i9CJc3k9jS9xDuE0owoWVZa7SxTmhl1PDetmzLnYIIIt-peJtNYGdpd-FcYxIFycQNRUoFEr77h4GBTLbC-vqbQHJC1vW4O2LEKhnhOAVlGyDYkNbA4DSL-LMwKxenQXRARsKSIMn7z-ZIqTE-VCNj9vbtgR",
+                   "protected":"eyJlcGsiOnsia3R5IjoiT0tQIiwiY3J2IjoiWDI1NTE5IiwieCI6IkdGY01vcEpsamY0cExaZmNoNGFfR2hUTV9ZQWY2aU5JMWRXREd5VkNhdzAifSwiYXB2IjoiTmNzdUFuclJmUEs2OUEtcmtaMEw5WFdVRzRqTXZOQzNaZzc0QlB6NTNQQSIsInNraWQiOiJkaWQ6ZXhhbXBsZTphbGljZSNrZXkteDI1NTE5LTEiLCJhcHUiOiJaR2xrT21WNFlXMXdiR1U2WVd4cFkyVWphMlY1TFhneU5UVXhPUzB4IiwidHlwIjoiYXBwbGljYXRpb24vZGlkY29tbS1lbmNyeXB0ZWQranNvbiIsImVuYyI6IkEyNTZDQkMtSFM1MTIiLCJhbGciOiJFQ0RILTFQVStBMjU2S1cifQ==",
+                   "recipients":[
+                      {
+                         "encrypted_key":"o0FJASHkQKhnFo_rTMHTI9qTm_m2mkJp-wv96mKyT5TP7QjBDuiQ0AMKaPI_RLLB7jpyE-Q80Mwos7CvwbMJDhIEBnk2qHVB",
+                         "header":{
+                            "kid":"did:example:bob#key-p384-1"
+                         }
+                      },
+                      {
+                         "encrypted_key":"rYlafW0XkNd8kaXCqVbtGJ9GhwBC3lZ9AihHK4B6J6V2kT7vjbSYuIpr1IlAjvxYQOw08yqEJNIwrPpB0ouDzKqk98FVN7rK",
+                         "header":{
+                            "kid":"did:example:bob#key-p384-2"
+                         }
+                      },
+                      {
+                         "encrypted_key":"aqfxMY2sV-njsVo-_9Ke9QbOf6hxhGrUVh_m-h_Aq530w3e_4IokChfKWG1tVJvXYv_AffY7vxj0k5aIfKZUxiNmBwC_QsNo",
+                         "header":{
+                            "kid":"did:example:bob#key-p384-3"
+                         }
+                      }
+                   ],
+                   "tag":"uYeo7IsZjN7AnvBjUZE5lNryNENbf6_zew_VC-d4b3U",
+                   "iv":"o02OXDQ6_-sKz2PX_6oyJg"
+                }
+        """.trimIndent()
+
+        val MESSAGE_PROTECTED_HEADER_IS_NOT_BASE64_ENCODED = """
+                    {
+                       "payload":"eyJpZCI6IjEyMzQ1Njc4OTAiLCJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXBsYWluK2pzb24iLCJ0eXBlIjoiaHR0cDovL2V4YW1wbGUuY29tL3Byb3RvY29scy9sZXRzX2RvX2x1bmNoLzEuMC9wcm9wb3NhbCIsImZyb20iOiJkaWQ6ZXhhbXBsZTphbGljZSIsInRvIjpbImRpZDpleGFtcGxlOmJvYiJdLCJjcmVhdGVkX3RpbWUiOjE1MTYyNjkwMjIsImV4cGlyZXNfdGltZSI6MTUxNjM4NTkzMSwiYm9keSI6eyJtZXNzYWdlc3BlY2lmaWNhdHRyaWJ1dGUiOiJhbmQgaXRzIHZhbHVlIn19",
+                       "signatures":[
+                          {
+                             "protected":"eyJ\\\\0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRWREU0EifQ",
+                             "signature":"FW33NnvOHV0Ted9-F7GZbkia-vYAfBKtH4oBxbrttWAhBZ6UFJMxcGjL3lwOl4YohI3kyyd08LHPWNMgP2EVCQ",
+                             "header":{
+                                "kid":"did:example:alice#key-1"
+                             }
+                          }
+                       ]
+                    }
+        """.trimIndent()
+
         val NEGATIVE_TEST_VECTORS = listOf(
+            NegativeTestVector(
+                packedMessage = "",
+                expectedThrow = ParseException::class,
+                expectedMessage = "Invalid JSON: Unexpected token  at position 0."
+            ),
+
             NegativeTestVector(
                 packedMessage = "{}",
                 expectedThrow = DIDCommException::class,
@@ -698,11 +961,139 @@ class JWE {
             ),
 
             NegativeTestVector(
+                packedMessage = BOB_MESSAGE_WITHOUT_RECIPIENTS,
+                expectedThrow = MalformedMessageException::
+                class,
+                expectedMessage = "The header \"id\" is missing",
+                unpackParams = UnpackParams
+                    .Builder(BOB_MESSAGE_WITHOUT_RECIPIENTS)
+                    .expectDecryptByAllKeys(true)
+                    .build()
+            ),
+
+            NegativeTestVector(
+                packedMessage = BOB_MESSAGE_WITHOUT_PROTECTED_HEADER,
+                expectedThrow = IllegalArgumentException::
+                class,
+                expectedMessage = "The header must not be null",
+                unpackParams = UnpackParams
+                    .Builder(BOB_MESSAGE_WITHOUT_PROTECTED_HEADER)
+                    .expectDecryptByAllKeys(true)
+                    .build()
+            ),
+
+            NegativeTestVector(
+                packedMessage = BOB_MESSAGE_WITHOUT_CIPHERTEXT,
+                expectedThrow = IllegalArgumentException::
+                class,
+                expectedMessage = "The ciphertext must not be null",
+                unpackParams = UnpackParams
+                    .Builder(BOB_MESSAGE_WITHOUT_CIPHERTEXT)
+                    .expectDecryptByAllKeys(true)
+                    .build()
+            ),
+
+            NegativeTestVector(
+                packedMessage = BOB_MESSAGE_WITHOUT_TAG,
+                expectedThrow = MalformedMessageException::
+                class,
+                expectedMessage = "Decrypt is failed",
+                unpackParams = UnpackParams
+                    .Builder(BOB_MESSAGE_WITHOUT_TAG)
+                    .expectDecryptByAllKeys(true)
+                    .build()
+            ),
+
+            NegativeTestVector(
+                packedMessage = BOB_MESSAGE_WITHOUT_IV,
+                expectedThrow = MalformedMessageException::
+                class,
+                expectedMessage = "Decrypt is failed",
+                unpackParams = UnpackParams
+                    .Builder(BOB_MESSAGE_WITHOUT_IV)
+                    .expectDecryptByAllKeys(true)
+                    .build()
+            ),
+
+            NegativeTestVector(
                 packedMessage = BOB_DAMAGED_MESSAGE,
-                expectedThrow = MalformedMessageException::class,
+                expectedThrow = MalformedMessageException::
+                class,
                 expectedMessage = "Decrypt is failed",
                 unpackParams = UnpackParams
                     .Builder(BOB_DAMAGED_MESSAGE)
+                    .expectDecryptByAllKeys(true)
+                    .build()
+            ),
+
+            NegativeTestVector(
+                packedMessage = BOB_MESSAGE_UNSUPPORTED_ALG_HEADER,
+                expectedThrow = UnsupportedAlgorithm::
+                class,
+                expectedMessage = "The algorithm ECDH-ES+A255KW+XC20P is unsupported",
+                unpackParams = UnpackParams
+                    .Builder(BOB_MESSAGE_UNSUPPORTED_ALG_HEADER)
+                    .expectDecryptByAllKeys(true)
+                    .build()
+            ),
+
+            NegativeTestVector(
+                packedMessage = BOB_MESSAGE_UNSUPPORTED_ENC_HEADER,
+                expectedThrow = UnsupportedAlgorithm::
+                class,
+                expectedMessage = "The algorithm ECDH-ES+A256KW+XC202 is unsupported",
+                unpackParams = UnpackParams
+                    .Builder(BOB_MESSAGE_UNSUPPORTED_ENC_HEADER)
+                    .expectDecryptByAllKeys(true)
+                    .build()
+            ),
+
+            NegativeTestVector(
+                packedMessage = BOB_ANON_MESSAGE_RECIPIENT_KEY_IS_INVALID,
+                expectedThrow = MalformedMessageException::
+                class,
+                expectedMessage = "Decrypt is failed",
+                unpackParams = UnpackParams
+                    .Builder(BOB_ANON_MESSAGE_RECIPIENT_KEY_IS_INVALID)
+                    .expectDecryptByAllKeys(true)
+                    .build()
+            ),
+
+            NegativeTestVector(
+                packedMessage = MESSAGE_ALICE_SKID_NOT_FOUND,
+                expectedThrow = DIDDocException::
+                class,
+                expectedMessage = "Verification method 'did:example:alice#key-x25519-5' not found in DID Doc 'did:example:alice'",
+                unpackParams = UnpackParams
+                    .Builder(
+                        MESSAGE_ALICE_SKID_NOT_FOUND
+                    )
+                    .expectDecryptByAllKeys(true)
+                    .build()
+            ),
+
+            NegativeTestVector(
+                packedMessage = MESSAGE_ALICE_AND_BOB_KEYS_FROM_DIFFERENT_CURVES,
+                expectedThrow = IncompatibleCryptoException::
+                class,
+                expectedMessage = "The recipient 'did:example:bob#key-p384-1' curve is not compatible to 'X25519'",
+                unpackParams = UnpackParams
+                    .Builder(
+                        MESSAGE_ALICE_AND_BOB_KEYS_FROM_DIFFERENT_CURVES
+                    )
+                    .expectDecryptByAllKeys(true)
+                    .build()
+            ),
+
+            NegativeTestVector(
+                packedMessage = MESSAGE_PROTECTED_HEADER_IS_NOT_BASE64_ENCODED,
+                expectedThrow = MalformedMessageException::
+                class,
+                expectedMessage = "Invalid signature",
+                unpackParams = UnpackParams
+                    .Builder(
+                        MESSAGE_PROTECTED_HEADER_IS_NOT_BASE64_ENCODED
+                    )
                     .expectDecryptByAllKeys(true)
                     .build()
             )

@@ -5,6 +5,7 @@ import org.dif.message.Attachment
 import org.dif.message.Message
 import org.dif.mock.AliceSecretResolverMock
 import org.dif.mock.BobSecretResolverMock
+import org.dif.mock.CharlieSecretResolverMock
 import org.dif.mock.DIDDocResolverMock
 import org.dif.model.PackEncryptedParams
 import org.dif.model.PackPlaintextParams
@@ -193,5 +194,63 @@ class DIDCommTest {
             assertFalse { anonymousSender }
             assertFalse { reWrappedInForward }
         }
+    }
+
+    @Test
+    fun `Test multi recipient support`() {
+        val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
+
+        val packResultBob = didComm.packEncrypted(
+            PackEncryptedParams.builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID)
+                .protectSenderId(true)
+                .signFrom(JWM.ALICE_DID)
+                .from(JWM.ALICE_DID)
+                .build()
+        )
+
+        val unpackBob = didComm.unpack(
+            UnpackParams.Builder(packResultBob.packedMessage)
+                .secretResolver(BobSecretResolverMock())
+                .build()
+        )
+
+        with(unpackBob.metadata) {
+            assertTrue { encrypted }
+            assertTrue { authenticated }
+            assertTrue { nonRepudiation }
+            assertTrue { anonymousSender }
+            assertFalse { reWrappedInForward }
+        }
+
+        val message = JWM.PLAINTEXT_MESSAGE.copy(to = listOf(JWM.CHARLIE_DID))
+
+        val packResultCharlie = didComm.packEncrypted(
+            PackEncryptedParams.builder(message, JWM.CHARLIE_DID)
+                .protectSenderId(true)
+                .signFrom(JWM.ALICE_DID)
+                .from(JWM.ALICE_DID)
+                .build()
+        )
+
+        val unpackCharlie = didComm.unpack(
+            UnpackParams.Builder(packResultCharlie.packedMessage)
+                .secretResolver(CharlieSecretResolverMock())
+                .build()
+        )
+
+        with(unpackCharlie.metadata) {
+            assertTrue { encrypted }
+            assertTrue { authenticated }
+            assertTrue { nonRepudiation }
+            assertTrue { anonymousSender }
+            assertFalse { reWrappedInForward }
+        }
+
+        val unpackMessageBob = unpackBob.message.copy(to = null)
+        val unpackMessageCharlie = unpackCharlie.message.copy(to = null)
+        val unpackMetadataBob = unpackBob.metadata.copy(encryptedTo = null, signedMessage = null)
+        val unpackMetadataCharlie = unpackCharlie.metadata.copy(encryptedTo = null, signedMessage = null)
+        assertEquals(unpackMessageBob, unpackMessageCharlie)
+        assertEquals(unpackMetadataBob, unpackMetadataCharlie)
     }
 }
