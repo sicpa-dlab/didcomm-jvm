@@ -6,6 +6,8 @@ import org.dif.mock.AliceSecretResolverMock
 import org.dif.mock.DIDDocResolverMock
 import org.dif.model.PackSignedParams
 
+import org.dif.fixtures.BenchCommon
+
 
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.Scope
@@ -33,6 +35,13 @@ open class DIDCommBench_packSigned {
             d.didComm.packSigned(
                 PackSignedParams.builder(JWM.PLAINTEXT_MESSAGE, JWM.ALICE_DID).build()
             )
+        )
+    }
+
+    @Benchmark
+    fun pack_signed_v2(bh: Blackhole/*, d: Data*/) {
+        bh.consume(
+            BenchCommon.pack_signed()
         )
     }
 }

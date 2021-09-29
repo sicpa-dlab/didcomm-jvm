@@ -22,7 +22,8 @@ android {
 
     sourceSets {
         androidTest {
-        //    kotlin.srcDirs += "../lib/src/test/kotlin"
+            kotlin.srcDirs += "../lib/src/testCommon/kotlin"
+            kotlin.srcDirs += "../lib/src/test/kotlin"
         }
     }
 

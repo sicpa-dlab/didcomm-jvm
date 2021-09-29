@@ -21,6 +21,13 @@ dependencies {
     testImplementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonKotlinVersion}"
 }
 
+sourceSets {
+    test {
+        kotlin.srcDirs += "src/testCommon/kotlin"
+    }
+}
+
+
 test {
     useJUnitPlatform()
 }
@@ -39,7 +46,7 @@ jar {
 
 // TODO tune settings
 jmh {
-    benchmarkMode = ["all"]
+    benchmarkMode = ["thrpt", "ss"]
     warmupIterations = 0
     operationsPerInvocation = 1000
     timeUnit = 'ms'
