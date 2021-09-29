@@ -14,7 +14,7 @@ import java.text.ParseException
 fun parse(str: String): ParseResult = try {
     parse(JSONObjectUtils.parse(str))
 } catch (e: ParseException) {
-    throw DIDCommException("Message cannot be parsed", e)
+    throw MalformedMessageException("Message cannot be parsed", e)
 }
 
 fun parse(json: Map<String, Any>): ParseResult = when {
@@ -37,13 +37,10 @@ sealed class ParseResult {
     class JWE(rawMessage: Map<String, Any>) : ParseResult() {
         val message: JWEObjectJSON = try {
             JWEObjectJSON.parse(rawMessage)
-        } catch (e: Exception) {
-            when (e) {
-                is IllegalArgumentException, is ParseException -> {
-                    throw MalformedMessageException(e.localizedMessage, e)
-                }
-                else -> throw e
-            }
+        } catch (e: IllegalArgumentException) {
+            throw MalformedMessageException(e.localizedMessage, e)
+        } catch (e: ParseException) {
+            throw MalformedMessageException(e.localizedMessage, e)
         }
     }
 }

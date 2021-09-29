@@ -68,12 +68,6 @@ data class Attachment(
                     val base64 = json.getTyped<String>(Header.Base64)
                         ?: throw MalformedMessageException("The header \"${Header.Base64}\" is missing")
 
-                    try {
-                        java.util.Base64.getDecoder().decode(base64)
-                    } catch (e: IllegalArgumentException) {
-                        throw MalformedMessageException("The header \"base64\" is not Base64 encoded")
-                    }
-
                     val hash = json.getTyped<String>(Header.Hash)
                     val jws = json.getTyped<Map<String, Any>>(Header.Jws)
 

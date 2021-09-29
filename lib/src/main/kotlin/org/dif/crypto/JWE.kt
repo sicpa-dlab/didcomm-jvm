@@ -40,13 +40,10 @@ fun authEncrypt(payload: String, auth: AuthCryptAlg, from: Key, to: List<Key>): 
     val algorithm = "SHA-256"
     val digest = try {
         MessageDigest.getInstance(algorithm)
-    } catch (e: Exception) {
-        when (e) {
-            is NullPointerException, is NoSuchAlgorithmException -> {
-                throw UnsupportedAlgorithm(algorithm)
-            }
-            else -> throw e
-        }
+    } catch (e: NullPointerException) {
+        throw UnsupportedAlgorithm(algorithm)
+    } catch (e: NoSuchAlgorithmException) {
+        throw UnsupportedAlgorithm(algorithm)
     }
 
     val skid = from.id
@@ -96,13 +93,10 @@ fun anonEncrypt(payload: String, anon: AnonCryptAlg, to: List<Key>): EncryptResu
     val algorithm = "SHA-256"
     val digest = try {
         MessageDigest.getInstance(algorithm)
-    } catch (e: Exception) {
-        when (e) {
-            is NullPointerException, is NoSuchAlgorithmException -> {
-                throw UnsupportedAlgorithm(algorithm)
-            }
-            else -> throw e
-        }
+    } catch (e: NullPointerException) {
+        throw UnsupportedAlgorithm(algorithm)
+    } catch (e: NoSuchAlgorithmException) {
+        throw UnsupportedAlgorithm(algorithm)
     }
 
     val kids = to.map { it.id }.sorted()
