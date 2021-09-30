@@ -14,7 +14,7 @@ class DIDCommBenchmarkJVMNaive {
     }
 
     fun measure(aFun: () -> Unit, N: Int = 1000, aFunName: String = "noname") {
-        val benchRes: BenchRes = BenchCommon.measure_naive(aFun, N, aFunName)
+        val benchRes: BenchRes = BenchCommon.measureNaive(aFun, N, aFunName)
         // logger.info(benchRes.toStr())
         println(benchRes.toStr())
     }
@@ -23,96 +23,80 @@ class DIDCommBenchmarkJVMNaive {
     fun bench_pack_signed() {
         // TODO resolve fun name dynamically
         measure(
-            BenchCommon::pack_signed,
-            aFunName = "pack_signed"
+            BenchCommon::packSigned,
+            aFunName = "packSigned"
         )
-        /*
-        var i = Integer(1000)
-        benchmarkRule.measureRepeated {
-            if (i < 100) {
-                i = Integer(i.toInt() + 1)
-            } else {
-                i = Integer(0)
-            }
-        }
-        */
-
-        /*
-        benchmarkRule.measureRepeated {
-            //BenchCommon.pack_signed()
-        }
-        */
     }
 
     @Test
     fun bench_pack_encrypted_authcrypt_3_keys() {
         measure(
-            BenchCommon::pack_encrypted_authcrypt_3_keys,
-            aFunName = "pack_encrypted_authcrypt_3_keys"
+            BenchCommon::packEncryptedAuthcrypt3Keys,
+            aFunName = "packEncryptedAuthcrypt3Keys"
         )
     }
 
     @Test
     fun bench_pack_encrypted_anoncrypt_3_keys() {
         measure(
-            BenchCommon::pack_encrypted_anoncrypt_3_keys,
-            aFunName = "pack_encrypted_anoncrypt_3_keys"
+            BenchCommon::packEncryptedAnoncrypt3Keys,
+            aFunName = "packEncryptedAnoncrypt3Keys"
         )
     }
 
     @Test
     fun bench_pack_encrypted_authcrypt_3_keys_signed() {
         measure(
-            BenchCommon::pack_encrypted_authcrypt_3_keys_signed,
-            aFunName = "pack_encrypted_authcrypt_3_keys_signed"
+            BenchCommon::packEncryptedAuthcrypt3KeysSigned,
+            aFunName = "packEncryptedAuthcrypt3KeysSigned"
         )
     }
 
     @Test
     fun bench_pack_encrypted_anoncrypt_3_keys_signed() {
         measure(
-            BenchCommon::pack_encrypted_anoncrypt_3_keys_signed,
-            aFunName = "pack_encrypted_anoncrypt_3_keys_signed"
+            BenchCommon::packEncryptedAnoncrypt3KeysSigned,
+            aFunName = "packEncryptedAnoncrypt3KeysSigned"
         )
     }
 
     @Test
     fun bench_unpack_signed() {
         measure(
-            BenchCommon::unpack_signed,
-            aFunName = "unpack_signed"
+            BenchCommon::unpackSigned,
+            aFunName = "unpackSigned"
         )
     }
 
     @Test
     fun bench_unpack_authcrypt_3_keys() {
         measure(
-            BenchCommon::unpack_authcrypt_3_keys,
-            aFunName = "unpack_authcrypt_3_keys"
+            BenchCommon::unpackAuthcrypt3Keys,
+            aFunName = "unpackAuthcrypt3Keys"
         )
     }
 
     @Test
     fun bench_unpack_anoncrypt_3_keys() {
         measure(
-            BenchCommon::unpack_anoncrypt_3_keys,
-            aFunName = "unpack_anoncrypt_3_keys"
+            BenchCommon::unpackAnoncrypt3Keys,
+            aFunName = "unpackAnoncrypt3Keys"
         )
     }
 
     @Test
     fun bench_unpack_authcrypt_3_keys_signed() {
         measure(
-            BenchCommon::unpack_authcrypt_3_keys_signed,
-            aFunName = "unpack_authcrypt_3_keys_signed"
+            BenchCommon::unpackAuthcrypt3KeysSigned,
+            aFunName = "unpackAuthcrypt3KeysSigned"
         )
     }
 
     @Test
     fun bench_unpack_anoncrypt_3_keys_signed() {
         measure(
-            BenchCommon::unpack_anoncrypt_3_keys_signed,
-            aFunName = "unpack_anoncrypt_3_keys_signed"
+            BenchCommon::unpackAnoncrypt3KeysSigned,
+            aFunName = "unpackAnoncrypt3KeysSigned"
         )
     }
 }

@@ -12,7 +12,7 @@ import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.infra.Blackhole
 
 @State(Scope.Benchmark)
-open class DIDCommBench_packEncrypted {
+open class DIDCommBenchPackEncrypted {
 
     @State(Scope.Benchmark)
     open class Data {
@@ -27,7 +27,7 @@ open class DIDCommBench_packEncrypted {
     }
 
     @Benchmark
-    fun pack_encrypted_authcrypt_3_keys(bh: Blackhole, d: Data) {
+    fun packEncryptedAuthcrypt3Keys(bh: Blackhole, d: Data) {
         bh.consume(
             d.didComm.packEncrypted(
                 PackEncryptedParams.Builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID)
@@ -38,7 +38,7 @@ open class DIDCommBench_packEncrypted {
     }
 
     @Benchmark
-    fun pack_encrypted_anoncrypt_3_keys(bh: Blackhole, d: Data) {
+    fun packEncryptedAnoncrypt3Keys(bh: Blackhole, d: Data) {
         bh.consume(
             d.didComm.packEncrypted(
                 PackEncryptedParams.Builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID)
@@ -49,7 +49,7 @@ open class DIDCommBench_packEncrypted {
     }
 
     @Benchmark
-    fun pack_encrypted_authcrypt_3_keys_signed(bh: Blackhole, d: Data) {
+    fun packEncryptedAuthcrypt3KeysSigned(bh: Blackhole, d: Data) {
         bh.consume(
             d.didComm.packEncrypted(
                 PackEncryptedParams.Builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID)
@@ -61,7 +61,7 @@ open class DIDCommBench_packEncrypted {
     }
 
     @Benchmark
-    fun pack_encrypted_anoncrypt_3_keys_signed(bh: Blackhole, d: Data) {
+    fun packEncryptedAnoncrypt3KeysSigned(bh: Blackhole, d: Data) {
         bh.consume(
             d.didComm.packEncrypted(
                 PackEncryptedParams.Builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID)

@@ -25,7 +25,7 @@ import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.infra.Blackhole
 
 @State(Scope.Benchmark)
-open class DIDCommBench_unpack {
+open class DIDCommBenchUnpack {
 
     @State(Scope.Benchmark)
     open class Data {
@@ -71,7 +71,7 @@ open class DIDCommBench_unpack {
     }
 
     @Benchmark
-    fun unpack_signed(bh: Blackhole, d: Data) {
+    fun unpackSigned(bh: Blackhole, d: Data) {
         bh.consume(
             d.didComm.unpack(
                 UnpackParams.Builder(d.packSignedRes.packedMessage).build()
@@ -80,7 +80,7 @@ open class DIDCommBench_unpack {
     }
 
     @Benchmark
-    fun unpack_authcrypt_3_keys(bh: Blackhole, d: Data) {
+    fun unpackAuthcrypt3Keys(bh: Blackhole, d: Data) {
         bh.consume(
             d.didComm.unpack(
                 UnpackParams.Builder(d.authPackRes.packedMessage)
@@ -92,7 +92,7 @@ open class DIDCommBench_unpack {
     }
 
     @Benchmark
-    fun unpack_anoncrypt_3_keys(bh: Blackhole, d: Data) {
+    fun unpackAnoncrypt3Keys(bh: Blackhole, d: Data) {
         bh.consume(
             d.didComm.unpack(
                 UnpackParams.Builder(d.anonPackRes.packedMessage)
@@ -104,7 +104,7 @@ open class DIDCommBench_unpack {
     }
 
     @Benchmark
-    fun unpack_authcrypt_3_keys_signed(bh: Blackhole, d: Data) {
+    fun unpackAuthcrypt3KeysSigned(bh: Blackhole, d: Data) {
         bh.consume(
             d.didComm.unpack(
                 UnpackParams.Builder(d.authPackSignedRes.packedMessage)
@@ -116,7 +116,7 @@ open class DIDCommBench_unpack {
     }
 
     @Benchmark
-    fun unpack_anoncrypt_3_keys_signed(bh: Blackhole, d: Data) {
+    fun unpackAnoncrypt3KeysSigned(bh: Blackhole, d: Data) {
         bh.consume(
             d.didComm.unpack(
                 UnpackParams.Builder(d.anonPackSignedRes.packedMessage)

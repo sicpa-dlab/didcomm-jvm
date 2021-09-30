@@ -13,7 +13,7 @@ import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.infra.Blackhole
 
 @State(Scope.Benchmark)
-open class DIDCommBench_packSigned {
+open class DIDCommBenchPackSigned {
 
     @State(Scope.Benchmark)
     open class Data {
@@ -26,7 +26,7 @@ open class DIDCommBench_packSigned {
     }
 
     @Benchmark
-    fun pack_signed(bh: Blackhole, d: Data) {
+    fun packSigned(bh: Blackhole, d: Data) {
         bh.consume(
             d.didComm.packSigned(
                 PackSignedParams.builder(JWM.PLAINTEXT_MESSAGE, JWM.ALICE_DID).build()
@@ -35,9 +35,9 @@ open class DIDCommBench_packSigned {
     }
 
     @Benchmark
-    fun pack_signed_v2(bh: Blackhole/*, d: Data*/) {
+    fun packSignedV2(bh: Blackhole/*, d: Data*/) {
         bh.consume(
-            BenchCommon.pack_signed()
+            BenchCommon.packSigned()
         )
     }
 }

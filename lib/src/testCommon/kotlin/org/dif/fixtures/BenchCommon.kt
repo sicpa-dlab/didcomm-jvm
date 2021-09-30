@@ -27,37 +27,37 @@ class BenchRes(
 
 class BenchCommon {
     companion object {
-        val didComm_def: DIDComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
+        val didCommDef: DIDComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
-        val packSignedRes = didComm_def.packSigned(
+        val packSignedRes = didCommDef.packSigned(
             PackSignedParams.builder(JWM.PLAINTEXT_MESSAGE, JWM.ALICE_DID).build()
         )
 
-        val authPackRes = didComm_def.packEncrypted(
+        val authPackRes = didCommDef.packEncrypted(
             PackEncryptedParams.Builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID)
                 .from(JWM.ALICE_DID)
                 .build()
         )
 
-        val anonPackRes = didComm_def.packEncrypted(
+        val anonPackRes = didCommDef.packEncrypted(
             PackEncryptedParams.Builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID)
                 .build()
         )
 
-        val authPackSignedRes = didComm_def.packEncrypted(
+        val authPackSignedRes = didCommDef.packEncrypted(
             PackEncryptedParams.Builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID)
                 .from(JWM.ALICE_DID)
                 .signFrom(JWM.ALICE_DID)
                 .build()
         )
 
-        val anonPackSignedRes = didComm_def.packEncrypted(
+        val anonPackSignedRes = didCommDef.packEncrypted(
             PackEncryptedParams.Builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID)
                 .signFrom(JWM.ALICE_DID)
                 .build()
         )
 
-        fun measure_naive(
+        fun measureNaive(
             aFun: () -> Unit,
             N: Int = 1000,
             aFunName: String = "noname"
@@ -70,13 +70,13 @@ class BenchCommon {
             return BenchRes(N, timeInMs, aFunName)
         }
 
-        fun pack_signed(didComm: DIDComm = didComm_def) {
+        fun packSigned(didComm: DIDComm = didCommDef) {
             didComm.packSigned(
                 PackSignedParams.builder(JWM.PLAINTEXT_MESSAGE, JWM.ALICE_DID).build()
             )
         }
 
-        fun pack_encrypted_authcrypt_3_keys(didComm: DIDComm = didComm_def) {
+        fun packEncryptedAuthcrypt3Keys(didComm: DIDComm = didCommDef) {
             didComm.packEncrypted(
                 PackEncryptedParams.Builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID)
                     .from(JWM.ALICE_DID)
@@ -84,7 +84,7 @@ class BenchCommon {
             )
         }
 
-        fun pack_encrypted_anoncrypt_3_keys(didComm: DIDComm = didComm_def) {
+        fun packEncryptedAnoncrypt3Keys(didComm: DIDComm = didCommDef) {
             didComm.packEncrypted(
                 PackEncryptedParams.Builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID)
                     .from(JWM.ALICE_DID)
@@ -92,16 +92,7 @@ class BenchCommon {
             )
         }
 
-        fun pack_encrypted_authcrypt_3_keys_signed(didComm: DIDComm = didComm_def) {
-            didComm.packEncrypted(
-                PackEncryptedParams.Builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID)
-                    .from(JWM.ALICE_DID)
-                    .signFrom(JWM.ALICE_DID)
-                    .build()
-            )
-        }
-
-        fun pack_encrypted_anoncrypt_3_keys_signed(didComm: DIDComm = didComm_def) {
+        fun packEncryptedAuthcrypt3KeysSigned(didComm: DIDComm = didCommDef) {
             didComm.packEncrypted(
                 PackEncryptedParams.Builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID)
                     .from(JWM.ALICE_DID)
@@ -110,13 +101,22 @@ class BenchCommon {
             )
         }
 
-        fun unpack_signed(didComm: DIDComm = didComm_def) {
+        fun packEncryptedAnoncrypt3KeysSigned(didComm: DIDComm = didCommDef) {
+            didComm.packEncrypted(
+                PackEncryptedParams.Builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID)
+                    .from(JWM.ALICE_DID)
+                    .signFrom(JWM.ALICE_DID)
+                    .build()
+            )
+        }
+
+        fun unpackSigned(didComm: DIDComm = didCommDef) {
             didComm.unpack(
                 UnpackParams.Builder(packSignedRes.packedMessage).build()
             )
         }
 
-        fun unpack_authcrypt_3_keys(didComm: DIDComm = didComm_def) {
+        fun unpackAuthcrypt3Keys(didComm: DIDComm = didCommDef) {
             didComm.unpack(
                 UnpackParams.Builder(authPackRes.packedMessage)
                     .secretResolver(BobSecretResolverMock())
@@ -125,7 +125,7 @@ class BenchCommon {
             )
         }
 
-        fun unpack_anoncrypt_3_keys(didComm: DIDComm = didComm_def) {
+        fun unpackAnoncrypt3Keys(didComm: DIDComm = didCommDef) {
             didComm.unpack(
                 UnpackParams.Builder(anonPackRes.packedMessage)
                     .secretResolver(BobSecretResolverMock())
@@ -134,7 +134,7 @@ class BenchCommon {
             )
         }
 
-        fun unpack_authcrypt_3_keys_signed(didComm: DIDComm = didComm_def) {
+        fun unpackAuthcrypt3KeysSigned(didComm: DIDComm = didCommDef) {
             didComm.unpack(
                 UnpackParams.Builder(authPackSignedRes.packedMessage)
                     .secretResolver(BobSecretResolverMock())
@@ -143,7 +143,7 @@ class BenchCommon {
             )
         }
 
-        fun unpack_anoncrypt_3_keys_signed(didComm: DIDComm = didComm_def) {
+        fun unpackAnoncrypt3KeysSigned(didComm: DIDComm = didCommDef) {
             didComm.unpack(
                 UnpackParams.Builder(anonPackSignedRes.packedMessage)
                     .secretResolver(BobSecretResolverMock())
