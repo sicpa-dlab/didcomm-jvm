@@ -31,19 +31,10 @@ import org.dif.exceptions.UnsupportedAlgorithm
 import org.dif.exceptions.UnsupportedCurveException
 import org.dif.exceptions.UnsupportedJWKException
 import org.dif.utils.asKeys
-import java.lang.NullPointerException
 import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 
 fun authEncrypt(payload: String, auth: AuthCryptAlg, from: Key, to: List<Key>): EncryptResult {
-    val algorithm = "SHA-256"
-    val digest = try {
-        MessageDigest.getInstance(algorithm)
-    } catch (e: NullPointerException) {
-        throw UnsupportedAlgorithm(algorithm)
-    } catch (e: NoSuchAlgorithmException) {
-        throw UnsupportedAlgorithm(algorithm)
-    }
+    val digest = MessageDigest.getInstance("SHA-256")
 
     val skid = from.id
     val kids = to.map { it.id }.sorted()
@@ -74,7 +65,7 @@ fun authEncrypt(payload: String, auth: AuthCryptAlg, from: Key, to: List<Key>): 
             else -> throw UnsupportedJWKException(sender.javaClass.name)
         }
     } catch (e: JOSEException) {
-        throw DIDCommException("The key subtype is not supported", e)
+        throw UnsupportedCurveException("The key subtype is not supported")
     }
 
     return JWEObjectJSON(jweHeader, Payload(Base64URL.encode(payload)))
@@ -89,14 +80,7 @@ fun authEncrypt(payload: String, auth: AuthCryptAlg, from: Key, to: List<Key>): 
 }
 
 fun anonEncrypt(payload: String, anon: AnonCryptAlg, to: List<Key>): EncryptResult {
-    val algorithm = "SHA-256"
-    val digest = try {
-        MessageDigest.getInstance(algorithm)
-    } catch (e: NullPointerException) {
-        throw UnsupportedAlgorithm(algorithm)
-    } catch (e: NoSuchAlgorithmException) {
-        throw UnsupportedAlgorithm(algorithm)
-    }
+    val digest = MessageDigest.getInstance("SHA-256")
 
     val kids = to.map { it.id }.sorted()
     val apv = Base64URL.encode(digest.digest(kids.joinToString(".").encodeToByteArray()))
@@ -120,7 +104,7 @@ fun anonEncrypt(payload: String, anon: AnonCryptAlg, to: List<Key>): EncryptResu
             else -> throw UnsupportedJWKException(recipient.javaClass.name)
         }
     } catch (e: JOSEException) {
-        throw DIDCommException("The key subtype is not supported", e)
+        throw UnsupportedCurveException("The key subtype is not supported")
     }
 
     return JWEObjectJSON(jweHeader, Payload(Base64URL.encode(payload)))

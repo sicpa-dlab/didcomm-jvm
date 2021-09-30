@@ -4,7 +4,6 @@ import com.nimbusds.jose.JOSEException
 import com.nimbusds.jose.JWEObjectJSON
 import com.nimbusds.jose.JWSObjectJSON
 import com.nimbusds.jose.util.JSONObjectUtils
-import org.dif.exceptions.DIDCommException
 import org.dif.exceptions.MalformedMessageException
 import org.dif.message.Message
 import java.lang.IllegalArgumentException
@@ -29,7 +28,7 @@ sealed class ParseResult {
         val message: JWSObjectJSON = try {
             JWSObjectJSON.parse(rawMessage)
         } catch (e: JOSEException) {
-            throw DIDCommException("Message cannot be parsed", e)
+            throw MalformedMessageException("Message cannot be parsed", e)
         }
     }
 
