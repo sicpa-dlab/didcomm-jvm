@@ -31,16 +31,14 @@ import org.dif.exceptions.UnsupportedAlgorithm
 import org.dif.exceptions.UnsupportedCurveException
 import org.dif.exceptions.UnsupportedJWKException
 import org.dif.utils.asKeys
-import java.security.MessageDigest
+import org.dif.utils.calculateAPV
 
 fun authEncrypt(payload: String, auth: AuthCryptAlg, from: Key, to: List<Key>): EncryptResult {
-    val digest = MessageDigest.getInstance("SHA-256")
-
     val skid = from.id
     val kids = to.map { it.id }.sorted()
 
     val apu = Base64URL.encode(from.id)
-    val apv = Base64URL.encode(digest.digest(kids.joinToString(".").encodeToByteArray()))
+    val apv = calculateAPV(kids)
 
     val (alg, enc) = when (auth) {
         AuthCryptAlg.A256CBC_HS512_ECDH_1PU_A256KW -> Pair(JWEAlgorithm.ECDH_1PU_A256KW, EncryptionMethod.A256CBC_HS512)
@@ -80,10 +78,8 @@ fun authEncrypt(payload: String, auth: AuthCryptAlg, from: Key, to: List<Key>): 
 }
 
 fun anonEncrypt(payload: String, anon: AnonCryptAlg, to: List<Key>): EncryptResult {
-    val digest = MessageDigest.getInstance("SHA-256")
-
     val kids = to.map { it.id }.sorted()
-    val apv = Base64URL.encode(digest.digest(kids.joinToString(".").encodeToByteArray()))
+    val apv = calculateAPV(kids)
 
     val (alg, enc) = when (anon) {
         AnonCryptAlg.A256CBC_HS512_ECDH_ES_A256KW -> Pair(JWEAlgorithm.ECDH_ES_A256KW, EncryptionMethod.A256CBC_HS512)

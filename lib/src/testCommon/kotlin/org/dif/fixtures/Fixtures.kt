@@ -4,8 +4,6 @@ import org.dif.common.AnonCryptAlg
 import org.dif.common.AuthCryptAlg
 import org.dif.common.SignAlg
 import org.dif.exceptions.DIDCommException
-import org.dif.exceptions.DIDDocException
-import org.dif.exceptions.IncompatibleCryptoException
 import org.dif.exceptions.MalformedMessageException
 import org.dif.exceptions.UnsupportedAlgorithm
 import org.dif.message.Message
@@ -1060,9 +1058,9 @@ class JWE {
 
             NegativeTestVector(
                 packedMessage = MESSAGE_ALICE_SKID_NOT_FOUND,
-                expectedThrow = DIDDocException::
+                expectedThrow = MalformedMessageException::
                 class,
-                expectedMessage = "Verification method 'did:example:alice#key-x25519-5' not found in DID Doc 'did:example:alice'",
+                expectedMessage = "APU is not equal to skid",
                 unpackParams = UnpackParams
                     .Builder(
                         MESSAGE_ALICE_SKID_NOT_FOUND
@@ -1073,9 +1071,9 @@ class JWE {
 
             NegativeTestVector(
                 packedMessage = MESSAGE_ALICE_AND_BOB_KEYS_FROM_DIFFERENT_CURVES,
-                expectedThrow = IncompatibleCryptoException::
+                expectedThrow = MalformedMessageException::
                 class,
-                expectedMessage = "The recipient 'did:example:bob#key-p384-1' curve is not compatible to 'X25519'",
+                expectedMessage = "apv is invalid",
                 unpackParams = UnpackParams
                     .Builder(
                         MESSAGE_ALICE_AND_BOB_KEYS_FROM_DIFFERENT_CURVES
