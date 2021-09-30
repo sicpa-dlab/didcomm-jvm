@@ -11,7 +11,6 @@ import org.dif.exceptions.UnsupportedAlgorithm
 import org.dif.message.Message
 import org.dif.model.Metadata
 import org.dif.model.UnpackParams
-import java.text.ParseException
 import kotlin.reflect.KClass
 
 class JWM {
@@ -950,8 +949,8 @@ class JWE {
         val NEGATIVE_TEST_VECTORS = listOf(
             NegativeTestVector(
                 packedMessage = "",
-                expectedThrow = ParseException::class,
-                expectedMessage = "Invalid JSON: Unexpected token  at position 0."
+                expectedThrow = DIDCommException::class,
+                expectedMessage = "Message cannot be parsed"
             ),
 
             NegativeTestVector(
@@ -973,7 +972,7 @@ class JWE {
 
             NegativeTestVector(
                 packedMessage = BOB_MESSAGE_WITHOUT_PROTECTED_HEADER,
-                expectedThrow = IllegalArgumentException::
+                expectedThrow = MalformedMessageException::
                 class,
                 expectedMessage = "The header must not be null",
                 unpackParams = UnpackParams
@@ -984,7 +983,7 @@ class JWE {
 
             NegativeTestVector(
                 packedMessage = BOB_MESSAGE_WITHOUT_CIPHERTEXT,
-                expectedThrow = IllegalArgumentException::
+                expectedThrow = MalformedMessageException::
                 class,
                 expectedMessage = "The ciphertext must not be null",
                 unpackParams = UnpackParams

@@ -1,6 +1,7 @@
 package org.dif.crypto
 
 import com.nimbusds.jose.EncryptionMethod
+import com.nimbusds.jose.JOSEException
 import com.nimbusds.jose.JOSEObjectType
 import com.nimbusds.jose.JWEAlgorithm
 import com.nimbusds.jose.JWEHeader
@@ -24,8 +25,10 @@ import org.dif.common.AuthCryptAlg
 import org.dif.common.CryptAlg
 import org.dif.common.Typ
 import org.dif.crypto.key.Key
+import org.dif.exceptions.DIDCommException
 import org.dif.exceptions.MalformedMessageException
 import org.dif.exceptions.UnsupportedAlgorithm
+import org.dif.exceptions.UnsupportedCurveException
 import org.dif.exceptions.UnsupportedJWKException
 import org.dif.utils.asKeys
 import java.security.MessageDigest
@@ -53,14 +56,26 @@ fun authEncrypt(payload: String, auth: AuthCryptAlg, from: Key, to: List<Key>): 
     val sender = from.jwk
     val recipients = to.map { Pair.of(UnprotectedHeader.Builder(it.id).build(), it.jwk) }
 
-    val encryptor = when (sender) {
-        is ECKey -> ECDH1PUEncrypterMulti(sender, recipients.asKeys())
-        is OctetKeyPair -> ECDH1PUX25519EncrypterMulti(sender, recipients.asKeys())
-        else -> throw UnsupportedJWKException(sender.javaClass.name)
+    val encryptor = try {
+        when (sender) {
+            is ECKey ->
+                ECDH1PUEncrypterMulti(sender, recipients.asKeys())
+            is OctetKeyPair ->
+                ECDH1PUX25519EncrypterMulti(sender, recipients.asKeys())
+            else -> throw UnsupportedJWKException(sender.javaClass.name)
+        }
+    } catch (e: JOSEException) {
+        throw UnsupportedCurveException("The key subtype is not supported")
     }
 
     return JWEObjectJSON(jweHeader, Payload(Base64URL.encode(payload)))
-        .apply { encrypt(encryptor) }
+        .apply {
+            try {
+                encrypt(encryptor)
+            } catch (e: JOSEException) {
+                throw DIDCommException("JWE cannot be encrypted", e)
+            }
+        }
         .run { EncryptResult(serialize(), kids, from.id) }
 }
 
@@ -82,14 +97,24 @@ fun anonEncrypt(payload: String, anon: AnonCryptAlg, to: List<Key>): EncryptResu
 
     val recipients = to.map { Pair.of(UnprotectedHeader.Builder(it.id).build(), it.jwk) }
 
-    val encryptor = when (val recipient = recipients.first().right) {
-        is ECKey -> ECDHEncrypterMulti(recipients.asKeys())
-        is OctetKeyPair -> X25519EncrypterMulti(recipients.asKeys())
-        else -> throw UnsupportedJWKException(recipient.javaClass.name)
+    val encryptor = try {
+        when (val recipient = recipients.first().right) {
+            is ECKey -> ECDHEncrypterMulti(recipients.asKeys())
+            is OctetKeyPair -> X25519EncrypterMulti(recipients.asKeys())
+            else -> throw UnsupportedJWKException(recipient.javaClass.name)
+        }
+    } catch (e: JOSEException) {
+        throw UnsupportedCurveException("The key subtype is not supported")
     }
 
     return JWEObjectJSON(jweHeader, Payload(Base64URL.encode(payload)))
-        .apply { encrypt(encryptor) }
+        .apply {
+            try {
+                encrypt(encryptor)
+            } catch (e: JOSEException) {
+                throw DIDCommException("JWE cannot be encrypted", e)
+            }
+        }
         .run { EncryptResult(serialize(), kids) }
 }
 
@@ -129,11 +154,20 @@ private fun authDecryptForAllKeys(jwe: JWEObjectJSON, from: Key, to: List<Key>):
     val sender = from.jwk
     val recipients = to.map { Pair.of(UnprotectedHeader.Builder(it.id).build(), it.jwk) }
 
-    val decrypter = when (sender) {
-        is ECKey -> ECDH1PUDecrypterMulti(sender, recipients.asKeys())
-        is OctetKeyPair -> ECDH1PUX25519DecrypterMulti(sender, recipients.asKeys())
-        else -> throw UnsupportedJWKException(sender.javaClass.name)
-    }
+    val decrypter =
+        when (sender) {
+            is ECKey -> try {
+                ECDH1PUDecrypterMulti(sender, recipients.asKeys())
+            } catch (e: JOSEException) {
+                throw UnsupportedCurveException(sender.curve.name)
+            }
+            is OctetKeyPair -> try {
+                ECDH1PUX25519DecrypterMulti(sender, recipients.asKeys())
+            } catch (e: JOSEException) {
+                throw UnsupportedCurveException(sender.curve.name)
+            }
+            else -> throw UnsupportedJWKException(sender.javaClass.name)
+        }
 
     try {
         jwe.decrypt(decrypter)
@@ -147,11 +181,20 @@ private fun authDecryptForAllKeys(jwe: JWEObjectJSON, from: Key, to: List<Key>):
 private fun anonDecryptForAllKeys(jwe: JWEObjectJSON, to: List<Key>): DecryptResult {
     val recipients = to.map { Pair.of(UnprotectedHeader.Builder(it.id).build(), it.jwk) }
 
-    val decrypter = when (val recipient = recipients.first().right) {
-        is ECKey -> ECDHDecrypterMulti(recipients.asKeys())
-        is OctetKeyPair -> X25519DecrypterMulti(recipients.asKeys())
-        else -> throw UnsupportedJWKException(recipient.javaClass.name)
-    }
+    val decrypter =
+        when (val recipient = recipients.first().right) {
+            is ECKey -> try {
+                ECDHDecrypterMulti(recipients.asKeys())
+            } catch (e: JOSEException) {
+                throw UnsupportedCurveException(recipient.curve.name)
+            }
+            is OctetKeyPair -> try {
+                X25519DecrypterMulti(recipients.asKeys())
+            } catch (e: JOSEException) {
+                throw UnsupportedCurveException(recipient.curve.name)
+            }
+            else -> throw UnsupportedJWKException(recipient.javaClass.name)
+        }
 
     try {
         jwe.decrypt(decrypter)
