@@ -1,11 +1,10 @@
 package org.dif
 
-import org.junit.jupiter.api.Disabled;
-import kotlin.test.Test
-import java.util.logging.Logger
-
 import org.dif.fixtures.BenchCommon
 import org.dif.fixtures.BenchRes
+import org.junit.jupiter.api.Disabled
+import java.util.logging.Logger
+import kotlin.test.Test
 
 @Disabled("Benchmark disabled for CI")
 class DIDCommBenchmarkJVMNaive {
@@ -14,8 +13,8 @@ class DIDCommBenchmarkJVMNaive {
         val logger = Logger.getLogger("DIDCommBenchmarkJVMNaive")
     }
 
-    fun measure(aFun: () -> Unit, N : Int = 1000, aFunName : String = "noname") {
-        val benchRes : BenchRes = BenchCommon.measure_naive(aFun, N, aFunName)
+    fun measure(aFun: () -> Unit, N: Int = 1000, aFunName: String = "noname") {
+        val benchRes: BenchRes = BenchCommon.measure_naive(aFun, N, aFunName)
         // logger.info(benchRes.toStr())
         println(benchRes.toStr())
     }
@@ -61,7 +60,6 @@ class DIDCommBenchmarkJVMNaive {
         )
     }
 
-
     @Test
     fun bench_pack_encrypted_authcrypt_3_keys_signed() {
         measure(
@@ -69,7 +67,6 @@ class DIDCommBenchmarkJVMNaive {
             aFunName = "pack_encrypted_authcrypt_3_keys_signed"
         )
     }
-
 
     @Test
     fun bench_pack_encrypted_anoncrypt_3_keys_signed() {
@@ -79,7 +76,6 @@ class DIDCommBenchmarkJVMNaive {
         )
     }
 
-
     @Test
     fun bench_unpack_signed() {
         measure(
@@ -87,7 +83,6 @@ class DIDCommBenchmarkJVMNaive {
             aFunName = "unpack_signed"
         )
     }
-
 
     @Test
     fun bench_unpack_authcrypt_3_keys() {
@@ -97,7 +92,6 @@ class DIDCommBenchmarkJVMNaive {
         )
     }
 
-
     @Test
     fun bench_unpack_anoncrypt_3_keys() {
         measure(
@@ -105,7 +99,6 @@ class DIDCommBenchmarkJVMNaive {
             aFunName = "unpack_anoncrypt_3_keys"
         )
     }
-
 
     @Test
     fun bench_unpack_authcrypt_3_keys_signed() {
@@ -115,7 +108,6 @@ class DIDCommBenchmarkJVMNaive {
         )
     }
 
-
     @Test
     fun bench_unpack_anoncrypt_3_keys_signed() {
         measure(
@@ -123,5 +115,4 @@ class DIDCommBenchmarkJVMNaive {
             aFunName = "unpack_anoncrypt_3_keys_signed"
         )
     }
-
 }

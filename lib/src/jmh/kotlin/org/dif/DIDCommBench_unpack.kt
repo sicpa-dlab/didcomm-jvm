@@ -13,19 +13,16 @@ import org.dif.fixtures.JWM
 import org.dif.mock.AliceSecretResolverMock
 import org.dif.mock.BobSecretResolverMock
 import org.dif.mock.DIDDocResolverMock
-import org.dif.model.PackSignedParams
-import org.dif.model.PackSignedResult
 import org.dif.model.PackEncryptedParams
 import org.dif.model.PackEncryptedResult
+import org.dif.model.PackSignedParams
+import org.dif.model.PackSignedResult
 import org.dif.model.UnpackParams
-
-
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.Scope
-import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.annotations.Setup
+import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.infra.Blackhole
-
 
 @State(Scope.Benchmark)
 open class DIDCommBench_unpack {

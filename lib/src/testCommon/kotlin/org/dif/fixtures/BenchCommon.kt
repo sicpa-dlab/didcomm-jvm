@@ -1,17 +1,13 @@
 package org.dif.fixtures
 
-import kotlin.system.measureTimeMillis
-
 import org.dif.DIDComm
-import org.dif.fixtures.JWM
 import org.dif.mock.AliceSecretResolverMock
 import org.dif.mock.BobSecretResolverMock
 import org.dif.mock.DIDDocResolverMock
-import org.dif.model.PackSignedParams
 import org.dif.model.PackEncryptedParams
-import org.dif.model.PackEncryptedResult
+import org.dif.model.PackSignedParams
 import org.dif.model.UnpackParams
-
+import kotlin.system.measureTimeMillis
 
 class BenchRes(
     val operations: Int,
@@ -29,10 +25,9 @@ class BenchRes(
     }
 }
 
-
 class BenchCommon {
     companion object {
-        val didComm_def : DIDComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
+        val didComm_def: DIDComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val packSignedRes = didComm_def.packSigned(
             PackSignedParams.builder(JWM.PLAINTEXT_MESSAGE, JWM.ALICE_DID).build()
@@ -63,7 +58,9 @@ class BenchCommon {
         )
 
         fun measure_naive(
-            aFun: () -> Unit, N : Int = 1000, aFunName : String = "noname"
+            aFun: () -> Unit,
+            N: Int = 1000,
+            aFunName: String = "noname"
         ): BenchRes {
             val timeInMs = measureTimeMillis {
                 for (i in 1..N) {
@@ -154,6 +151,5 @@ class BenchCommon {
                     .build()
             )
         }
-
     }
 }

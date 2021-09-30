@@ -5,13 +5,11 @@ import org.dif.fixtures.JWM
 import org.dif.mock.AliceSecretResolverMock
 import org.dif.mock.DIDDocResolverMock
 import org.dif.model.PackEncryptedParams
-
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.Scope
-import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.annotations.Setup
+import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.infra.Blackhole
-
 
 @State(Scope.Benchmark)
 open class DIDCommBench_packEncrypted {
@@ -20,7 +18,7 @@ open class DIDCommBench_packEncrypted {
     open class Data {
         // @Param(["1", "16", "256"])
         // var count = 0
-        public lateinit var didComm: DIDComm 
+        public lateinit var didComm: DIDComm
 
         @Setup
         fun setup() {

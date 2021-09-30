@@ -14,6 +14,6 @@ rootProject.name = 'didcomm'
 
 include ':lib'
 
-// NOTE android libraries requries jdk >= 11
+// NOTE android libraries require jdk >= 11
 //include ':android'
 //include ':benchmark'
