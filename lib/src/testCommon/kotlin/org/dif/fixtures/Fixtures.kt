@@ -1060,7 +1060,7 @@ class JWE {
                 packedMessage = MESSAGE_ALICE_SKID_NOT_FOUND,
                 expectedThrow = MalformedMessageException::
                 class,
-                expectedMessage = "APU is not equal to skid",
+                expectedMessage = "apu is not equal to skid",
                 unpackParams = UnpackParams
                     .Builder(
                         MESSAGE_ALICE_SKID_NOT_FOUND
