@@ -1,9 +1,11 @@
 plugins {
+    id 'java-library'
     id 'org.jetbrains.kotlin.jvm'
     id "org.jlleitschuh.gradle.ktlint" version "${ktlintGradle}"
+    id "me.champeau.jmh" version "0.6.6"
 }
 
-group = 'org.dif'
+group = "org.dif"
 version = "${version}"
 
 kotlin {
@@ -19,6 +21,13 @@ dependencies {
     testImplementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonKotlinVersion}"
 }
 
+sourceSets {
+    test {
+        kotlin.srcDirs += "src/testCommon/kotlin"
+    }
+}
+
+
 test {
     useJUnitPlatform()
 }
@@ -29,4 +38,19 @@ compileKotlin {
 
 compileTestKotlin {
     kotlinOptions.jvmTarget = "${jvmTarget}"
+}
+
+jar {
+    baseName "${rootProject.name}"
+}
+
+// TODO tune settings
+jmh {
+    benchmarkMode = ["thrpt", "avgt"]
+    warmupIterations = 0
+    operationsPerInvocation = 1
+    timeUnit = 'ms'
+    iterations = 1
+    fork = 1
+    includeTests = true
 }

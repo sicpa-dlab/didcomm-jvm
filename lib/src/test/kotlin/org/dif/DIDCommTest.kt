@@ -18,7 +18,7 @@ import kotlin.test.assertTrue
 
 class DIDCommTest {
     @Test
-    fun `Test encrypt message with attachments`() {
+    fun `Test_encrypt_message_with_attachments`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val attachments = listOf(
@@ -52,7 +52,7 @@ class DIDCommTest {
     }
 
     @Test
-    fun `Test repudiable authentication encryption message`() {
+    fun `Test_repudiable_authentication_encryption_message`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val packResult = didComm.packEncrypted(
@@ -77,7 +77,7 @@ class DIDCommTest {
     }
 
     @Test
-    fun `Test repudiable non authenticated encryption message`() {
+    fun `Test_repudiable_non_authenticated_encryption_message`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val packResult = didComm.packEncrypted(
@@ -100,7 +100,7 @@ class DIDCommTest {
     }
 
     @Test
-    fun `Test non repudiable encryption message`() {
+    fun `Test_non_repudiable_encryption_message`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val packResult = didComm.packEncrypted(
@@ -126,7 +126,7 @@ class DIDCommTest {
     }
 
     @Test
-    fun `Test non repudiable encryption message for anonymous sender`() {
+    fun `Test_non_repudiable_encryption_message_for_anonymous_sender`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val packResult = didComm.packEncrypted(
@@ -153,7 +153,7 @@ class DIDCommTest {
     }
 
     @Test
-    fun `Test signed unencrypted message`() {
+    fun `Test_signed_unencrypted_message`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val packResult = didComm.packSigned(
@@ -175,7 +175,7 @@ class DIDCommTest {
     }
 
     @Test
-    fun `Test plaintext message`() {
+    fun `Test_plaintext_message`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val packResult = didComm.packPlaintext(

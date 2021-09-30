@@ -20,7 +20,7 @@ import kotlin.test.assertFailsWith
 class EncryptedMessageTest {
 
     @Test
-    fun `Test encrypted message test vectors`() {
+    fun `Test_encrypted_message_test_vectors`() {
         for (tv in TEST_VECTORS) {
             val didComm = DIDComm(DIDDocResolverMock(), BobSecretResolverMock())
 
@@ -58,7 +58,7 @@ class EncryptedMessageTest {
     }
 
     @Test
-    fun `Test decrypt message for part of the keys`() {
+    fun `Test_decrypt_message_for_part_of_the_keys`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val message = JWM.PLAINTEXT_MESSAGE.copy(to = listOf(JWM.CHARLIE_DID))
@@ -85,7 +85,7 @@ class EncryptedMessageTest {
     }
 
     @Test
-    fun `Test decrypt with message with damaged keys by all keys`() {
+    fun `Test_decrypt_with_message_with_damaged_keys_by_all_keys`() {
         val didComm = DIDComm(DIDDocResolverMock(), BobSecretResolverMock())
         val expected = "Decrypt is failed"
 
@@ -101,7 +101,7 @@ class EncryptedMessageTest {
     }
 
     @Test
-    fun `Test decrypt with message with damaged keys by one key`() {
+    fun `Test_decrypt_with_message_with_damaged_keys_by_one_key`() {
         val didComm = DIDComm(DIDDocResolverMock(), BobSecretResolverMock())
         val expected = listOf("did:example:bob#key-x25519-2")
 
@@ -114,7 +114,7 @@ class EncryptedMessageTest {
     }
 
     @Test
-    fun `Test decrypt negative test vectors`() {
+    fun `Test_decrypt_negative_test_vectors`() {
         for (tv in JWE.NEGATIVE_TEST_VECTORS) {
             val didComm = DIDComm(DIDDocResolverMock(), BobSecretResolverMock())
 

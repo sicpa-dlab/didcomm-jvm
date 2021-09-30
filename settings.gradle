@@ -13,4 +13,7 @@ dependencyResolutionManagement {
 rootProject.name = 'didcomm'
 
 include ':lib'
+
+// NOTE android libraries require jdk >= 11
 //include ':android'
+//include ':benchmark'
