@@ -33,5 +33,5 @@ compileTestKotlin {
 }
 
 jar {
-    baseName "${artifactName}"
+    baseName "${rootProject.name}"
 }
