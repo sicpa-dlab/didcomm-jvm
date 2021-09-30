@@ -28,7 +28,7 @@ import kotlin.test.assertTrue
 
 class PlaintextMessageTest {
     @Test
-    fun `Test pack unpack plaintext message`() {
+    fun `Test_pack_unpack_plaintext_message`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val packed = didComm.packPlaintext(
@@ -45,7 +45,7 @@ class PlaintextMessageTest {
     }
 
     @Test
-    fun `Test plaintext without body`() {
+    fun `Test_plaintext_without_body`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val thrown = assertFailsWith<MalformedMessageException> {
@@ -58,7 +58,7 @@ class PlaintextMessageTest {
     }
 
     @Test
-    fun `Test plaintext custom body with jackson`() {
+    fun `Test_plaintext_custom_body_with_jackson`() {
         val mapper = ObjectMapper().registerModule(KotlinModule())
         val protocolMessage = CustomProtocolBody("1", "Name", true, 1970)
 
@@ -88,7 +88,7 @@ class PlaintextMessageTest {
     }
 
     @Test
-    fun `Test custom headers works`() {
+    fun `Test_custom_headers_works`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val message = Message.builder("1", mapOf(), "protocol")
@@ -123,7 +123,7 @@ class PlaintextMessageTest {
     }
 
     @Test
-    fun `Test header reserved name`() {
+    fun `Test_header_reserved_name`() {
         val builder = Message.builder("", mapOf(), "")
 
         for (header in Message.reservedHeaderNames) {
@@ -138,7 +138,7 @@ class PlaintextMessageTest {
     }
 
     @Test
-    fun `Test parse when message is empty json`() {
+    fun `Test_parse_when_message_is_empty_json`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val thrown = assertFailsWith<MalformedMessageException> {
@@ -151,7 +151,7 @@ class PlaintextMessageTest {
     }
 
     @Test
-    fun `Test wrong attachment data`() {
+    fun `Test_wrong_attachment_data`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         for (tv in JWM.WRONG_ATTACHMENTS) {
@@ -166,7 +166,7 @@ class PlaintextMessageTest {
     }
 
     @Test
-    fun `Test correct attachment data`() {
+    fun `Test_correct_attachment_data`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         for (tv in JWM.CORRECT_ATTACHMENTS) {
@@ -189,7 +189,7 @@ class PlaintextMessageTest {
     }
 
     @Test
-    fun `Test full plaintext message`() {
+    fun `Test_full_plaintext_message`() {
         val fromPrior = FromPrior.builder("iss", "sub")
             .aud("aud")
             .exp(123456789)

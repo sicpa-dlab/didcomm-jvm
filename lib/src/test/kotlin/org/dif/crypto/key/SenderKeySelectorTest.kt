@@ -15,7 +15,7 @@ import kotlin.test.assertFailsWith
 
 class SenderKeySelectorTest {
     @Test
-    fun `Test find anon crypto keys by DID`() {
+    fun `Test_find_anon_crypto_keys_by_DID`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
         val keys = senderKeySelector.findAnonCryptKeys(JWM.BOB_DID)
 
@@ -29,7 +29,7 @@ class SenderKeySelectorTest {
     }
 
     @Test
-    fun `Test find anon crypto keys by DID URL`() {
+    fun `Test_find_anon_crypto_keys_by_DID_URL`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
         val keys = senderKeySelector.findAnonCryptKeys("did:example:bob#key-x25519-2")
 
@@ -38,7 +38,7 @@ class SenderKeySelectorTest {
     }
 
     @Test
-    fun `Test find signing key by DID`() {
+    fun `Test_find_signing_key_by_DID`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
         val key = senderKeySelector.findSigningKey(JWM.ALICE_DID)
 
@@ -47,7 +47,7 @@ class SenderKeySelectorTest {
     }
 
     @Test
-    fun `Test find signing key by DID URL`() {
+    fun `Test_find_signing_key_by_DID_URL`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
         val key = senderKeySelector.findSigningKey("did:example:alice#key-2")
 
@@ -56,7 +56,7 @@ class SenderKeySelectorTest {
     }
 
     @Test
-    fun `Test find auth crypto keys by DID`() {
+    fun `Test_find_auth_crypto_keys_by_DID`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
         val (from, to) = senderKeySelector.findAuthCryptKeys(JWM.ALICE_DID, JWM.BOB_DID)
 
@@ -74,7 +74,7 @@ class SenderKeySelectorTest {
     }
 
     @Test
-    fun `Test find auth crypto keys by Alice DID URL`() {
+    fun `Test_find_auth_crypto_keys_by_Alice_DID_URL`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
         val (from, to) = senderKeySelector.findAuthCryptKeys("did:example:alice#key-x25519-1", JWM.BOB_DID)
 
@@ -92,7 +92,7 @@ class SenderKeySelectorTest {
     }
 
     @Test
-    fun `Test find auth crypto keys by Bob DID URL`() {
+    fun `Test_find_auth_crypto_keys_by_Bob_DID_URL`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
         val (from, to) = senderKeySelector.findAuthCryptKeys(JWM.ALICE_DID, "did:example:bob#key-x25519-3")
 
@@ -108,7 +108,7 @@ class SenderKeySelectorTest {
     }
 
     @Test
-    fun `Test find auth crypto keys by DID URL`() {
+    fun `Test_find_auth_crypto_keys_by_DID_URL`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
         val (from, to) = senderKeySelector.findAuthCryptKeys("did:example:alice#key-x25519-1", "did:example:bob#key-x25519-3")
 
@@ -124,7 +124,7 @@ class SenderKeySelectorTest {
     }
 
     @Test
-    fun `Test find second type auth key`() {
+    fun `Test_find_second_type_auth_key`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
         val expectedSenderKey = "did:example:alice#key-p256-1"
         val expectedRecipientKeys = listOf(
@@ -140,7 +140,7 @@ class SenderKeySelectorTest {
     }
 
     @Test
-    fun `Test signing key not found by DID`() {
+    fun `Test_signing_key_not_found_by_DID`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val actual = assertFailsWith<DIDDocException> {
@@ -151,7 +151,7 @@ class SenderKeySelectorTest {
     }
 
     @Test
-    fun `Test key not found by DID URL`() {
+    fun `Test_key_not_found_by_DID_URL`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
         val expected = "The Secret 'did:example:alice#key-x25519-3' not found"
         val didUrl = "did:example:alice#key-x25519-3"
@@ -182,7 +182,7 @@ class SenderKeySelectorTest {
     }
 
     @Test
-    fun `Test verification method not found by DID URL`() {
+    fun `Test_verification_method_not_found_by_DID_URL`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
         val expected = "Verification method 'did:example:bob#key-4' not found in DID Doc 'did:example:bob'"
         val didUrl = "did:example:bob#key-4"
@@ -205,7 +205,7 @@ class SenderKeySelectorTest {
     }
 
     @Test
-    fun `Test DID Doc not resolved`() {
+    fun `Test_DID_Doc_not_resolved`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
         val did = JWM.NONA_DID
         val expected = "The DID Doc '$did' not resolved"
@@ -244,7 +244,7 @@ class SenderKeySelectorTest {
     }
 
     @Test
-    fun `Test empty DID Doc`() {
+    fun `Test_empty_DID_Doc`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
 
         run {
@@ -281,7 +281,7 @@ class SenderKeySelectorTest {
     }
 
     @Test
-    fun `Test incompatible Crypto`() {
+    fun `Test_incompatible_Crypto`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), CharlieSecretResolverMock())
         val bobDIDUrl = "did:example:bob#key-p256-1"
         val charlieDIDUrl = "did:example:charlie#key-x25519-1"
