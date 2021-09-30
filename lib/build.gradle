@@ -1,4 +1,5 @@
 plugins {
+    id 'java-library'
     id 'org.jetbrains.kotlin.jvm'
     id "org.jlleitschuh.gradle.ktlint" version "${ktlintGradle}"
 }
@@ -29,4 +30,8 @@ compileKotlin {
 
 compileTestKotlin {
     kotlinOptions.jvmTarget = "${jvmTarget}"
+}
+
+jar {
+    baseName "${rootProject.name}"
 }
