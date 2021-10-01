@@ -1,4 +1,4 @@
-package org.dif.model
+package org.didcommx.didcomm.model
 
 /**
  * Result of pack encrypted message operation.

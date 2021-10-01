@@ -1,13 +1,13 @@
-package org.dif.message
+package org.didcommx.didcomm.message
 
-import org.dif.common.Typ
-import org.dif.exceptions.DIDCommException
-import org.dif.exceptions.DIDCommIllegalArgumentException
-import org.dif.exceptions.MalformedMessageException
-import org.dif.utils.getTyped
-import org.dif.utils.getTypedArray
-import org.dif.utils.isDIDFragment
-import org.dif.utils.toJSONString
+import org.didcommx.didcomm.common.Typ
+import org.didcommx.didcomm.exceptions.DIDCommException
+import org.didcommx.didcomm.exceptions.DIDCommIllegalArgumentException
+import org.didcommx.didcomm.exceptions.MalformedMessageException
+import org.didcommx.didcomm.utils.getTyped
+import org.didcommx.didcomm.utils.getTypedArray
+import org.didcommx.didcomm.utils.isDIDFragment
+import org.didcommx.didcomm.utils.toJSONString
 
 data class Message(
     val id: String,

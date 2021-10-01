@@ -1,14 +1,14 @@
-package org.dif.crypto.key
+package org.didcommx.didcomm.crypto.key
 
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.CurveBasedJWK
 import com.nimbusds.jose.jwk.JWK
-import org.dif.common.VerificationMaterial
-import org.dif.common.VerificationMethodType
-import org.dif.diddoc.VerificationMethod
-import org.dif.exceptions.UnsupportedJWKException
-import org.dif.exceptions.UnsupportedSecretTypeException
-import org.dif.secret.Secret
+import org.didcommx.didcomm.common.VerificationMaterial
+import org.didcommx.didcomm.common.VerificationMethodType
+import org.didcommx.didcomm.diddoc.VerificationMethod
+import org.didcommx.didcomm.exceptions.UnsupportedJWKException
+import org.didcommx.didcomm.exceptions.UnsupportedSecretTypeException
+import org.didcommx.didcomm.secret.Secret
 
 sealed interface Key {
     val id: String

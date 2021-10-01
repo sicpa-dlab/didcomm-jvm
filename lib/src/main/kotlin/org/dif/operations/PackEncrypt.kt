@@ -1,12 +1,12 @@
-package org.dif.operations
+package org.didcommx.didcomm.operations
 
-import org.dif.crypto.EncryptResult
-import org.dif.crypto.anonEncrypt
-import org.dif.crypto.authEncrypt
-import org.dif.crypto.key.Key
-import org.dif.crypto.key.SenderKeySelector
-import org.dif.crypto.sign
-import org.dif.model.PackEncryptedParams
+import org.didcommx.didcomm.crypto.EncryptResult
+import org.didcommx.didcomm.crypto.anonEncrypt
+import org.didcommx.didcomm.crypto.authEncrypt
+import org.didcommx.didcomm.crypto.key.Key
+import org.didcommx.didcomm.crypto.key.SenderKeySelector
+import org.didcommx.didcomm.crypto.sign
+import org.didcommx.didcomm.model.PackEncryptedParams
 
 fun signIfNeeded(params: PackEncryptedParams, keySelector: SenderKeySelector) =
     if (params.signFrom != null) {

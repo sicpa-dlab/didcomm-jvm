@@ -1,10 +1,10 @@
-package org.dif.jmh
+package org.didcommx.didcomm.jmh
 
-import org.dif.DIDComm
-import org.dif.fixtures.JWM
-import org.dif.mock.AliceSecretResolverMock
-import org.dif.mock.DIDDocResolverMock
-import org.dif.model.PackEncryptedParams
+import org.didcommx.didcomm.DIDComm
+import org.didcommx.didcomm.fixtures.JWM
+import org.didcommx.didcomm.mock.AliceSecretResolverMock
+import org.didcommx.didcomm.mock.DIDDocResolverMock
+import org.didcommx.didcomm.model.PackEncryptedParams
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.Scope
 import org.openjdk.jmh.annotations.Setup

@@ -1,13 +1,13 @@
-package org.dif
+package org.didcommx.didcomm
 
 import com.nimbusds.jose.JWSObjectJSON
 import com.nimbusds.jose.util.JSONObjectUtils
-import org.dif.fixtures.JWM
-import org.dif.fixtures.JWS
-import org.dif.mock.AliceSecretResolverMock
-import org.dif.mock.DIDDocResolverMock
-import org.dif.model.PackSignedParams
-import org.dif.model.UnpackParams
+import org.didcommx.didcomm.fixtures.JWM
+import org.didcommx.didcomm.fixtures.JWS
+import org.didcommx.didcomm.mock.AliceSecretResolverMock
+import org.didcommx.didcomm.mock.DIDDocResolverMock
+import org.didcommx.didcomm.model.PackSignedParams
+import org.didcommx.didcomm.model.UnpackParams
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -1,4 +1,4 @@
-package org.dif.utils
+package org.didcommx.didcomm.utils
 
 fun isDIDFragment(str: String) = str.contains("#")
 

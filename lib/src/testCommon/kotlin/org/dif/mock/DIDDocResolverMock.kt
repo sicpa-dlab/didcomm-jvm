@@ -1,12 +1,12 @@
-package org.dif.mock
+package org.didcommx.didcomm.mock
 
-import org.dif.common.VerificationMaterial
-import org.dif.common.VerificationMaterialFormat
-import org.dif.common.VerificationMethodType
-import org.dif.diddoc.DIDDoc
-import org.dif.diddoc.DIDDocResolver
-import org.dif.diddoc.DIDDocResolverInMemory
-import org.dif.diddoc.VerificationMethod
+import org.didcommx.didcomm.common.VerificationMaterial
+import org.didcommx.didcomm.common.VerificationMaterialFormat
+import org.didcommx.didcomm.common.VerificationMethodType
+import org.didcommx.didcomm.diddoc.DIDDoc
+import org.didcommx.didcomm.diddoc.DIDDocResolver
+import org.didcommx.didcomm.diddoc.DIDDocResolverInMemory
+import org.didcommx.didcomm.diddoc.VerificationMethod
 import java.util.Optional
 
 class DIDDocResolverMock : DIDDocResolver {

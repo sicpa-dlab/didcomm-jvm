@@ -1,4 +1,4 @@
-package org.dif.common
+package org.didcommx.didcomm.common
 
 enum class Typ(val typ: String) {
     Encrypted("application/didcomm-encrypted+json"),

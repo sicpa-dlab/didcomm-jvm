@@ -1,8 +1,8 @@
-package org.dif.utils
+package org.didcommx.didcomm.utils
 
 import com.nimbusds.jose.shaded.json.JSONArray
 import com.nimbusds.jose.util.JSONObjectUtils
-import org.dif.exceptions.MalformedMessageException
+import org.didcommx.didcomm.exceptions.MalformedMessageException
 
 inline fun <reified T> Map<String, Any?>.getTypedArray(key: String): Array<T?>? = this[key]?.let {
     if (it !is JSONArray) throw MalformedMessageException("The expected type of header '$key' is 'JSONArray'. Got '${it::class.simpleName}'")

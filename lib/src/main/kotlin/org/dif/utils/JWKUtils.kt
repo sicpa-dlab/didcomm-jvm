@@ -1,4 +1,4 @@
-package org.dif.utils
+package org.didcommx.didcomm.utils
 
 import com.nimbusds.jose.UnprotectedHeader
 import com.nimbusds.jose.jwk.JWK

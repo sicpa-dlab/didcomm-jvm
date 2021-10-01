@@ -1,11 +1,11 @@
-package org.dif.crypto
+package org.didcommx.didcomm.crypto
 
 import com.nimbusds.jose.JOSEException
 import com.nimbusds.jose.JWEObjectJSON
 import com.nimbusds.jose.JWSObjectJSON
 import com.nimbusds.jose.util.JSONObjectUtils
-import org.dif.exceptions.MalformedMessageException
-import org.dif.message.Message
+import org.didcommx.didcomm.exceptions.MalformedMessageException
+import org.didcommx.didcomm.message.Message
 import java.lang.IllegalArgumentException
 import java.text.ParseException
 

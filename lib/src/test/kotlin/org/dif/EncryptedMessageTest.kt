@@ -1,16 +1,16 @@
-package org.dif
+package org.didcommx.didcomm
 
 import com.nimbusds.jose.util.JSONObjectUtils
-import org.dif.exceptions.MalformedMessageException
-import org.dif.fixtures.JWE
-import org.dif.fixtures.JWE.Companion.TEST_VECTORS
-import org.dif.fixtures.JWM
-import org.dif.mock.AliceSecretResolverMock
-import org.dif.mock.BobSecretResolverMock
-import org.dif.mock.CharlieSecretResolverMock
-import org.dif.mock.DIDDocResolverMock
-import org.dif.model.PackEncryptedParams
-import org.dif.model.UnpackParams
+import org.didcommx.didcomm.exceptions.MalformedMessageException
+import org.didcommx.didcomm.fixtures.JWE
+import org.didcommx.didcomm.fixtures.JWE.Companion.TEST_VECTORS
+import org.didcommx.didcomm.fixtures.JWM
+import org.didcommx.didcomm.mock.AliceSecretResolverMock
+import org.didcommx.didcomm.mock.BobSecretResolverMock
+import org.didcommx.didcomm.mock.CharlieSecretResolverMock
+import org.didcommx.didcomm.mock.DIDDocResolverMock
+import org.didcommx.didcomm.model.PackEncryptedParams
+import org.didcommx.didcomm.model.UnpackParams
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertContentEquals

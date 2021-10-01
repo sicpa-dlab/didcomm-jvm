@@ -1,4 +1,4 @@
-package org.dif.crypto
+package org.didcommx.didcomm.crypto
 
 import com.nimbusds.jose.JOSEException
 import com.nimbusds.jose.JOSEObjectType
@@ -16,16 +16,16 @@ import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.OctetKeyPair
 import com.nimbusds.jose.util.Base64URL
-import org.dif.common.SignAlg
-import org.dif.common.Typ
-import org.dif.crypto.key.Key
-import org.dif.exceptions.DIDCommException
-import org.dif.exceptions.MalformedMessageException
-import org.dif.exceptions.UnsupportedAlgorithm
-import org.dif.exceptions.UnsupportedCurveException
-import org.dif.exceptions.UnsupportedJWKException
-import org.dif.message.Message
-import org.dif.utils.asKey
+import org.didcommx.didcomm.common.SignAlg
+import org.didcommx.didcomm.common.Typ
+import org.didcommx.didcomm.crypto.key.Key
+import org.didcommx.didcomm.exceptions.DIDCommException
+import org.didcommx.didcomm.exceptions.MalformedMessageException
+import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
+import org.didcommx.didcomm.exceptions.UnsupportedCurveException
+import org.didcommx.didcomm.exceptions.UnsupportedJWKException
+import org.didcommx.didcomm.message.Message
+import org.didcommx.didcomm.utils.asKey
 
 fun sign(payload: String, key: Key): String {
     val jwk = key.jwk

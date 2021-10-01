@@ -1,12 +1,12 @@
-package org.dif.fixtures
+package org.didcommx.didcomm.fixtures
 
-import org.dif.DIDComm
-import org.dif.mock.AliceSecretResolverMock
-import org.dif.mock.BobSecretResolverMock
-import org.dif.mock.DIDDocResolverMock
-import org.dif.model.PackEncryptedParams
-import org.dif.model.PackSignedParams
-import org.dif.model.UnpackParams
+import org.didcommx.didcomm.DIDComm
+import org.didcommx.didcomm.mock.AliceSecretResolverMock
+import org.didcommx.didcomm.mock.BobSecretResolverMock
+import org.didcommx.didcomm.mock.DIDDocResolverMock
+import org.didcommx.didcomm.model.PackEncryptedParams
+import org.didcommx.didcomm.model.PackSignedParams
+import org.didcommx.didcomm.model.UnpackParams
 import kotlin.system.measureTimeMillis
 
 class BenchRes(

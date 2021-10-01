@@ -1,11 +1,11 @@
-package org.dif.mock
+package org.didcommx.didcomm.mock
 
-import org.dif.common.VerificationMaterial
-import org.dif.common.VerificationMaterialFormat
-import org.dif.common.VerificationMethodType
-import org.dif.secret.Secret
-import org.dif.secret.SecretResolver
-import org.dif.secret.SecretResolverInMemory
+import org.didcommx.didcomm.common.VerificationMaterial
+import org.didcommx.didcomm.common.VerificationMaterialFormat
+import org.didcommx.didcomm.common.VerificationMethodType
+import org.didcommx.didcomm.secret.Secret
+import org.didcommx.didcomm.secret.SecretResolver
+import org.didcommx.didcomm.secret.SecretResolverInMemory
 import java.util.Optional
 
 class BobSecretResolverMock : SecretResolver {

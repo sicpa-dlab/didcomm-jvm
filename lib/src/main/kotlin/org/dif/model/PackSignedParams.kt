@@ -1,11 +1,11 @@
-package org.dif.model
+package org.didcommx.didcomm.model
 
-import org.dif.diddoc.DIDDocResolver
-import org.dif.exceptions.DIDCommIllegalArgumentException
-import org.dif.message.Message
-import org.dif.secret.SecretResolver
-import org.dif.utils.divideDIDFragment
-import org.dif.utils.isDID
+import org.didcommx.didcomm.diddoc.DIDDocResolver
+import org.didcommx.didcomm.exceptions.DIDCommIllegalArgumentException
+import org.didcommx.didcomm.message.Message
+import org.didcommx.didcomm.secret.SecretResolver
+import org.didcommx.didcomm.utils.divideDIDFragment
+import org.didcommx.didcomm.utils.isDID
 
 /**
  * Pack Signed Message Parameters

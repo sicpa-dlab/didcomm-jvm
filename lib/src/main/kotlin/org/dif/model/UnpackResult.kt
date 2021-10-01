@@ -1,9 +1,9 @@
-package org.dif.model
+package org.didcommx.didcomm.model
 
-import org.dif.common.AnonCryptAlg
-import org.dif.common.AuthCryptAlg
-import org.dif.common.SignAlg
-import org.dif.message.Message
+import org.didcommx.didcomm.common.AnonCryptAlg
+import org.didcommx.didcomm.common.AuthCryptAlg
+import org.didcommx.didcomm.common.SignAlg
+import org.didcommx.didcomm.message.Message
 
 /**
  * Result of unpack operation.

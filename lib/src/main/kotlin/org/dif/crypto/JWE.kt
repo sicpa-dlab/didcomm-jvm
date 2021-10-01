@@ -1,4 +1,4 @@
-package org.dif.crypto
+package org.didcommx.didcomm.crypto
 
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.JOSEException
@@ -20,17 +20,17 @@ import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.OctetKeyPair
 import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jose.util.Pair
-import org.dif.common.AnonCryptAlg
-import org.dif.common.AuthCryptAlg
-import org.dif.common.CryptAlg
-import org.dif.common.Typ
-import org.dif.crypto.key.Key
-import org.dif.exceptions.DIDCommException
-import org.dif.exceptions.MalformedMessageException
-import org.dif.exceptions.UnsupportedAlgorithm
-import org.dif.exceptions.UnsupportedCurveException
-import org.dif.exceptions.UnsupportedJWKException
-import org.dif.utils.asKeys
+import org.didcommx.didcomm.common.AnonCryptAlg
+import org.didcommx.didcomm.common.AuthCryptAlg
+import org.didcommx.didcomm.common.CryptAlg
+import org.didcommx.didcomm.common.Typ
+import org.didcommx.didcomm.crypto.key.Key
+import org.didcommx.didcomm.exceptions.DIDCommException
+import org.didcommx.didcomm.exceptions.MalformedMessageException
+import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
+import org.didcommx.didcomm.exceptions.UnsupportedCurveException
+import org.didcommx.didcomm.exceptions.UnsupportedJWKException
+import org.didcommx.didcomm.utils.asKeys
 import java.security.MessageDigest
 
 fun authEncrypt(payload: String, auth: AuthCryptAlg, from: Key, to: List<Key>): EncryptResult {

@@ -1,14 +1,14 @@
-package org.dif.crypto.key
+package org.didcommx.didcomm.crypto.key
 
 import com.nimbusds.jose.jwk.Curve
-import org.dif.diddoc.DIDDocResolver
-import org.dif.exceptions.DIDDocException
-import org.dif.exceptions.DIDUrlNotFoundException
-import org.dif.exceptions.IncompatibleCryptoException
-import org.dif.exceptions.SecretNotFoundException
-import org.dif.secret.SecretResolver
-import org.dif.utils.divideDIDFragment
-import org.dif.utils.isDIDFragment
+import org.didcommx.didcomm.diddoc.DIDDocResolver
+import org.didcommx.didcomm.exceptions.DIDDocException
+import org.didcommx.didcomm.exceptions.DIDUrlNotFoundException
+import org.didcommx.didcomm.exceptions.IncompatibleCryptoException
+import org.didcommx.didcomm.exceptions.SecretNotFoundException
+import org.didcommx.didcomm.secret.SecretResolver
+import org.didcommx.didcomm.utils.divideDIDFragment
+import org.didcommx.didcomm.utils.isDIDFragment
 
 class RecipientKeySelector(private val didDocResolver: DIDDocResolver, private val secretResolver: SecretResolver) {
     fun findVerificationKey(signFrom: String): Key = Key.wrapVerificationMethod(

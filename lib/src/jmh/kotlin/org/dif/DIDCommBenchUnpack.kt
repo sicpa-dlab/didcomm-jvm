@@ -1,4 +1,4 @@
-package org.dif.jmh
+package org.didcommx.didcomm.jmh
 
 /*
 import kotlin.Throws
@@ -8,16 +8,16 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 */
 
-import org.dif.DIDComm
-import org.dif.fixtures.JWM
-import org.dif.mock.AliceSecretResolverMock
-import org.dif.mock.BobSecretResolverMock
-import org.dif.mock.DIDDocResolverMock
-import org.dif.model.PackEncryptedParams
-import org.dif.model.PackEncryptedResult
-import org.dif.model.PackSignedParams
-import org.dif.model.PackSignedResult
-import org.dif.model.UnpackParams
+import org.didcommx.didcomm.DIDComm
+import org.didcommx.didcomm.fixtures.JWM
+import org.didcommx.didcomm.mock.AliceSecretResolverMock
+import org.didcommx.didcomm.mock.BobSecretResolverMock
+import org.didcommx.didcomm.mock.DIDDocResolverMock
+import org.didcommx.didcomm.model.PackEncryptedParams
+import org.didcommx.didcomm.model.PackEncryptedResult
+import org.didcommx.didcomm.model.PackSignedParams
+import org.didcommx.didcomm.model.PackSignedResult
+import org.didcommx.didcomm.model.UnpackParams
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.Scope
 import org.openjdk.jmh.annotations.Setup

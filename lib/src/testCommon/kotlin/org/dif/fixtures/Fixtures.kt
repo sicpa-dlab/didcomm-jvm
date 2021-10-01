@@ -1,16 +1,16 @@
-package org.dif.fixtures
+package org.didcommx.didcomm.fixtures
 
-import org.dif.common.AnonCryptAlg
-import org.dif.common.AuthCryptAlg
-import org.dif.common.SignAlg
-import org.dif.exceptions.DIDCommException
-import org.dif.exceptions.DIDDocException
-import org.dif.exceptions.IncompatibleCryptoException
-import org.dif.exceptions.MalformedMessageException
-import org.dif.exceptions.UnsupportedAlgorithm
-import org.dif.message.Message
-import org.dif.model.Metadata
-import org.dif.model.UnpackParams
+import org.didcommx.didcomm.common.AnonCryptAlg
+import org.didcommx.didcomm.common.AuthCryptAlg
+import org.didcommx.didcomm.common.SignAlg
+import org.didcommx.didcomm.exceptions.DIDCommException
+import org.didcommx.didcomm.exceptions.DIDDocException
+import org.didcommx.didcomm.exceptions.IncompatibleCryptoException
+import org.didcommx.didcomm.exceptions.MalformedMessageException
+import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
+import org.didcommx.didcomm.message.Message
+import org.didcommx.didcomm.model.Metadata
+import org.didcommx.didcomm.model.UnpackParams
 import kotlin.reflect.KClass
 
 class JWM {

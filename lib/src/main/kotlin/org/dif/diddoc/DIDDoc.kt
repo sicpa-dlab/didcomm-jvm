@@ -1,8 +1,8 @@
-package org.dif.diddoc
+package org.didcommx.didcomm.diddoc
 
-import org.dif.common.VerificationMaterial
-import org.dif.common.VerificationMethodType
-import org.dif.exceptions.DIDDocException
+import org.didcommx.didcomm.common.VerificationMaterial
+import org.didcommx.didcomm.common.VerificationMethodType
+import org.didcommx.didcomm.exceptions.DIDDocException
 
 /**
  * DID DOC (https://www.w3.org/TR/did-core/#dfn-did-documents)

@@ -1,19 +1,19 @@
-package org.dif.operations
+package org.didcommx.didcomm.operations
 
-import org.dif.common.AnonCryptAlg
-import org.dif.common.AuthCryptAlg
-import org.dif.crypto.ParseResult
-import org.dif.crypto.anonDecrypt
-import org.dif.crypto.authDecrypt
-import org.dif.crypto.getCryptoAlg
-import org.dif.crypto.key.RecipientKeySelector
-import org.dif.crypto.parse
-import org.dif.crypto.verify
-import org.dif.exceptions.MalformedMessageException
-import org.dif.message.Message
-import org.dif.model.Metadata
-import org.dif.model.UnpackParams
-import org.dif.model.UnpackResult
+import org.didcommx.didcomm.common.AnonCryptAlg
+import org.didcommx.didcomm.common.AuthCryptAlg
+import org.didcommx.didcomm.crypto.ParseResult
+import org.didcommx.didcomm.crypto.anonDecrypt
+import org.didcommx.didcomm.crypto.authDecrypt
+import org.didcommx.didcomm.crypto.getCryptoAlg
+import org.didcommx.didcomm.crypto.key.RecipientKeySelector
+import org.didcommx.didcomm.crypto.parse
+import org.didcommx.didcomm.crypto.verify
+import org.didcommx.didcomm.exceptions.MalformedMessageException
+import org.didcommx.didcomm.message.Message
+import org.didcommx.didcomm.model.Metadata
+import org.didcommx.didcomm.model.UnpackParams
+import org.didcommx.didcomm.model.UnpackResult
 
 fun unpack(params: UnpackParams, keySelector: RecipientKeySelector): UnpackResult {
     val metadataBuilder = Metadata.Builder()

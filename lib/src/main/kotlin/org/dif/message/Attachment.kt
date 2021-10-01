@@ -1,9 +1,9 @@
-package org.dif.message
+package org.didcommx.didcomm.message
 
-import org.dif.exceptions.MalformedMessageException
-import org.dif.utils.getTyped
-import org.dif.utils.getTypedArray
-import org.dif.utils.toJSONString
+import org.didcommx.didcomm.exceptions.MalformedMessageException
+import org.didcommx.didcomm.utils.getTyped
+import org.didcommx.didcomm.utils.getTypedArray
+import org.didcommx.didcomm.utils.toJSONString
 
 data class Attachment(
     val id: String,

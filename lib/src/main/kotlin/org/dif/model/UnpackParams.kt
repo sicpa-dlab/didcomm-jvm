@@ -1,7 +1,7 @@
-package org.dif.model
+package org.didcommx.didcomm.model
 
-import org.dif.diddoc.DIDDocResolver
-import org.dif.secret.SecretResolver
+import org.didcommx.didcomm.diddoc.DIDDocResolver
+import org.didcommx.didcomm.secret.SecretResolver
 
 /**
  * Unpack Parameters.

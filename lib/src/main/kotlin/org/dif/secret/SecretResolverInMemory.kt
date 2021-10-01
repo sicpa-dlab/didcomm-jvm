@@ -1,4 +1,4 @@
-package org.dif.secret
+package org.didcommx.didcomm.secret
 
 import java.util.Optional
 

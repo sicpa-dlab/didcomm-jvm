@@ -1,4 +1,4 @@
-package org.dif.diddoc
+package org.didcommx.didcomm.diddoc
 
 import java.util.Optional
 

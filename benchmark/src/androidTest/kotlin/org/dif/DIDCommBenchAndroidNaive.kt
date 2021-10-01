@@ -1,11 +1,11 @@
-package org.dif.benchmark
+package org.didcommx.didcomm.benchmark
 
 import android.util.Log
 import org.junit.jupiter.api.Disabled;
 import kotlin.test.Test
 
-import org.dif.fixtures.BenchCommon
-import org.dif.fixtures.BenchRes
+import org.didcommx.didcomm.fixtures.BenchCommon
+import org.didcommx.didcomm.fixtures.BenchRes
 
 
 // TODO looks like that doesn't work in android

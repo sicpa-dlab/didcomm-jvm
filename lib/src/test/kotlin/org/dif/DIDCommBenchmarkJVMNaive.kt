@@ -1,7 +1,7 @@
-package org.dif
+package org.didcommx.didcomm
 
-import org.dif.fixtures.BenchCommon
-import org.dif.fixtures.BenchRes
+import org.didcommx.didcomm.fixtures.BenchCommon
+import org.didcommx.didcomm.fixtures.BenchRes
 import org.junit.jupiter.api.Disabled
 import java.util.logging.Logger
 import kotlin.test.Test

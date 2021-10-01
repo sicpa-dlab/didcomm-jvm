@@ -1,25 +1,25 @@
-package org.dif
+package org.didcommx.didcomm
 
-import org.dif.common.AnonCryptAlg
-import org.dif.common.AuthCryptAlg
-import org.dif.crypto.key.RecipientKeySelector
-import org.dif.crypto.key.SenderKeySelector
-import org.dif.crypto.sign
-import org.dif.diddoc.DIDDoc
-import org.dif.diddoc.DIDDocResolver
-import org.dif.model.PackEncryptedParams
-import org.dif.model.PackEncryptedResult
-import org.dif.model.PackPlaintextParams
-import org.dif.model.PackPlaintextResult
-import org.dif.model.PackSignedParams
-import org.dif.model.PackSignedResult
-import org.dif.model.UnpackParams
-import org.dif.model.UnpackResult
-import org.dif.operations.encrypt
-import org.dif.operations.protectSenderIfNeeded
-import org.dif.operations.signIfNeeded
-import org.dif.operations.unpack
-import org.dif.secret.SecretResolver
+import org.didcommx.didcomm.common.AnonCryptAlg
+import org.didcommx.didcomm.common.AuthCryptAlg
+import org.didcommx.didcomm.crypto.key.RecipientKeySelector
+import org.didcommx.didcomm.crypto.key.SenderKeySelector
+import org.didcommx.didcomm.crypto.sign
+import org.didcommx.didcomm.diddoc.DIDDoc
+import org.didcommx.didcomm.diddoc.DIDDocResolver
+import org.didcommx.didcomm.model.PackEncryptedParams
+import org.didcommx.didcomm.model.PackEncryptedResult
+import org.didcommx.didcomm.model.PackPlaintextParams
+import org.didcommx.didcomm.model.PackPlaintextResult
+import org.didcommx.didcomm.model.PackSignedParams
+import org.didcommx.didcomm.model.PackSignedResult
+import org.didcommx.didcomm.model.UnpackParams
+import org.didcommx.didcomm.model.UnpackResult
+import org.didcommx.didcomm.operations.encrypt
+import org.didcommx.didcomm.operations.protectSenderIfNeeded
+import org.didcommx.didcomm.operations.signIfNeeded
+import org.didcommx.didcomm.operations.unpack
+import org.didcommx.didcomm.secret.SecretResolver
 
 /**
  * DID Comm operations

@@ -1,4 +1,4 @@
-package org.dif.exceptions
+package org.didcommx.didcomm.exceptions
 
 /**
  * The base class for all DIDComm errors and exceptions.

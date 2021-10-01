@@ -1,7 +1,7 @@
-package org.dif.secret
+package org.didcommx.didcomm.secret
 
-import org.dif.common.VerificationMaterial
-import org.dif.common.VerificationMethodType
+import org.didcommx.didcomm.common.VerificationMaterial
+import org.didcommx.didcomm.common.VerificationMethodType
 
 /**
  * A secret (private key) abstraction.

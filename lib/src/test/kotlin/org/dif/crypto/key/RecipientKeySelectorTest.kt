@@ -1,12 +1,12 @@
-package org.dif.crypto.key
+package org.didcommx.didcomm.crypto.key
 
-import org.dif.exceptions.DIDDocException
-import org.dif.exceptions.DIDUrlNotFoundException
-import org.dif.exceptions.IncompatibleCryptoException
-import org.dif.exceptions.SecretNotFoundException
-import org.dif.fixtures.JWM
-import org.dif.mock.BobSecretResolverMock
-import org.dif.mock.DIDDocResolverMock
+import org.didcommx.didcomm.exceptions.DIDDocException
+import org.didcommx.didcomm.exceptions.DIDUrlNotFoundException
+import org.didcommx.didcomm.exceptions.IncompatibleCryptoException
+import org.didcommx.didcomm.exceptions.SecretNotFoundException
+import org.didcommx.didcomm.fixtures.JWM
+import org.didcommx.didcomm.mock.BobSecretResolverMock
+import org.didcommx.didcomm.mock.DIDDocResolverMock
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals

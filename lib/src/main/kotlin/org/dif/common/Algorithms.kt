@@ -1,4 +1,4 @@
-package org.dif.common
+package org.didcommx.didcomm.common
 
 /**
  * Encryption algorithms marker.
