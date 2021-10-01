@@ -48,7 +48,8 @@ Requirements:
 
 Preparation steps:
 
-*   enable `benchmark` project in [settings.gradle](../settings.gradle)
+*   enable `benchmark` project in using Gradle property `androidBuilds=true`
+    (e.g. in [gradle.properties](../gradle.properties) or via CLI option `-PandroidBuilds=true`)
 *   enable benchmark tests in [DIDCommBenchAndroidNaive.kt](../benchmark/src/androidTest/kotlin/org/dif/DIDCommBenchAndroidNaive.kt)
 *   ensure that either an emulator is [available](https://developer.android.com/studio/run/managing-avds) or real Android device is [attached](https://developer.android.com/studio/run/device)
 
@@ -58,5 +59,5 @@ Run:
 *   using gradle
 
     ```bash
-    ./gradlew :benchmark:cleanConnectedAndroidTest :benchmark:connectedAndroidTest --info
+    ./gradlew -PandroidBuilds=true :benchmark:cleanConnectedAndroidTest :benchmark:connectedAndroidTest --info
     ```

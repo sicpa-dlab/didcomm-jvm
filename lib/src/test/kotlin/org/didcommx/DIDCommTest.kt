@@ -197,7 +197,7 @@ class DIDCommTest {
     }
 
     @Test
-    fun `Test multi recipient support`() {
+    fun `Test_multi_recipient_support`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val packResultBob = didComm.packEncrypted(
