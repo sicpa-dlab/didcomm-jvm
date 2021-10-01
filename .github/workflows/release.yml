@@ -35,10 +35,6 @@ jobs:
           version="$(gradle -q version)"
           echo "$version"
           echo "::set-output name=current_version::$version"
-
-          version="$(gradle -q version)"
-          echo "$version"
-          echo "::set-output name=current_version::$version"
         shell: bash
 
       - name: Get release info
@@ -85,9 +81,10 @@ jobs:
 
       - name: verify packaging
         id: build_assets
-        if: ${{ !needs.checks.outputs.asset_jar_url) }}
+        if: ${{ !needs.checks.outputs.asset_jar_url }}
         run: |
           gradle jar
+          ls lib/build/libs
           asset_jar_name="$(find lib/build/libs -name '*${{ steps.current_version.outputs.current_version }}.jar' -printf '%f')"
           echo "::set-output name=asset_jar_name::$asset_jar_name"
         shell: bash

@@ -3,6 +3,9 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
     id "org.jlleitschuh.gradle.ktlint" version "${ktlintGradle}"
     id "me.champeau.jmh" version "0.6.6"
+    // publishing
+    id 'maven-publish'
+    id 'signing'
 }
 
 group = "org.dif"
@@ -41,6 +44,7 @@ compileTestKotlin {
 }
 
 jar {
+    // FIXME deprecated https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Jar.html
     baseName "${rootProject.name}"
 }
 
@@ -53,4 +57,88 @@ jmh {
     iterations = 1
     fork = 1
     includeTests = true
+}
+
+// publishing
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+
+task version {
+    doLast {
+        println(version)
+    }
+}
+
+
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = "${rootProject.name}"
+            from components.java
+
+            pom {
+                name = 'DIDComm'
+                description = 'DIDComm for Java/Kotlin'
+                url = 'https://github.com/sicpa-dlab/didcomm-jvm'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    // TODO
+                    developer {
+                        id = ''
+                        name = ''
+                        email = ''
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://sicpa-dlab/didcomm-jvm.git'
+                    developerConnection = 'scm:git:ssh://sicpa-dlab/didcomm-jvm.git'
+                    url = 'https://github.com/sicpa-dlab/didcomm-jvm'
+                }
+            }
+
+        }
+    }
+
+    // ORG_GRADLE_PROJECT_mavenOSSRHUsername=<jira-id>
+    // ORG_GRADLE_PROJECT_mavenOSSRHPassword=<jira-password>
+    repositories {
+        maven {
+            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+
+            name = 'mavenOSSRH'
+            credentials(PasswordCredentials)
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
+
+signing {
+    // ORG_GRADLE_PROJECT_signingKeyId=<gpg-signingKeyId>
+    // ORG_GRADLE_PROJECT_signingKey=<gpg-signingKey>
+    // ORG_GRADLE_PROJECT_signingPassword=<gpg-signingPassword>
+    def signingKeyId = findProperty("signingKeyId")
+    def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
+    useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+
+    // TODO test signing
+    // sign publishing.publications.maven
+}
+
+
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
 }

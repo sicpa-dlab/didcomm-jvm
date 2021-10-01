@@ -2,6 +2,10 @@ name: verify
 
 on: [ pull_request ]
 
+env:
+  PKG_NAME: didcomm
+
+
 jobs:
 
   check-version-bumped:
@@ -34,6 +38,7 @@ jobs:
         if: steps.release_info.outputs.release_info
         run: exit 1
 
+        # XXX do we need that here
       - name: Set up JDK 8
         uses: actions/setup-java@v2
         with:
@@ -41,7 +46,10 @@ jobs:
           java-version: 8
 
       - name: check it can be packaged
-        run: gradle jar
+        run: |
+          gradle jar
+          ls lib/build/libs
+        shell: bash
 
   test:
     strategy:
@@ -51,23 +59,28 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up JDK 8
         uses: actions/setup-java@v2
         with:
           distribution: 'zulu'
           java-version: 8
+
       - name: Execute tests
         run: |
           gradle test
+
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up JDK 8
         uses: actions/setup-java@v2
         with:
           distribution: 'zulu'
           java-version: 8
+
       - name: check code
         run: |
           gradle ktlintCheck
