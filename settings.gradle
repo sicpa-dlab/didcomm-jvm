@@ -16,4 +16,4 @@ include ':lib'
 
 // NOTE android libraries require jdk >= 11
 //include ':android'
-include ':benchmark'
+//include ':benchmark'
