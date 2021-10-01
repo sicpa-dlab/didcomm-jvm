@@ -1,0 +1,168 @@
+name: release
+
+on:
+  push:
+  workflow_dispatch:
+   #inputs:
+   #  devN:
+   #    description: 'development release number'
+   #    required: false
+   #    default: '0'
+
+env:
+  PKG_NAME: didcomm
+  PKG_GROUP: org.dif
+
+jobs:
+
+  checks:
+    name: check releases
+    if: github.ref == 'refs/heads/stable'
+    runs-on: ubuntu-latest
+    outputs:
+      current_version: ${{ steps.current_version.outputs.current_version }}
+      release_info: ${{ steps.release_info.outputs.release_info }}
+      asset_jar_url: ${{ steps.release_info.outputs.asset_jar_url }}
+      upload_url:  ${{ steps.release_info.outputs.upload_url }}
+      already_in_maven: ${{ steps.check_in_maven.outputs.already_in_maven != '' }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get the metadata
+        id: current_version
+        run: |
+          version="$(gradle -q version)"
+          echo "$version"
+          echo "::set-output name=current_version::$version"
+        shell: bash
+
+      - name: Get release info
+        id: release_info
+        run: |
+          release_info="$(curl -s https://api.github.com/repos/${{ github.repository }}/releases \
+              | jq '.[] | select(.name == "v${{ steps.current_version.outputs.current_version }}")')"
+          echo "::set-output name=release_info::$release_info"
+          echo "$release_info"
+
+          asset_jar_url="$(echo "$release_info" \
+              | jq -r '.assets[] | select(.name | match("^${{ env.PKG_NAME }}.*\\.jar$")) | .browser_download_url')"
+          echo "::set-output name=asset_jar_url::$asset_jar_url"
+          echo "$asset_jar_url"
+
+          upload_url="$(echo "$release_info" | jq -r '.upload_url')"
+          echo "::set-output name=upload_url::$upload_url"
+          echo "$upload_url"
+        shell: bash
+
+      - name: check if already deployed to Maven Central
+        id: check_in_maven
+        run: |
+          out="$(curl -s 'https://search.maven.org/solrsearch/select?q=a:${{ env.PKG_NAME }}+AND+g:${{ env.PKG_GROUP }}+AND+v:${{ steps.current_version.outputs.current_version }}&wt=json'  \
+               | jq -r '.response | .docs[] | .v')"
+          echo "in maven check: $out"
+          echo "::set-output name=already_in_maven::$out"
+        shell: bash {0}  # to opt-out of default fail-fast behavior
+
+  release:
+    name: GitHub Release
+    if: github.ref == 'refs/heads/stable'
+    runs-on: ubuntu-latest
+    needs: checks
+    steps:
+      - uses: actions/checkout@v2
+
+        # XXX do we need that here
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: 8
+
+      - name: verify packaging
+        id: build_assets
+        if: ${{ !needs.checks.outputs.asset_jar_url }}
+        run: |
+          gradle jar
+          ls lib/build/libs
+          asset_jar_name="$(find lib/build/libs -name '*${{ steps.current_version.outputs.current_version }}.jar' -printf '%f')"
+          echo "::set-output name=asset_jar_name::$asset_jar_name"
+        shell: bash
+          
+      - name: Create GutHub Release
+        id: create_release
+        if: ${{ !needs.checks.outputs.release_info }}
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ needs.checks.outputs.current_version }}
+          release_name: v${{ needs.checks.outputs.current_version }}
+
+      - name: Set upload url
+        id: upload_url
+        if: ${{ !needs.checks.outputs.asset_jar_url }}
+        run: |
+          if [[ -n "${{ needs.checks.outputs.upload_url }}" ]]; then
+            echo "::set-output name=value::${{ needs.checks.outputs.upload_url }}"
+          else
+            echo "::set-output name=value::${{ steps.create_release.outputs.upload_url }}"
+          fi
+
+      # XXX ??? do we actually need that
+      - name: Upload to GitHub
+        if: ${{ !needs.checks.outputs.asset_jar_url }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.upload_url.outputs.value }}
+          asset_path: lib/build/libs/${{ steps.build_assets.outputs.asset_jar_name }}
+          asset_name: ${{ steps.build_assets.outputs.asset_jar_name }}
+          asset_content_type: application/octet-stream  # TODO check for less generic type
+
+
+      # NOTE looks like there is no option to skip packaging here
+      #      and use already prepared artifacts, so we publish to Maven first
+      - name: Publish to Maven Central
+        if: needs.checks.outputs.already_in_maven == 'false'
+        env:
+          ORG_GRADLE_PROJECT_mavenOSSRHUsername: ${{ secrets.ORG_GRADLE_PROJECT_mavenOSSRHUsername }}
+          ORG_GRADLE_PROJECT_mavenOSSRHPassword: ${{ secrets.ORG_GRADLE_PROJECT_mavenOSSRHPassword }}
+          ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.ORG_GRADLE_PROJECT_signingKeyId }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ORG_GRADLE_PROJECT_signingKey }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.ORG_GRADLE_PROJECT_signingPassword }}
+        run: gradle publish
+        shell: bash
+
+  deploy-dev-maven:
+    name: Publish dev to Maven Central
+    if: github.ref != 'refs/heads/stable' && github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: set dev version
+        run: |
+          # TODO decide
+          # sed -i -r "s~^version=(.+)~version=\1-0.dev.${{ github.event.inputs.devN }}~" ./gradle.properties
+          sed -i -r "s~^version=(.+)~version=\1-SNAPSHOT~" ./gradle.properties
+          grep version ./gradle.properties
+        shell: bash
+
+        # XXX do we need that here
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: 8
+
+      - name: Publish to Maven Central
+        env:
+          ORG_GRADLE_PROJECT_mavenOSSRHUsername: ${{ secrets.ORG_GRADLE_PROJECT_mavenOSSRHUsername }}
+          ORG_GRADLE_PROJECT_mavenOSSRHPassword: ${{ secrets.ORG_GRADLE_PROJECT_mavenOSSRHPassword }}
+          ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.ORG_GRADLE_PROJECT_signingKeyId }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ORG_GRADLE_PROJECT_signingKey }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.ORG_GRADLE_PROJECT_signingPassword }}
+        run: gradle publish
+        shell: bash
