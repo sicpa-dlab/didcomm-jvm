@@ -18,6 +18,6 @@ def androidBuilds = this.properties['androidBuilds'] ?: false
 
 // NOTE android libraries require jdk >= 11
 if (androidBuilds) {
-  include ':android'
-  include ':benchmark'
+  include ':android-test'
+  include ':android-benchmark'
 }
