@@ -56,13 +56,6 @@ jmh {
     includeTests = true
 }
 
-// publishing
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
 task group {
     doLast {
         println(project.group)
@@ -79,6 +72,13 @@ task version {
     doLast {
         println(version)
     }
+}
+
+// publishing
+
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 publishing {
@@ -148,3 +148,4 @@ javadoc {
         options.addBooleanOption('html5', true)
     }
 }
+
