@@ -8,7 +8,7 @@ plugins {
     id 'signing'
 }
 
-group = "org.didcommx"
+group = "org.didcommx.didcomm"
 version = "${version}"
 project.ext.artifactId = rootProject.name
 archivesBaseName = project.artifactId
