@@ -9,10 +9,6 @@ on:
    #    required: false
    #    default: '0'
 
-env:
-  PKG_NAME: didcomm
-  PKG_GROUP: org.dif
-
 jobs:
 
   checks:
@@ -20,7 +16,9 @@ jobs:
     if: github.ref == 'refs/heads/stable'
     runs-on: ubuntu-latest
     outputs:
-      current_version: ${{ steps.current_version.outputs.current_version }}
+      proj_group: ${{ steps.proj_meta.outputs.proj_group }}
+      proj_artifactId: ${{ steps.proj_meta.outputs.proj_artifactId }}
+      current_version: ${{ steps.proj_meta.outputs.current_version }}
       release_info: ${{ steps.release_info.outputs.release_info }}
       asset_jar_url: ${{ steps.release_info.outputs.asset_jar_url }}
       upload_url:  ${{ steps.release_info.outputs.upload_url }}
@@ -30,8 +28,16 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Get the metadata
-        id: current_version
+        id: proj_meta
         run: |
+          group="$(gradle -q group)"
+          echo "$group"
+          echo "::set-output name=proj_group::$group"
+
+          artifactId="$(gradle -q artifactId)"
+          echo "$artifactId"
+          echo "::set-output name=proj_artifactId::$artifactId"
+
           version="$(gradle -q version)"
           echo "$version"
           echo "::set-output name=current_version::$version"
@@ -41,12 +47,12 @@ jobs:
         id: release_info
         run: |
           release_info="$(curl -s https://api.github.com/repos/${{ github.repository }}/releases \
-              | jq '.[] | select(.name == "v${{ steps.current_version.outputs.current_version }}")')"
+              | jq '.[] | select(.name == "v${{ steps.proj_meta.outputs.current_version }}")')"
           echo "::set-output name=release_info::$release_info"
           echo "$release_info"
 
           asset_jar_url="$(echo "$release_info" \
-              | jq -r '.assets[] | select(.name | match("^${{ env.PKG_NAME }}.*\\.jar$")) | .browser_download_url')"
+              | jq -r '.assets[] | select(.name | match("^${{ steps.proj_meta.outputs.proj_artifactId }}.*\\.jar$")) | .browser_download_url')"
           echo "::set-output name=asset_jar_url::$asset_jar_url"
           echo "$asset_jar_url"
 
@@ -58,7 +64,7 @@ jobs:
       - name: check if already deployed to Maven Central
         id: check_in_maven
         run: |
-          out="$(curl -s 'https://search.maven.org/solrsearch/select?q=a:${{ env.PKG_NAME }}+AND+g:${{ env.PKG_GROUP }}+AND+v:${{ steps.current_version.outputs.current_version }}&wt=json'  \
+          out="$(curl -s 'https://search.maven.org/solrsearch/select?q=a:${{ steps.proj_meta.outputs.proj_artifactId }}+AND+g:${{ steps.proj_meta.outputs.proj_group }}+AND+v:${{ steps.proj_meta.outputs.current_version }}&wt=json'  \
                | jq -r '.response | .docs[] | .v')"
           echo "in maven check: $out"
           echo "::set-output name=already_in_maven::$out"
@@ -85,7 +91,7 @@ jobs:
         run: |
           gradle jar
           ls lib/build/libs
-          asset_jar_name="$(find lib/build/libs -name '*${{ steps.current_version.outputs.current_version }}.jar' -printf '%f')"
+          asset_jar_name="$(find lib/build/libs -name '*${{ steps.proj_meta.outputs.current_version }}.jar' -printf '%f')"
           echo "::set-output name=asset_jar_name::$asset_jar_name"
         shell: bash
           
@@ -127,11 +133,14 @@ jobs:
       - name: Publish to Maven Central
         if: needs.checks.outputs.already_in_maven == 'false'
         env:
-          ORG_GRADLE_PROJECT_mavenOSSRHUsername: ${{ secrets.ORG_GRADLE_PROJECT_mavenOSSRHUsername }}
-          ORG_GRADLE_PROJECT_mavenOSSRHPassword: ${{ secrets.ORG_GRADLE_PROJECT_mavenOSSRHPassword }}
-          ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.ORG_GRADLE_PROJECT_signingKeyId }}
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ORG_GRADLE_PROJECT_signingKey }}
-          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.ORG_GRADLE_PROJECT_signingPassword }}
+          # maven user creds
+          ORG_GRADLE_PROJECT_mavenOSSRHUsername: ${{ secrets.MAVEN_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenOSSRHPassword: ${{ secrets.MAVEN_PASSWORD }}
+          # creds of for an ascii-armored GPG subkey to sign for Maven
+          # https://docs.gradle.org/current/userguide/signing_plugin.html#using_in_memory_ascii_armored_openpgp_subkeys
+          ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.MAVEN_GPG_ARMORED_KEY_ID }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.MAVEN_GPG_ARMORED_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.MAVEN_GPG_PASSWORD }}
         run: gradle publish
         shell: bash
 
@@ -142,13 +151,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: set dev version
-        run: |
-          # TODO decide
-          # sed -i -r "s~^version=(.+)~version=\1-0.dev.${{ github.event.inputs.devN }}~" ./gradle.properties
-          sed -i -r "s~^version=(.+)~version=\1-SNAPSHOT~" ./gradle.properties
-          grep version ./gradle.properties
-        shell: bash
+      # NOTE it's always in SNAPSHOT state for now
+      # - name: set SNAPSHOT version
+      #   run: |
+      #     # TODO decide
+      #     # sed -i -r "s~^version=(.+)~version=\1-0.dev.${{ github.event.inputs.devN }}~" ./gradle.properties
+      #     sed -i -r "s~^version=(.+)~version=\1-SNAPSHOT~" ./gradle.properties
+      #     grep version ./gradle.properties
+      #   shell: bash
 
         # XXX do we need that here
       - name: Set up JDK 8

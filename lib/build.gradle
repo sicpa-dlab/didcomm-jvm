@@ -10,6 +10,8 @@ plugins {
 
 group = "org.didcommx.didcomm"
 version = "${version}"
+project.ext.artifactId = rootProject.name
+archivesBaseName = project.artifactId
 
 kotlin {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -43,11 +45,6 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "${jvmTarget}"
 }
 
-jar {
-    // FIXME deprecated https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Jar.html
-    baseName "${rootProject.name}"
-}
-
 // TODO tune settings
 jmh {
     benchmarkMode = ["thrpt", "avgt"]
@@ -59,13 +56,17 @@ jmh {
     includeTests = true
 }
 
-// publishing
-
-java {
-    withJavadocJar()
-    withSourcesJar()
+task group {
+    doLast {
+        println(project.group)
+    }
 }
 
+task artifactId {
+    doLast {
+        println(project.artifactId)
+    }
+}
 
 task version {
     doLast {
@@ -73,12 +74,17 @@ task version {
     }
 }
 
+// publishing
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
 
 publishing {
     publications {
         maven(MavenPublication) {
-            artifactId = "${rootProject.name}"
+            artifactId = project.artifactId
             from components.java
 
             pom {
@@ -133,7 +139,7 @@ signing {
     useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
 
     // TODO test signing
-    // sign publishing.publications.maven
+    sign publishing.publications.maven
 }
 
 
@@ -142,3 +148,4 @@ javadoc {
         options.addBooleanOption('html5', true)
     }
 }
+
