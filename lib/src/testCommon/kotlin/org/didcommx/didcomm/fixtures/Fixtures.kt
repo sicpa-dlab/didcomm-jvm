@@ -4,8 +4,6 @@ import org.didcommx.didcomm.common.AnonCryptAlg
 import org.didcommx.didcomm.common.AuthCryptAlg
 import org.didcommx.didcomm.common.SignAlg
 import org.didcommx.didcomm.exceptions.DIDCommException
-import org.didcommx.didcomm.exceptions.DIDDocException
-import org.didcommx.didcomm.exceptions.IncompatibleCryptoException
 import org.didcommx.didcomm.exceptions.MalformedMessageException
 import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.message.Message

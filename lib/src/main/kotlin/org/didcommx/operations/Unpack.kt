@@ -78,7 +78,6 @@ private fun ParseResult.JWE.authUnpack(
     )
         throw MalformedMessageException("apv is invalid")
 
-
     val (from, to) = keySelector.findAuthCryptKeys(sender, recipients)
     val decrypted = authDecrypt(message, decryptByAllKeys, from, to)
 

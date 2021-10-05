@@ -32,7 +32,6 @@ import org.didcommx.didcomm.exceptions.UnsupportedCurveException
 import org.didcommx.didcomm.exceptions.UnsupportedJWKException
 import org.didcommx.didcomm.utils.asKeys
 import org.didcommx.didcomm.utils.calculateAPV
-import java.security.MessageDigest
 
 fun authEncrypt(payload: String, auth: AuthCryptAlg, from: Key, to: List<Key>): EncryptResult {
     val skid = from.id
