@@ -14,6 +14,7 @@ import org.didcommx.didcomm.message.Message
 import org.didcommx.didcomm.model.Metadata
 import org.didcommx.didcomm.model.UnpackParams
 import org.didcommx.didcomm.model.UnpackResult
+import org.didcommx.didcomm.utils.calculateAPV
 
 fun unpack(params: UnpackParams, keySelector: RecipientKeySelector): UnpackResult {
     val metadataBuilder = Metadata.Builder()
@@ -60,12 +61,23 @@ private fun ParseResult.JWE.authUnpack(
     decryptByAllKeys: Boolean,
     metadataBuilder: Metadata.Builder
 ): Message {
+    if (message.header.senderKeyID != null &&
+        message.header.agreementPartyUInfo.decodeToString() != message.header.senderKeyID
+    )
+        throw MalformedMessageException("apu is not equal to skid")
+
     val sender = message.header?.senderKeyID
         ?: message.header.agreementPartyUInfo.decodeToString()
         ?: throw MalformedMessageException("The \"skid\" header must be present")
 
     val recipients = message.recipients?.mapNotNull { it?.header?.keyID }
         ?: throw MalformedMessageException("JWE Unprotected Per-Recipient header must be present")
+
+    if (message.header.agreementPartyVInfo != null &&
+        message.header.agreementPartyVInfo != calculateAPV(recipients)
+    )
+        throw MalformedMessageException("apv is invalid")
+
 
     val (from, to) = keySelector.findAuthCryptKeys(sender, recipients)
     val decrypted = authDecrypt(message, decryptByAllKeys, from, to)
@@ -90,8 +102,18 @@ private fun ParseResult.JWE.anonUnpack(
     decryptByAllKeys: Boolean,
     metadataBuilder: Metadata.Builder
 ): Message {
+    if (message.header.senderKeyID != null &&
+        message.header.agreementPartyUInfo.decodeToString() != message.header.senderKeyID
+    )
+        throw MalformedMessageException("apu is not equal to skid")
+
     val recipients = message.recipients?.mapNotNull { it?.header?.keyID }
         ?: throw MalformedMessageException("JWE Unprotected Per-Recipient header must be present")
+
+    if (message.header.agreementPartyVInfo != null &&
+        message.header.agreementPartyVInfo != calculateAPV(recipients)
+    )
+        throw MalformedMessageException("apv is invalid")
 
     val to = keySelector.findAnonCryptKeys(recipients)
     val decrypted = anonDecrypt(message, decryptByAllKeys, to)

@@ -31,16 +31,15 @@ import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.exceptions.UnsupportedCurveException
 import org.didcommx.didcomm.exceptions.UnsupportedJWKException
 import org.didcommx.didcomm.utils.asKeys
+import org.didcommx.didcomm.utils.calculateAPV
 import java.security.MessageDigest
 
 fun authEncrypt(payload: String, auth: AuthCryptAlg, from: Key, to: List<Key>): EncryptResult {
-    val digest = MessageDigest.getInstance("SHA-256")
-
     val skid = from.id
     val kids = to.map { it.id }.sorted()
 
     val apu = Base64URL.encode(from.id)
-    val apv = Base64URL.encode(digest.digest(kids.joinToString(".").encodeToByteArray()))
+    val apv = calculateAPV(kids)
 
     val (alg, enc) = when (auth) {
         AuthCryptAlg.A256CBC_HS512_ECDH_1PU_A256KW -> Pair(JWEAlgorithm.ECDH_1PU_A256KW, EncryptionMethod.A256CBC_HS512)
@@ -80,10 +79,8 @@ fun authEncrypt(payload: String, auth: AuthCryptAlg, from: Key, to: List<Key>): 
 }
 
 fun anonEncrypt(payload: String, anon: AnonCryptAlg, to: List<Key>): EncryptResult {
-    val digest = MessageDigest.getInstance("SHA-256")
-
     val kids = to.map { it.id }.sorted()
-    val apv = Base64URL.encode(digest.digest(kids.joinToString(".").encodeToByteArray()))
+    val apv = calculateAPV(kids)
 
     val (alg, enc) = when (anon) {
         AnonCryptAlg.A256CBC_HS512_ECDH_ES_A256KW -> Pair(JWEAlgorithm.ECDH_ES_A256KW, EncryptionMethod.A256CBC_HS512)
