@@ -24,7 +24,7 @@ class SecretResolverDemoTest {
 
         assertEquals(secret1, secretsResolver.findKey(secret1.kid).get())
         assertEquals(secret2, secretsResolver.findKey(secret2.kid).get())
-        assertTrue(secretsResolver.findKey("unknown-kid").isEmpty)
+        assertFalse(secretsResolver.findKey("unknown-kid").isPresent)
 
         assertEquals(listOf(secret1.kid, secret2.kid), secretsResolver.getKids())
 
