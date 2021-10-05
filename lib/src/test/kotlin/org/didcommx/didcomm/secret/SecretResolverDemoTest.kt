@@ -6,6 +6,7 @@ import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class SecretResolverDemoTest {
@@ -46,7 +47,7 @@ class SecretResolverDemoTest {
 
         assertEquals(secret1, secretsResolver.findKey(secret1.kid).get())
         assertEquals(secret2, secretsResolver.findKey(secret2.kid).get())
-        assertTrue(secretsResolver.findKey("unknown-kid").isEmpty)
+        assertFalse(secretsResolver.findKey("unknown-kid").isPresent)
 
         assertEquals(listOf(secret1.kid, secret2.kid), secretsResolver.getKids())
 
