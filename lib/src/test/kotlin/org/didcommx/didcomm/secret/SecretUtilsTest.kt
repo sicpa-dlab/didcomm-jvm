@@ -2,10 +2,6 @@ package org.didcommx.didcomm.secret
 
 import org.didcommx.didcomm.common.VerificationMaterialFormat
 import org.didcommx.didcomm.common.VerificationMethodType
-import org.didcommx.secret.generateEd25519Keys
-import org.didcommx.secret.generateX25519Keys
-import org.didcommx.secret.jwkToSecret
-import org.didcommx.secret.secretToJwk
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

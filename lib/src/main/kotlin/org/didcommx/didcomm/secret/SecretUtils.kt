@@ -1,4 +1,4 @@
-package org.didcommx.secret
+package org.didcommx.didcomm.secret
 
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator
@@ -6,7 +6,6 @@ import com.nimbusds.jose.util.JSONObjectUtils
 import org.didcommx.didcomm.common.VerificationMaterial
 import org.didcommx.didcomm.common.VerificationMaterialFormat
 import org.didcommx.didcomm.common.VerificationMethodType
-import org.didcommx.didcomm.secret.Secret
 import org.didcommx.didcomm.utils.toJSONString
 
 fun jwkToSecret(jwk: Map<String, Any>): Secret =

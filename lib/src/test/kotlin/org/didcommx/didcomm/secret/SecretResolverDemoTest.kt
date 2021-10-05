@@ -1,7 +1,5 @@
 package org.didcommx.didcomm.secret
 
-import org.didcommx.secret.generateEd25519Keys
-import org.didcommx.secret.jwkToSecret
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import kotlin.test.Test

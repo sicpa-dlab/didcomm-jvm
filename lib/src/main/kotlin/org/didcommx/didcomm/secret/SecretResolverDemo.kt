@@ -2,8 +2,6 @@ package org.didcommx.didcomm.secret
 
 import org.didcommx.didcomm.utils.fromJsonToList
 import org.didcommx.didcomm.utils.toJson
-import org.didcommx.secret.jwkToSecret
-import org.didcommx.secret.secretToJwk
 import java.io.File
 import java.util.Optional
 import kotlin.io.path.Path
