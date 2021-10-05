@@ -5,7 +5,7 @@ import org.didcommx.didcomm.utils.toJson
 import org.didcommx.secret.jwkToSecret
 import org.didcommx.secret.secretToJwk
 import java.io.File
-import java.util.*
+import java.util.Optional
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 
@@ -45,6 +45,4 @@ class SecretResolverDemo(private val filePath: String = "secrets.json") : Secret
 
     override fun findKeys(kids: List<String>): Set<String> =
         kids.intersect(secrets.keys)
-
-
 }
