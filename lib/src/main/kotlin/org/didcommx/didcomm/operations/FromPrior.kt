@@ -1,6 +1,7 @@
 package org.didcommx.didcomm.operations
 
 import com.nimbusds.jose.JWSHeader
+import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jwt.JWTClaimsSet
 import org.didcommx.didcomm.crypto.key.RecipientKeySelector
 import org.didcommx.didcomm.crypto.key.SenderKeySelector
@@ -15,6 +16,7 @@ fun packFromPrior(message: Message, fromPriorIssuerKid: String?, keySelector: Se
     if (message.fromPrior != null) {
         val key = keySelector.findSigningKey(fromPriorIssuerKid ?: message.fromPrior.iss)
         val updatedMessage = message.copy(
+            fromPrior = null,
             fromPriorJwt = signJwt(JWTClaimsSet.parse(message.fromPrior.toJSONObject()), key)
         )
         Pair(updatedMessage, key.id)
@@ -27,7 +29,8 @@ fun unpackFromPrior(message: Message, keySelector: RecipientKeySelector): Pair<M
         val issKid = extractFromPriorKid(message.fromPriorJwt)
         val key = keySelector.findVerificationKey(issKid)
         val updatedMessage = message.copy(
-            fromPrior = FromPrior.parse(verifyJwt(message.fromPriorJwt, key).toJSONObject())
+            fromPrior = FromPrior.parse(verifyJwt(message.fromPriorJwt, key).toJSONObject()),
+            fromPriorJwt = null
         )
         Pair(updatedMessage, key.id)
     } else {
@@ -39,6 +42,6 @@ private fun extractFromPriorKid(fromPriorJwt: String): String {
     if (segments.size != 3) {
         throw MalformedMessageException("JWT cannot be deserialized")
     }
-    val jwsHeader = JWSHeader.parse(segments[0])
+    val jwsHeader = JWSHeader.parse(Base64URL(segments[0]))
     return jwsHeader.keyID
 }

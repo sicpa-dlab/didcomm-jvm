@@ -92,7 +92,7 @@ data class PackSignedParams(
                 if (message.fromPrior.sub == message.fromPrior.iss)
                     throw DIDCommIllegalArgumentException(message.fromPrior.sub)
 
-                if (message.from != null && message.fromPrior.sub != message.from)
+                if (message.fromPrior.sub != message.from)
                     throw DIDCommIllegalArgumentException(message.fromPrior.sub)
 
                 if (fromPriorIssuerKid != null &&

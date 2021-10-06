@@ -109,7 +109,7 @@ data class Message(
                     Header.CreatedTime -> builder.createdTime(json.getTyped(it))
                     Header.ExpiresTime -> builder.expiresTime(json.getTyped(it))
                     Header.Attachments -> builder.attachments(Attachment.parse(json.getTypedArray(Header.Attachments)))
-                    Header.FromPrior -> builder.fromPrior(FromPrior.parse(json.getTyped(it)))
+                    Header.FromPrior -> builder.fromPriorJwt(json.getTyped(it))
                     Header.PleaseAck -> builder.pleaseAck(json.getTyped(it))
                     Header.Ack -> builder.ack(json.getTyped(it))
                     Header.Thid -> builder.thid(json.getTyped(it))

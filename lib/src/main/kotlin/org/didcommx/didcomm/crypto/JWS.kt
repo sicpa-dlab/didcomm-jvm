@@ -24,7 +24,6 @@ import org.didcommx.didcomm.exceptions.MalformedMessageException
 import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.exceptions.UnsupportedCurveException
 import org.didcommx.didcomm.exceptions.UnsupportedJWKException
-import org.didcommx.didcomm.message.Message
 import org.didcommx.didcomm.utils.asKey
 
 fun sign(payload: String, key: Key): String {
@@ -57,7 +56,7 @@ fun sign(payload: String, key: Key): String {
         .serialize()
 }
 
-fun verify(jws: JWSObjectJSON, signAlg: SignAlg, key: Key): Message {
+fun verify(jws: JWSObjectJSON, signAlg: SignAlg, key: Key): Map<String, Any> {
     val jwk = key.jwk
 
     val verifier = try {
@@ -73,7 +72,7 @@ fun verify(jws: JWSObjectJSON, signAlg: SignAlg, key: Key): Message {
     if (!jws.verify(verifier))
         throw MalformedMessageException("Invalid signature")
 
-    return Message.parse(jws.payload.toJSONObject())
+    return jws.payload.toJSONObject()
 }
 
 fun getCryptoAlg(jws: JWSObjectJSON): SignAlg =

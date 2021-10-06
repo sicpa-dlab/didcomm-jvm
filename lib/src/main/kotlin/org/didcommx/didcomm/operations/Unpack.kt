@@ -22,15 +22,17 @@ fun unpack(params: UnpackParams, keySelector: RecipientKeySelector): UnpackResul
     val msg = when (val parseResult = parse(params.packedMessage)) {
         is ParseResult.JWS -> parseResult.unpack(keySelector, metadataBuilder)
         is ParseResult.JWE -> parseResult.unpack(keySelector, params.expectDecryptByAllKeys, metadataBuilder)
-        is ParseResult.JWM -> {
-            metadataBuilder.fromPriorJwt(parseResult.message.fromPriorJwt)
-            val (updatedMessage, fromPriorIssuerKid) = unpackFromPrior(parseResult.message, keySelector)
-            metadataBuilder.fromPriorIssuerKid(fromPriorIssuerKid)
-            updatedMessage
-        }
+        is ParseResult.JWM -> parseResult.unpack(keySelector, metadataBuilder)
     }
 
     return UnpackResult(msg, metadataBuilder.build())
+}
+
+private fun ParseResult.JWM.unpack(keySelector: RecipientKeySelector, metadataBuilder: Metadata.Builder): Message {
+    metadataBuilder.fromPriorJwt(message.fromPriorJwt)
+    val (updatedMessage, fromPriorIssuerKid) = unpackFromPrior(message, keySelector)
+    metadataBuilder.fromPriorIssuerKid(fromPriorIssuerKid)
+    return updatedMessage
 }
 
 private fun ParseResult.JWS.unpack(keySelector: RecipientKeySelector, metadataBuilder: Metadata.Builder): Message {
@@ -39,7 +41,7 @@ private fun ParseResult.JWS.unpack(keySelector: RecipientKeySelector, metadataBu
 
     val key = keySelector.findVerificationKey(kid)
     val alg = getCryptoAlg(message)
-    val message = verify(message, alg, key)
+    val unpackedMessage = verify(message, alg, key)
 
     metadataBuilder
         .signAlg(alg)
@@ -47,7 +49,10 @@ private fun ParseResult.JWS.unpack(keySelector: RecipientKeySelector, metadataBu
         .nonRepudiation(true)
         .signedMessage(rawMessage)
 
-    return message
+    return when (val parseResult = parse(unpackedMessage)) {
+        is ParseResult.JWM -> parseResult.unpack(keySelector, metadataBuilder)
+        else -> throw MalformedMessageException("Malformed Message")
+    }
 }
 
 private fun ParseResult.JWE.unpack(
@@ -95,7 +100,7 @@ private fun ParseResult.JWE.authUnpack(
 
     return when (val parseResult = parse(decrypted.unpackedMessage)) {
         is ParseResult.JWS -> parseResult.unpack(keySelector, metadataBuilder)
-        is ParseResult.JWM -> parseResult.message
+        is ParseResult.JWM -> parseResult.unpack(keySelector, metadataBuilder)
         else -> throw MalformedMessageException("Malformed Message")
     }
 }
@@ -131,7 +136,7 @@ private fun ParseResult.JWE.anonUnpack(
     return when (val parseResult = parse(decrypted.unpackedMessage)) {
         is ParseResult.JWE -> parseResult.anonAuthUnpack(keySelector, decryptByAllKeys, metadataBuilder)
         is ParseResult.JWS -> parseResult.unpack(keySelector, metadataBuilder)
-        is ParseResult.JWM -> parseResult.message
+        is ParseResult.JWM -> parseResult.unpack(keySelector, metadataBuilder)
     }
 }
 

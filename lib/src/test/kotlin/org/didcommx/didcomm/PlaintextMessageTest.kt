@@ -3,6 +3,7 @@ package org.didcommx.didcomm
 import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.nimbusds.jose.util.JSONObjectUtils
 import org.didcommx.didcomm.exceptions.DIDCommException
 import org.didcommx.didcomm.exceptions.MalformedMessageException
 import org.didcommx.didcomm.fixtures.CustomProtocolBody
@@ -10,16 +11,21 @@ import org.didcommx.didcomm.fixtures.JWM
 import org.didcommx.didcomm.message.Attachment
 import org.didcommx.didcomm.message.FromPrior
 import org.didcommx.didcomm.message.Message
+import org.didcommx.didcomm.mock.AliceRotatedToCharlieSecretResolverMock
 import org.didcommx.didcomm.mock.AliceSecretResolverMock
 import org.didcommx.didcomm.mock.DIDDocResolverMock
 import org.didcommx.didcomm.model.PackPlaintextParams
 import org.didcommx.didcomm.model.UnpackParams
+import org.didcommx.didcomm.utils.divideDIDFragment
 import org.didcommx.didcomm.utils.getTyped
 import org.didcommx.didcomm.utils.getTypedArray
+import org.didcommx.didcomm.utils.isDID
+import org.didcommx.didcomm.utils.isDIDFragment
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -45,12 +51,109 @@ class PlaintextMessageTest {
     }
 
     @Test
+    fun `Test_pack_unpack_plaintext_message_with_from_prior_and_issuer_kid`() {
+        val didComm = DIDComm(DIDDocResolverMock(), AliceRotatedToCharlieSecretResolverMock())
+
+        for (message in listOf(JWM.PLAINTEXT_MESSAGE_FROM_PRIOR_MINIMAL, JWM.PLAINTEXT_MESSAGE_FROM_PRIOR)) {
+            val packResult = didComm.packPlaintext(
+                PackPlaintextParams.builder(message)
+                    .fromPriorIssuerKid("did:example:alice#key-2")
+                    .build()
+            )
+
+            assertNotNull(packResult.packedMessage)
+            assertEquals("did:example:alice#key-2", packResult.fromPriorIssuerKid)
+
+            val unpackResult = didComm.unpack(
+                UnpackParams.Builder(packResult.packedMessage).build()
+            )
+
+            assertEquals(message, unpackResult.message)
+            assertEquals("did:example:alice#key-2", unpackResult.metadata.fromPriorIssuerKid)
+            assertEquals(
+                JSONObjectUtils.parse(packResult.packedMessage)["from_prior"],
+                unpackResult.metadata.fromPriorJwt
+            )
+        }
+    }
+
+    @Test
+    fun `Test_pack_unpack_plaintext_message_with_from_prior_and_no_issuer_kid`() {
+        val didComm = DIDComm(DIDDocResolverMock(), AliceRotatedToCharlieSecretResolverMock())
+
+        for (message in listOf(JWM.PLAINTEXT_MESSAGE_FROM_PRIOR_MINIMAL, JWM.PLAINTEXT_MESSAGE_FROM_PRIOR)) {
+            val packResult = didComm.packPlaintext(
+                PackPlaintextParams.builder(message).build()
+            )
+
+            assertNotNull(packResult.packedMessage)
+            assertNotNull(packResult.fromPriorIssuerKid)
+            assertTrue(isDID(packResult.fromPriorIssuerKid!!))
+            assertTrue(isDIDFragment(packResult.fromPriorIssuerKid!!))
+            assertEquals(JWM.ALICE_DID, divideDIDFragment(packResult.fromPriorIssuerKid!!).first())
+
+            val unpackResult = didComm.unpack(
+                UnpackParams.Builder(packResult.packedMessage).build()
+            )
+
+            assertEquals(message, unpackResult.message)
+            assertEquals(packResult.fromPriorIssuerKid, unpackResult.metadata.fromPriorIssuerKid)
+            assertEquals(
+                JSONObjectUtils.parse(packResult.packedMessage)["from_prior"],
+                unpackResult.metadata.fromPriorJwt
+            )
+        }
+    }
+
+    @Test
+    fun `Test_pack_plaintext_message_with_invalid_from_prior`() {
+        val didComm = DIDComm(DIDDocResolverMock(), AliceRotatedToCharlieSecretResolverMock())
+
+        for (message in JWM.INVALID_FROM_PRIOR_PLAINTEXT_MESSAGES) {
+            assertFails {
+                didComm.packPlaintext(PackPlaintextParams.builder(message).build())
+            }
+        }
+    }
+
+    @Test
+    fun `Test_unpack_plaintext_message_with_from_prior`() {
+        val didComm = DIDComm(DIDDocResolverMock(), AliceRotatedToCharlieSecretResolverMock())
+
+        val unpackResult = didComm.unpack(
+            UnpackParams.Builder(JWM.PACKED_MESSAGE_FROM_PRIOR).build()
+        )
+
+        assertEquals(JWM.PLAINTEXT_MESSAGE_FROM_PRIOR, unpackResult.message)
+        assertEquals("did:example:alice#key-1", unpackResult.metadata.fromPriorIssuerKid)
+        assertEquals(
+            JSONObjectUtils.parse(JWM.PACKED_MESSAGE_FROM_PRIOR)["from_prior"],
+            unpackResult.metadata.fromPriorJwt
+        )
+    }
+
+    @Test
+    fun `Test_unpack_plaintext_message_with_invalid_from_prior`() {
+        val didComm = DIDComm(DIDDocResolverMock(), AliceRotatedToCharlieSecretResolverMock())
+
+        for (tv in JWM.WRONG_FROM_PRIOR_PACKED_MESSAGES) {
+            val thrown = assertFailsWith<MalformedMessageException> {
+                didComm.unpack(
+                    UnpackParams.Builder(tv.json).build()
+                )
+            }
+
+            assertEquals(tv.expectedMessage, thrown.message)
+        }
+    }
+
+    @Test
     fun `Test_plaintext_without_body`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val thrown = assertFailsWith<MalformedMessageException> {
             didComm.unpack(
-                UnpackParams.Builder(JWM.PLAINTEXT_MESSAGE_WITHOUT_BODY).build()
+                UnpackParams.Builder(JWM.PACKED_MESSAGE_WITHOUT_BODY).build()
             )
         }
 
@@ -190,7 +293,7 @@ class PlaintextMessageTest {
 
     @Test
     fun `Test_full_plaintext_message`() {
-        val fromPrior = FromPrior.builder("iss", "sub")
+        val fromPrior = FromPrior.builder(JWM.ALICE_DID, JWM.CHARLIE_DID)
             .aud("aud")
             .exp(123456789)
             .nbf(987654321)
@@ -237,7 +340,7 @@ class PlaintextMessageTest {
         )
 
         val message = Message.builder("id1", body, "coolest-protocol")
-            .from(JWM.ALICE_DID)
+            .from(JWM.CHARLIE_DID)
             .to(listOf(JWM.BOB_DID, JWM.ELLIE_DID))
             .createdTime(123)
             .expiresTime(456)
@@ -251,7 +354,7 @@ class PlaintextMessageTest {
             .customHeader("array", listOf(1L, 2L, 3L))
             .build()
 
-        val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
+        val didComm = DIDComm(DIDDocResolverMock(), AliceRotatedToCharlieSecretResolverMock())
 
         val packed = didComm.packPlaintext(
             PackPlaintextParams.builder(message).build()

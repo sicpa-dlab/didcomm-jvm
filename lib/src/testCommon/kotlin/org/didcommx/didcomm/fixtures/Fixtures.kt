@@ -6,6 +6,7 @@ import org.didcommx.didcomm.common.SignAlg
 import org.didcommx.didcomm.exceptions.DIDCommException
 import org.didcommx.didcomm.exceptions.MalformedMessageException
 import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
+import org.didcommx.didcomm.message.FromPrior
 import org.didcommx.didcomm.message.Message
 import org.didcommx.didcomm.model.Metadata
 import org.didcommx.didcomm.model.UnpackParams
@@ -43,7 +44,80 @@ class JWM {
             .expiresTime(1516385931)
             .build()
 
-        val PLAINTEXT_MESSAGE_WITHOUT_BODY = """
+        val PLAINTEXT_MESSAGE_FROM_PRIOR_MINIMAL = Message.builder(ID, BODY, TYPE)
+            .from(CHARLIE_DID)
+            .to(listOf(BOB_DID))
+            .createdTime(1516269022)
+            .expiresTime(1516385931)
+            .fromPrior(
+                FromPrior.builder(iss = ALICE_DID, sub = CHARLIE_DID).build()
+            )
+            .build()
+
+        val PLAINTEXT_MESSAGE_FROM_PRIOR = Message.builder(ID, BODY, TYPE)
+            .from(CHARLIE_DID)
+            .to(listOf(BOB_DID))
+            .createdTime(1516269022)
+            .expiresTime(1516385931)
+            .fromPrior(
+                FromPrior.builder(iss = ALICE_DID, sub = CHARLIE_DID)
+                    .aud("123")
+                    .exp(1234)
+                    .nbf(12345)
+                    .iat(123456)
+                    .jti("dfg")
+                    .build()
+            )
+            .build()
+
+        val PLAINTEXT_MESSAGE_INVALID_FROM_PRIOR_ISS = Message.builder(ID, BODY, TYPE)
+            .from(CHARLIE_DID)
+            .to(listOf(BOB_DID))
+            .createdTime(1516269022)
+            .expiresTime(1516385931)
+            .fromPrior(
+                FromPrior.builder(iss = "invalid", sub = CHARLIE_DID).build()
+            )
+            .build()
+
+        val PLAINTEXT_MESSAGE_INVALID_FROM_PRIOR_SUB = Message.builder(ID, BODY, TYPE)
+            .from(CHARLIE_DID)
+            .to(listOf(BOB_DID))
+            .createdTime(1516269022)
+            .expiresTime(1516385931)
+            .fromPrior(
+                FromPrior.builder(iss = ALICE_DID, sub = "invalid").build()
+            )
+            .build()
+
+        val PLAINTEXT_MESSAGE_INVALID_FROM_PRIOR_EQUAL_ISS_AND_SUB = Message.builder(ID, BODY, TYPE)
+            .from(CHARLIE_DID)
+            .to(listOf(BOB_DID))
+            .createdTime(1516269022)
+            .expiresTime(1516385931)
+            .fromPrior(
+                FromPrior.builder(iss = CHARLIE_DID, sub = CHARLIE_DID).build()
+            )
+            .build()
+
+        val PLAINTEXT_MESSAGE_MISMATCHED_FROM_PRIOR_SUB = Message.builder(ID, BODY, TYPE)
+            .from(CHARLIE_DID)
+            .to(listOf(BOB_DID))
+            .createdTime(1516269022)
+            .expiresTime(1516385931)
+            .fromPrior(
+                FromPrior.builder(iss = ALICE_DID, sub = ELLIE_DID).build()
+            )
+            .build()
+
+        val INVALID_FROM_PRIOR_PLAINTEXT_MESSAGES = listOf(
+            PLAINTEXT_MESSAGE_INVALID_FROM_PRIOR_ISS,
+            PLAINTEXT_MESSAGE_INVALID_FROM_PRIOR_SUB,
+            PLAINTEXT_MESSAGE_INVALID_FROM_PRIOR_EQUAL_ISS_AND_SUB,
+            PLAINTEXT_MESSAGE_MISMATCHED_FROM_PRIOR_SUB,
+        )
+
+        val PACKED_MESSAGE_WITHOUT_BODY = """
             {
                "id":"1234567890",
                "typ":"application/didcomm-plain+json",
@@ -56,6 +130,68 @@ class JWM {
                "expires_time":1516385931
             }
         """.trimIndent()
+
+        val PACKED_MESSAGE_FROM_PRIOR = """
+            {
+                "id":"1234567890",
+                "typ":"application/didcomm-plain+json",
+                "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                "from":"did:example:charlie",
+                "to":[
+                    "did:example:bob"
+                ],
+                "created_time":1516269022,
+                "expires_time":1516385931,
+                "from_prior":"eyJraWQiOiJkaWQ6ZXhhbXBsZTphbGljZSNrZXktMSIsImFsZyI6IkVkRFNBIn0.eyJzdWIiOiJkaWQ6ZXhhbXBsZTpjaGFybGllIiwiYXVkIjoiMTIzIiwibmJmIjoxMjM0NSwiaXNzIjoiZGlkOmV4YW1wbGU6YWxpY2UiLCJleHAiOjEyMzQsImlhdCI6MTIzNDU2LCJqdGkiOiJkZmcifQ.R-6-uklPRTcVSIQqjHdELkpjVEG8n4r0IHr9llP9KNdvneOW4x94liEINtcCn2OM93pOweD1MsmA9L3oPfIIDA",
+                "body": {
+                    "messagespecificattribute":"and its value"
+                }
+            }
+        """.trimIndent()
+
+        val WRONG_FROM_PRIOR_PACKED_MESSAGES: List<WrongMessage> = listOf(
+            WrongMessage(
+                """
+                    {
+                        "id":"1234567890",
+                        "typ":"application/didcomm-plain+json",
+                        "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                        "from":"did:example:charlie",
+                        "to":[
+                            "did:example:bob"
+                        ],
+                        "created_time":1516269022,
+                        "expires_time":1516385931,
+                        "from_prior":"invalid",
+                        "body": {
+                            "messagespecificattribute":"and its value"
+                        }
+                    }
+                """.trimIndent(),
+                "JWT cannot be deserialized"
+            ),
+
+            WrongMessage(
+                """
+                    {
+                        "id":"1234567890",
+                        "typ":"application/didcomm-plain+json",
+                        "type":"http://example.com/protocols/lets_do_lunch/1.0/proposal",
+                        "from":"did:example:charlie",
+                        "to":[
+                            "did:example:bob"
+                        ],
+                        "created_time":1516269022,
+                        "expires_time":1516385931,
+                        "from_prior":"eyJraWQiOiJkaWQ6ZXhhbXBsZTphbGljZSNrZXktMSIsImFsZyI6IkVkRFNBIn0.eyJzdWIiOiJkaWQ6ZXhhbXBsZTpjaGFybGllIiwiYXVkIjoiMTIzIiwibmJmIjoxMjM0NSwiaXNzIjoiZGlkOmV4YW1wbGU6YWxpY2UiLCJleHAiOjEyMzQsImlhdCI6MTIzNDU2LCJqdGkiOiJkZmcifQ.R-6-uklPRTcVSIQqjHdELkpjVEG8n4r0IHr9llP9KNdvneOW4x94liEINtcCn2OM93pOweD1MsmA9L3oPfIID",
+                        "body": {
+                            "messagespecificattribute":"and its value"
+                        }
+                    }
+                """.trimIndent(),
+                "JWT has an invalid signature"
+            )
+        )
 
         val CORRECT_ATTACHMENTS: List<CorrectAttachment> = listOf(
             CorrectAttachment(
