@@ -28,10 +28,10 @@ data class PackPlaintextParams(
      * @property message The message to be packed into a Plaintext DIDComm message.
      */
     class Builder(val message: Message) {
-        var didDocResolver: DIDDocResolver? = null
+        internal var didDocResolver: DIDDocResolver? = null
             private set
 
-        var secretResolver: SecretResolver? = null
+        internal var secretResolver: SecretResolver? = null
             private set
 
         /**

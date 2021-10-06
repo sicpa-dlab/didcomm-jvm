@@ -27,16 +27,16 @@ data class UnpackParams(
      * @property packedMessage packed DIDComm message as JSON string to be unpacked.
      */
     class Builder(val packedMessage: String) {
-        var expectDecryptByAllKeys: Boolean = false
+        internal var expectDecryptByAllKeys: Boolean = false
             private set
 
-        var unwrapReWrappingForward: Boolean = true
+        internal var unwrapReWrappingForward: Boolean = true
             private set
 
-        var didDocResolver: DIDDocResolver? = null
+        internal var didDocResolver: DIDDocResolver? = null
             private set
 
-        var secretResolver: SecretResolver? = null
+        internal var secretResolver: SecretResolver? = null
             private set
 
         /**
