@@ -5,7 +5,7 @@ on: [ pull_request ]
 
 jobs:
 
-  check-version-bumped:
+  release-ready:
     name: Check is ready for release
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'stable'
@@ -48,7 +48,7 @@ jobs:
           ls lib/build/libs
         shell: bash
 
-  test:
+  unit:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
@@ -64,10 +64,9 @@ jobs:
           java-version: 8
 
       - name: Execute tests
-        run: |
-          gradle test
+        run: gradle test
 
-  lint:
+  static-ktlint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -79,5 +78,4 @@ jobs:
           java-version: 8
 
       - name: check code
-        run: |
-          gradle ktlintCheck
+        run: gradle ktlintCheck
