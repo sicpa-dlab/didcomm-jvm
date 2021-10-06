@@ -202,4 +202,4 @@ PRs are welcome!
 
 The following CI checks are run against every PR:
 - all tests must pass
-- code style ios analyzed using ktlint.
+- code style is analyzed using ktlint.

@@ -291,14 +291,14 @@ class DIDCommDemoTest {
         )
         println("Sending ${packResultCharlie.packedMessage} to ${packResultCharlie.serviceMetadata?.serviceEndpoint ?: ""} for Charlie")
 
-        val unpackCharlie = didComm.unpack(
+        val unpackResultCharlie = didComm.unpack(
             UnpackParams.Builder(packResultCharlie.packedMessage)
                 .secretResolver(CharlieSecretResolverMock())
                 .build()
         )
-        println("Charlie got ${unpackCharlie.message} message")
+        println("Charlie got ${unpackResultCharlie.message} message")
 
-        with(unpackCharlie.metadata) {
+        with(unpackResultCharlie.metadata) {
             assertTrue { encrypted }
             assertTrue { authenticated }
             assertTrue { nonRepudiation }
@@ -307,9 +307,9 @@ class DIDCommDemoTest {
         }
 
         val unpackMessageBob = unpackResultBob.message.copy(to = null)
-        val unpackMessageCharlie = unpackCharlie.message.copy(to = null)
-        val unpackMetadataBob = unpackCharlie.metadata.copy(encryptedTo = null, signedMessage = null)
-        val unpackMetadataCharlie = unpackCharlie.metadata.copy(encryptedTo = null, signedMessage = null)
+        val unpackMessageCharlie = unpackResultCharlie.message.copy(to = null)
+        val unpackMetadataBob = unpackResultCharlie.metadata.copy(encryptedTo = null, signedMessage = null)
+        val unpackMetadataCharlie = unpackResultCharlie.metadata.copy(encryptedTo = null, signedMessage = null)
         assertEquals(unpackMessageBob, unpackMessageCharlie)
         assertEquals(unpackMetadataBob, unpackMetadataCharlie)
     }
