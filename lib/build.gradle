@@ -35,6 +35,23 @@ sourceSets {
     }
 }
 
+task group {
+    doLast {
+        println(project.group)
+    }
+}
+
+task artifactId {
+    doLast {
+        println(project.artifactId)
+    }
+}
+
+task version {
+    doLast {
+        println(version)
+    }
+}
 
 test {
     useJUnitPlatform()
@@ -57,24 +74,6 @@ jmh {
     iterations = 1
     fork = 1
     includeTests = true
-}
-
-task group {
-    doLast {
-        println(project.group)
-    }
-}
-
-task artifactId {
-    doLast {
-        println(project.artifactId)
-    }
-}
-
-task version {
-    doLast {
-        println(version)
-    }
 }
 
 // publishing
@@ -160,4 +159,3 @@ shadowJar {
 
     archiveClassifier.set("") // remove suffix `-all` as intellij can"t find the library otherwise
 }
-
