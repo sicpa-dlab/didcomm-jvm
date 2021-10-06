@@ -196,7 +196,6 @@ class PlaintextMessageTest {
             .nbf(987654321)
             .iat(1234554321)
             .jti("jti")
-            .issKid("issKid")
             .build()
 
         val attachments = listOf(
