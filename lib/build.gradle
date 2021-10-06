@@ -1,6 +1,6 @@
 plugins {
-    id 'java-library'
-    id 'org.jetbrains.kotlin.jvm'
+    id "java-library"
+    id "org.jetbrains.kotlin.jvm"
     id "org.jlleitschuh.gradle.ktlint" version "${ktlintGradle}"
     id "me.champeau.jmh" version "0.6.6"
     // publishing
@@ -53,7 +53,7 @@ jmh {
     benchmarkMode = ["thrpt", "avgt"]
     warmupIterations = 0
     operationsPerInvocation = 1
-    timeUnit = 'ms'
+    timeUnit = "ms"
     iterations = 1
     fork = 1
     includeTests = true
@@ -91,27 +91,25 @@ publishing {
             from components.java
 
             pom {
-                name = 'DIDComm'
-                description = 'DIDComm for Java/Kotlin'
-                url = 'https://github.com/sicpa-dlab/didcomm-jvm'
+                name = "DIDComm"
+                description = "DIDComm for Java/Kotlin"
+                url = "https://github.com/sicpa-dlab/didcomm-jvm"
                 licenses {
                     license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
                     }
                 }
                 developers {
-                    // TODO
                     developer {
-                        id = ''
-                        name = ''
-                        email = ''
+                        name = "SICPA"
+                        email = "DLCHOpenSourceContrib@sicpa.com"
                     }
                 }
                 scm {
-                    connection = 'scm:git:git://sicpa-dlab/didcomm-jvm.git'
-                    developerConnection = 'scm:git:ssh://sicpa-dlab/didcomm-jvm.git'
-                    url = 'https://github.com/sicpa-dlab/didcomm-jvm'
+                    connection = "scm:git:git://sicpa-dlab/didcomm-jvm.git"
+                    developerConnection = "scm:git:ssh://sicpa-dlab/didcomm-jvm.git"
+                    url = "https://github.com/sicpa-dlab/didcomm-jvm"
                 }
             }
 
@@ -125,30 +123,32 @@ publishing {
             def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
             def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
 
-            name = 'mavenOSSRH'
+            name = "mavenOSSRH"
             credentials(PasswordCredentials)
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            url = version.endsWith("SNAPSHOT") ? snapshotsRepoUrl : releasesRepoUrl
         }
     }
 }
 
 signing {
-    // ORG_GRADLE_PROJECT_signingKeyId=<gpg-signingKeyId>
+    // ORG_GRADLE_PROJECT_signingKeyId=<gpg-signingKeyId> - in case of a sub-key
     // ORG_GRADLE_PROJECT_signingKey=<gpg-signingKey>
     // ORG_GRADLE_PROJECT_signingPassword=<gpg-signingPassword>
-    def signingKeyId = findProperty("signingKeyId")
+
     def signingKey = findProperty("signingKey")
     def signingPassword = findProperty("signingPassword")
-    useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+    // NOTE Maven Central doesn't support sub-keys so we have to use primary one
+    //def signingKeyId = findProperty("signingKeyId")
+    // useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+    useInMemoryPgpKeys(signingKey, signingPassword)
 
-    // TODO test signing
     sign publishing.publications.maven
 }
 
 
 javadoc {
     if(JavaVersion.current().isJava9Compatible()) {
-        options.addBooleanOption('html5', true)
+        options.addBooleanOption("html5", true)
     }
 }
 
