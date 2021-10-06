@@ -22,7 +22,12 @@ fun unpack(params: UnpackParams, keySelector: RecipientKeySelector): UnpackResul
     val msg = when (val parseResult = parse(params.packedMessage)) {
         is ParseResult.JWS -> parseResult.unpack(keySelector, metadataBuilder)
         is ParseResult.JWE -> parseResult.unpack(keySelector, params.expectDecryptByAllKeys, metadataBuilder)
-        is ParseResult.JWM -> parseResult.message
+        is ParseResult.JWM -> {
+            metadataBuilder.fromPriorJwt(parseResult.message.fromPriorJwt)
+            val (updatedMessage, fromPriorIssuerKid) = unpackFromPrior(parseResult.message, keySelector)
+            metadataBuilder.fromPriorIssuerKid(fromPriorIssuerKid)
+            updatedMessage
+        }
     }
 
     return UnpackResult(msg, metadataBuilder.build())
