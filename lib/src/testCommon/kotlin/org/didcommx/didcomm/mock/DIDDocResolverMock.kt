@@ -298,7 +298,9 @@ class DIDDocResolverMock : DIDDocResolver {
 
             DIDDoc(
                 did = "did:example:charlie",
-                authentications = listOf(),
+                authentications = listOf(
+                    "did:example:charlie#key-ed25519-1"
+                ),
                 keyAgreements = listOf(
                     "did:example:charlie#key-x25519-1",
                     "did:example:charlie#key-x25519-2",
@@ -306,6 +308,22 @@ class DIDDocResolverMock : DIDDocResolver {
                 ),
                 didCommServices = listOf(),
                 verificationMethods = listOf(
+                    VerificationMethod(
+                        id = "did:example:charlie#key-ed25519-1",
+                        controller = "did:example:charlie#key-ed25519-1",
+                        type = VerificationMethodType.JSON_WEB_KEY_2020,
+                        verificationMaterial = VerificationMaterial(
+                            VerificationMaterialFormat.JWK,
+                            """
+                                {
+                                   "kty":"OKP",
+                                   "crv":"Ed25519",
+                                   "x":"G-boxFB6vOZBu-wXkm-9Lh79I8nf9Z50cILaOgKKGww"
+                                }
+                            """.trimIndent()
+                        )
+                    ),
+
                     VerificationMethod(
                         id = "did:example:charlie#key-x25519-1",
                         controller = "did:example:charlie#key-x25519-1",
