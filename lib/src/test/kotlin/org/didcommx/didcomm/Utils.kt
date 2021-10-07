@@ -16,6 +16,7 @@ import org.didcommx.didcomm.mock.CharlieSecretResolverMock
 import org.didcommx.didcomm.mock.Mediator1SecretResolverMock
 import org.didcommx.didcomm.mock.Mediator2SecretResolverMock
 import org.didcommx.didcomm.mock.SecretResolverInMemoryMock
+import org.didcommx.didcomm.secret.Secret
 
 enum class Person(num: Int) {
     ALICE(1),
@@ -41,11 +42,11 @@ val DIDDocsSpec = mapOf(
     Person.MEDIATOR2 to Pair(DID_DOC_MEDIATOR2, Mediator2SecretResolverMock()),
 )
 
-private fun getDIDDoc(person: Person): DIDDoc {
+internal fun getDIDDoc(person: Person): DIDDoc {
     return DIDDocsSpec.getValue(person).first
 }
 
-private fun getSecretsResolver(person: Person): SecretResolverInMemoryMock {
+internal fun getSecretsResolver(person: Person): SecretResolverInMemoryMock {
     return DIDDocsSpec.getValue(person).second
 }
 
@@ -67,7 +68,10 @@ fun getAuthMethodsNotInSecrets(person: Person): List<VerificationMethod> {
     }
 }
 
-fun getKeyAgreementMethodsInSecrets(person: Person, type: KeyAgreementCurveType = KeyAgreementCurveType.ALL): List<VerificationMethod> {
+fun getKeyAgreementMethodsInSecrets(
+    person: Person,
+    type: KeyAgreementCurveType = KeyAgreementCurveType.ALL
+): List<VerificationMethod> {
     val didDoc = getDIDDoc(person)
     val secretsResolver = getSecretsResolver(person)
     return didDoc.verificationMethods.filter { vm ->
@@ -77,7 +81,10 @@ fun getKeyAgreementMethodsInSecrets(person: Person, type: KeyAgreementCurveType 
     }
 }
 
-fun getKeyAgreementMethodsNotInSecrets(person: Person, type: KeyAgreementCurveType = KeyAgreementCurveType.ALL): List<VerificationMethod> {
+fun getKeyAgreementMethodsNotInSecrets(
+    person: Person,
+    type: KeyAgreementCurveType = KeyAgreementCurveType.ALL
+): List<VerificationMethod> {
     val didDoc = getDIDDoc(person)
     val secretsResolver = getSecretsResolver(person)
     return didDoc.verificationMethods.filter { vm ->
@@ -85,6 +92,45 @@ fun getKeyAgreementMethodsNotInSecrets(person: Person, type: KeyAgreementCurveTy
             didDoc.keyAgreements.contains(vm.id) &&
             (type == KeyAgreementCurveType.ALL || type == mapCureToType(vm))
     }
+}
+
+fun getKeyAgreementMethods(
+    person: Person,
+    type: KeyAgreementCurveType = KeyAgreementCurveType.ALL
+): List<VerificationMethod> {
+    val didDoc = getDIDDoc(person)
+    return didDoc.verificationMethods.filter { vm ->
+        didDoc.keyAgreements.contains(vm.id) &&
+            (type == KeyAgreementCurveType.ALL || type == mapCureToType(vm))
+    }
+}
+
+fun getKeyAgreementSecrets(person: Person, type: KeyAgreementCurveType = KeyAgreementCurveType.ALL): List<Secret> {
+    val didDoc = getDIDDoc(person)
+    val secretsResolver = getSecretsResolver(person)
+
+    return secretsResolver.getSecrets().filter { s ->
+        didDoc.keyAgreements.contains(s.kid) &&
+            (type == KeyAgreementCurveType.ALL || type == mapCureToType(s))
+    }
+}
+
+private fun mapCureToType(vm: Secret): KeyAgreementCurveType {
+    if (
+        vm.type == VerificationMethodType.JSON_WEB_KEY_2020 &&
+        vm.verificationMaterial.format == VerificationMaterialFormat.JWK
+    ) {
+        val jwk = JSONObjectUtils.parse(vm.verificationMaterial.value)
+        if (jwk["crv"] == "X25519")
+            return KeyAgreementCurveType.X25519
+        if (jwk["crv"] == "P-256")
+            return KeyAgreementCurveType.P256
+        if (jwk["crv"] == "P-384")
+            return KeyAgreementCurveType.P384
+        if (jwk["crv"] == "P-521")
+            return KeyAgreementCurveType.P521
+    }
+    throw IllegalArgumentException("Unknown verification methods curve type: $vm")
 }
 
 private fun mapCureToType(vm: VerificationMethod): KeyAgreementCurveType {

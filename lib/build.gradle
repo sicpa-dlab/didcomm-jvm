@@ -26,6 +26,7 @@ dependencies {
     implementation "com.google.crypto.tink:tink:${googleTinkVersion}"
     testImplementation "org.jetbrains.kotlin:kotlin-test"
     testImplementation "org.junit.jupiter:junit-jupiter:${jUnitJupiter}"
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
     testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     testImplementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonKotlinVersion}"
 }
