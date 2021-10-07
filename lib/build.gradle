@@ -6,6 +6,9 @@ plugins {
     // publishing
     id 'maven-publish'
     id 'signing'
+
+    // TODO: remove once published to Maven
+    id "com.github.johnrengelman.shadow" version "${johnrengelmanShadow}"
 }
 
 group = "org.didcommx.didcomm"
@@ -148,5 +151,14 @@ javadoc {
     if(JavaVersion.current().isJava9Compatible()) {
         options.addBooleanOption('html5', true)
     }
+}
+
+// TODO: remove once published to Maven
+shadowJar {
+    // @see https://youtrack.jetbrains.com/issue/KT-25709
+    exclude("**/*.kotlin_metadata")
+    exclude("**/*.kotlin_builtins")
+
+    archiveClassifier.set("") // remove suffix `-all` as intellij can"t find the library otherwise
 }
 

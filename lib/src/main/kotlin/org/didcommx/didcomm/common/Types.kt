@@ -17,9 +17,11 @@ enum class Typ(val typ: String) {
 
 enum class VerificationMethodType {
     JSON_WEB_KEY_2020,
-    X25519_KEY_AGREEMENT_KEY_2019,
-    ED25519_VERIFICATION_KEY_2018,
-    ECDSA_SECP_256K1_VERIFICATION_KEY_2019,
+//    X25519_KEY_AGREEMENT_KEY_2019, - not supported now
+//    X25519_KEY_AGREEMENT_KEY_2020, - not supported now
+//    ED25519_VERIFICATION_KEY_2018, - not supported now
+//    ED25519_VERIFICATION_KEY_2020, - not supported now
+//    ECDSA_SECP_256K1_VERIFICATION_KEY_2019, - not supported now
     OTHER
 }
 
@@ -30,6 +32,7 @@ data class VerificationMaterial(
 
 enum class VerificationMaterialFormat {
     JWK,
-    BASE58,
-    OTHER
+//    BASE58, - not supported now
+//    MULTIBASE, - not supported now
+//    OTHER - not supported now
 }

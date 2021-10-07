@@ -121,39 +121,39 @@ data class Message(
     }
 
     class Builder(val id: String, val body: Map<String, Any?>, val type: String) {
-        var typ: Typ = Typ.Plaintext
+        internal var typ: Typ = Typ.Plaintext
 
-        var from: String? = null
+        internal var from: String? = null
             private set
 
-        var to: List<String>? = null
+        internal var to: List<String>? = null
             private set
 
-        var createdTime: Long? = null
+        internal var createdTime: Long? = null
             private set
 
-        var expiresTime: Long? = null
+        internal var expiresTime: Long? = null
             private set
 
-        var customHeaders: MutableMap<String, Any?> = mutableMapOf()
+        internal var customHeaders: MutableMap<String, Any?> = mutableMapOf()
             private set
 
-        var attachments: List<Attachment>? = null
+        internal var attachments: List<Attachment>? = null
             private set
 
-        var fromPrior: FromPrior? = null
+        internal var fromPrior: FromPrior? = null
             private set
 
-        var pleaseAck: Boolean? = null
+        internal var pleaseAck: Boolean? = null
             private set
 
-        var ack: String? = null
+        internal var ack: String? = null
             private set
 
-        var thid: String? = null
+        internal var thid: String? = null
             private set
 
-        var pthid: String? = null
+        internal var pthid: String? = null
             private set
 
         fun from(from: String?) = apply {
