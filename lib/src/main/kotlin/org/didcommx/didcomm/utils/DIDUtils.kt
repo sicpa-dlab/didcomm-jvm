@@ -14,5 +14,5 @@ fun isDID(str: String): Boolean {
 
 fun calculateAPV(kids: List<String>): Base64URL? {
     val digest = MessageDigest.getInstance("SHA-256")
-    return Base64URL.encode(digest.digest(kids.joinToString(".").encodeToByteArray()))
+    return Base64URL.encode(digest.digest(kids.sorted().joinToString(".").encodeToByteArray()))
 }
