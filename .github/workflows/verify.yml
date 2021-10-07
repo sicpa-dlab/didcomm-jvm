@@ -5,7 +5,7 @@ on: [ pull_request ]
 
 jobs:
 
-  check-version-bumped:
+  release-ready:
     name: Check is ready for release
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'stable'
@@ -20,6 +20,12 @@ jobs:
           echo "::set-output name=current_version::$version"
         shell: bash
 
+      - name: Check version format
+        run: |
+          # verify the version has "MAJOR.MINOR.PATCH" parts only
+          echo "${{ steps.current_version.outputs.current_version }}" | grep -e '^[0-9]\+\.[0-9]\+\.[0-9]\+$'
+        shell: bash
+
       # TODO improve (DRY): copy-paste from release.yml
       - name: Get release info
         id: release_info
@@ -30,7 +36,7 @@ jobs:
           echo "$release_info"
         shell: bash
 
-      - name: check version bumped
+      - name: Check version bumped
         # TODO check if greater than latest tag / release (?)
         if: steps.release_info.outputs.release_info
         run: exit 1
@@ -48,7 +54,7 @@ jobs:
           ls lib/build/libs
         shell: bash
 
-  test:
+  unit:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
@@ -64,10 +70,9 @@ jobs:
           java-version: 8
 
       - name: Execute tests
-        run: |
-          gradle test
+        run: gradle test
 
-  lint:
+  static-ktlint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -79,5 +84,4 @@ jobs:
           java-version: 8
 
       - name: check code
-        run: |
-          gradle ktlintCheck
+        run: gradle ktlintCheck

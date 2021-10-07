@@ -137,8 +137,7 @@ jobs:
           ORG_GRADLE_PROJECT_mavenOSSRHUsername: ${{ secrets.MAVEN_USERNAME }}
           ORG_GRADLE_PROJECT_mavenOSSRHPassword: ${{ secrets.MAVEN_PASSWORD }}
           # creds of for an ascii-armored GPG subkey to sign for Maven
-          # https://docs.gradle.org/current/userguide/signing_plugin.html#using_in_memory_ascii_armored_openpgp_subkeys
-          ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.MAVEN_GPG_ARMORED_KEY_ID }}
+          # https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.MAVEN_GPG_ARMORED_KEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.MAVEN_GPG_PASSWORD }}
         run: gradle publish
