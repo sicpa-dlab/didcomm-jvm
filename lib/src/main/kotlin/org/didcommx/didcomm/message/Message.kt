@@ -19,6 +19,7 @@ data class Message(
     val createdTime: Long?,
     val expiresTime: Long?,
     val fromPrior: FromPrior?,
+    val fromPriorJwt: String?,
     val attachments: List<Attachment>?,
     val pleaseAck: Boolean?,
     val ack: String?,
@@ -40,6 +41,7 @@ data class Message(
         builder.createdTime,
         builder.expiresTime,
         builder.fromPrior,
+        builder.fromPriorJwt,
         builder.attachments,
         builder.pleaseAck,
         builder.ack,
@@ -107,7 +109,7 @@ data class Message(
                     Header.CreatedTime -> builder.createdTime(json.getTyped(it))
                     Header.ExpiresTime -> builder.expiresTime(json.getTyped(it))
                     Header.Attachments -> builder.attachments(Attachment.parse(json.getTypedArray(Header.Attachments)))
-                    Header.FromPrior -> builder.fromPrior(FromPrior.parse(json.getTyped(it)))
+                    Header.FromPrior -> builder.fromPriorJwt(json.getTyped(it))
                     Header.PleaseAck -> builder.pleaseAck(json.getTyped(it))
                     Header.Ack -> builder.ack(json.getTyped(it))
                     Header.Thid -> builder.thid(json.getTyped(it))
@@ -144,6 +146,9 @@ data class Message(
         internal var fromPrior: FromPrior? = null
             private set
 
+        internal var fromPriorJwt: String? = null
+            private set
+
         internal var pleaseAck: Boolean? = null
             private set
 
@@ -170,6 +175,7 @@ data class Message(
         fun createdTime(createdTime: Long?) = apply { this.createdTime = createdTime }
         fun expiresTime(expiresTime: Long?) = apply { this.expiresTime = expiresTime }
         fun fromPrior(fromPrior: FromPrior?) = apply { this.fromPrior = fromPrior }
+        fun fromPriorJwt(fromPriorJwt: String?) = apply { this.fromPriorJwt = fromPriorJwt }
         fun attachments(attachments: List<Attachment>?) = apply { this.attachments = attachments }
         fun pleaseAck(pleaseAck: Boolean?) = apply { this.pleaseAck = pleaseAck }
         fun ack(ack: String?) = apply { this.ack = ack }
@@ -195,12 +201,11 @@ data class Message(
         Header.ExpiresTime to expiresTime,
         Header.Body to body,
         Header.Attachments to attachments?.map { it.toJSONObject() },
-        Header.FromPrior to fromPrior,
+        Header.FromPrior to fromPriorJwt,
         Header.PleaseAck to pleaseAck,
         Header.Ack to ack,
         Header.Thid to thid,
         Header.Pthid to pthid,
-        Header.FromPrior to fromPrior?.toJSONObject(),
         *customHeaders.entries.map { Pair(it.key, it.value) }.toTypedArray()
     ).filterValues { it != null }
 

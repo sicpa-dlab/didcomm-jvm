@@ -11,8 +11,7 @@ data class FromPrior(
     val exp: Long?,
     val nbf: Long?,
     val iat: Long?,
-    val jti: String?,
-    val issKid: String?
+    val jti: String?
 ) {
     private constructor(builder: Builder) : this(
         builder.iss,
@@ -21,8 +20,7 @@ data class FromPrior(
         builder.exp,
         builder.nbf,
         builder.iat,
-        builder.jti,
-        builder.issKid
+        builder.jti
     )
 
     companion object {
@@ -35,7 +33,6 @@ data class FromPrior(
                 const val Nbf = "nbf"
                 const val Iat = "iat"
                 const val Jti = "jti"
-                const val IssKid = "iss_kid"
             }
         }
 
@@ -58,7 +55,6 @@ data class FromPrior(
                     Header.Nbf -> builder.nbf(json.getTyped(it))
                     Header.Iat -> builder.iat(json.getTyped(it))
                     Header.Jti -> builder.jti(json.getTyped(it))
-                    Header.IssKid -> builder.issKid(json.getTyped(it))
                     else -> throw MalformedMessageException("Unknown from_prior's header: $it")
                 }
             }
@@ -83,15 +79,11 @@ data class FromPrior(
         internal var jti: String? = null
             private set
 
-        internal var issKid: String? = null
-            private set
-
         fun aud(aud: String?) = apply { this.aud = aud }
         fun exp(exp: Long?) = apply { this.exp = exp }
         fun nbf(nbf: Long?) = apply { this.nbf = nbf }
         fun iat(iat: Long?) = apply { this.iat = iat }
         fun jti(jti: String?) = apply { this.jti = jti }
-        fun issKid(issKid: String?) = apply { this.issKid = issKid }
 
         fun build() = FromPrior(this)
     }
@@ -104,7 +96,6 @@ data class FromPrior(
         Header.Nbf to nbf,
         Header.Iat to iat,
         Header.Jti to jti,
-        Header.IssKid to issKid,
     ).filterValues { it != null }
 
     override fun toString(): String =

@@ -27,6 +27,7 @@ data class UnpackResult(val message: Message, val metadata: Metadata)
  *                              if the message has been authenticated and encrypted.
  * @property encryptedTo        Target key IDS for encryption if the message has been encrypted.
  * @property signFrom           Key ID used for signature if the message has been signed.
+ * @property fromPriorIssuerKid Identifier (DID URL) of FromPrior issuer key
  * @property encAlgAuth         Algorithm used for authentication encryption if the message has been authenticated and encrypted.
  * @property encAlgAnon         Algorithm used for anonymous encryption if the message has been encrypted but not authenticated.
  * @property signAlg            Signature algorithm in case of non-repudiation.
@@ -41,10 +42,12 @@ data class Metadata(
     val encryptedTo: List<String>? = null,
     val encryptedFrom: String? = null,
     val signFrom: String? = null,
+    val fromPriorIssuerKid: String? = null,
     val encAlgAuth: AuthCryptAlg? = null,
     val encAlgAnon: AnonCryptAlg? = null,
     val signAlg: SignAlg? = null,
-    val signedMessage: Map<String, Any>? = null
+    val signedMessage: Map<String, Any>? = null,
+    val fromPriorJwt: String? = null
 ) {
     constructor(builder: Builder) : this(
         builder.encrypted,
@@ -55,10 +58,12 @@ data class Metadata(
         builder.encryptedTo,
         builder.encryptedFrom,
         builder.signFrom,
+        builder.fromPriorIssuerKid,
         builder.encAlgAuth,
         builder.encAlgAnon,
         builder.signAlg,
-        builder.signedMessage
+        builder.signedMessage,
+        builder.fromPriorJwt
     )
 
     class Builder {
@@ -86,6 +91,9 @@ data class Metadata(
         var signFrom: String? = null
             private set
 
+        var fromPriorIssuerKid: String? = null
+            private set
+
         var encAlgAuth: AuthCryptAlg? = null
             private set
 
@@ -98,6 +106,9 @@ data class Metadata(
         var signedMessage: Map<String, Any>? = null
             private set
 
+        var fromPriorJwt: String? = null
+            private set
+
         fun encrypted(encrypted: Boolean) = apply { this.encrypted = encrypted }
         fun authenticated(authenticated: Boolean) = apply { this.authenticated = authenticated }
         fun nonRepudiation(nonRepudiation: Boolean) = apply { this.nonRepudiation = nonRepudiation }
@@ -106,10 +117,12 @@ data class Metadata(
         fun encryptedTo(encryptedTo: List<String>) = apply { this.encryptedTo = encryptedTo }
         fun encryptedFrom(encryptedFrom: String?) = apply { this.encryptedFrom = encryptedFrom }
         fun signFrom(signFrom: String?) = apply { this.signFrom = signFrom }
+        fun fromPriorIssuerKid(fromPriorIssuerKid: String?) = apply { this.fromPriorIssuerKid = fromPriorIssuerKid }
         fun encAlgAuth(encAlgAuth: AuthCryptAlg) = apply { this.encAlgAuth = encAlgAuth }
         fun encAlgAnon(encAlgAnon: AnonCryptAlg) = apply { this.encAlgAnon = encAlgAnon }
         fun signAlg(signAlg: SignAlg) = apply { this.signAlg = signAlg }
         fun signedMessage(signedMessage: Map<String, Any>) = apply { this.signedMessage = signedMessage }
+        fun fromPriorJwt(fromPriorJwt: String?) = apply { this.fromPriorJwt = fromPriorJwt }
 
         fun build() = Metadata(this)
     }

@@ -8,12 +8,12 @@ import org.didcommx.didcomm.crypto.key.SenderKeySelector
 import org.didcommx.didcomm.crypto.sign
 import org.didcommx.didcomm.model.PackEncryptedParams
 
-fun signIfNeeded(params: PackEncryptedParams, keySelector: SenderKeySelector) =
+fun signIfNeeded(message: String, params: PackEncryptedParams, keySelector: SenderKeySelector) =
     if (params.signFrom != null) {
         val key = keySelector.findSigningKey(params.signFrom)
-        Pair(sign(params.message.toString(), key), key.id)
+        Pair(sign(message, key), key.id)
     } else {
-        Pair(params.message.toString(), null)
+        Pair(message, null)
     }
 
 fun encrypt(params: PackEncryptedParams, payload: String, keySelector: SenderKeySelector) =

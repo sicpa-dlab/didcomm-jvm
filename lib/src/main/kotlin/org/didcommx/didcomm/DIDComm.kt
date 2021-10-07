@@ -16,6 +16,7 @@ import org.didcommx.didcomm.model.PackSignedResult
 import org.didcommx.didcomm.model.UnpackParams
 import org.didcommx.didcomm.model.UnpackResult
 import org.didcommx.didcomm.operations.encrypt
+import org.didcommx.didcomm.operations.packFromPrior
 import org.didcommx.didcomm.operations.protectSenderIfNeeded
 import org.didcommx.didcomm.operations.signIfNeeded
 import org.didcommx.didcomm.operations.unpack
@@ -42,7 +43,13 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
      * @return Result of Pack Plaintext Operation.
      */
     fun packPlaintext(params: PackPlaintextParams): PackPlaintextResult {
-        return PackPlaintextResult(params.message.toString())
+        val didDocResolver = params.didDocResolver ?: this.didDocResolver
+        val secretResolver = params.secretResolver ?: this.secretResolver
+        val senderKeySelector = SenderKeySelector(didDocResolver, secretResolver)
+
+        val (message, fromPriorIssuerKid) = packFromPrior(params.message, params.fromPriorIssuerKid, senderKeySelector)
+
+        return PackPlaintextResult(message.toString(), fromPriorIssuerKid)
     }
 
     /**
@@ -73,10 +80,11 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         val secretResolver = params.secretResolver ?: this.secretResolver
         val senderKeySelector = SenderKeySelector(didDocResolver, secretResolver)
 
-        val key = senderKeySelector.findSigningKey(params.signFrom)
-        val msg = sign(params.message.toString(), key)
+        val (message, fromPriorIssuerKid) = packFromPrior(params.message, params.fromPriorIssuerKid, senderKeySelector)
+        val signFromKey = senderKeySelector.findSigningKey(params.signFrom)
+        val msg = sign(message.toString(), signFromKey)
 
-        return PackSignedResult(msg, key.id)
+        return PackSignedResult(msg, signFromKey.id, fromPriorIssuerKid)
     }
 
     /**
@@ -137,11 +145,18 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         val secretResolver = params.secretResolver ?: this.secretResolver
         val senderKeySelector = SenderKeySelector(didDocResolver, secretResolver)
 
-        val (payload, signFrom) = signIfNeeded(params, senderKeySelector)
+        val (message, fromPriorIssuerKid) = packFromPrior(params.message, params.fromPriorIssuerKid, senderKeySelector)
+        val (payload, signFromKid) = signIfNeeded(message.toString(), params, senderKeySelector)
         val (encryptedResult, recipientKeys) = encrypt(params, payload, senderKeySelector)
         val (packedMessage) = protectSenderIfNeeded(params, encryptedResult, recipientKeys)
 
-        return PackEncryptedResult(packedMessage, encryptedResult.toKids, encryptedResult.fromKid, signFrom)
+        return PackEncryptedResult(
+            packedMessage,
+            encryptedResult.toKids,
+            encryptedResult.fromKid,
+            signFromKid,
+            fromPriorIssuerKid
+        )
     }
 
     /**

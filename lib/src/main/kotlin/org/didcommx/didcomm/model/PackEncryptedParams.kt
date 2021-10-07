@@ -8,6 +8,7 @@ import org.didcommx.didcomm.message.Message
 import org.didcommx.didcomm.secret.SecretResolver
 import org.didcommx.didcomm.utils.divideDIDFragment
 import org.didcommx.didcomm.utils.isDID
+import org.didcommx.didcomm.utils.isDIDFragment
 
 /**
  * Pack Encrypted Message Parameters
@@ -17,6 +18,7 @@ data class PackEncryptedParams(
     val to: String,
     val from: String?,
     val signFrom: String?,
+    val fromPriorIssuerKid: String?,
     val encAlgAuth: AuthCryptAlg,
     val encAlgAnon: AnonCryptAlg,
     val protectSenderId: Boolean,
@@ -31,6 +33,7 @@ data class PackEncryptedParams(
         builder.to,
         builder.from,
         builder.signFrom,
+        builder.fromPriorIssuerKid,
         builder.encAlgAuth,
         builder.encAlgAnon,
         builder.protectSenderId,
@@ -56,6 +59,9 @@ data class PackEncryptedParams(
             private set
 
         internal var signFrom: String? = null
+            private set
+
+        internal var fromPriorIssuerKid: String? = null
             private set
 
         internal var didDocResolver: DIDDocResolver? = null
@@ -90,6 +96,14 @@ data class PackEncryptedParams(
          * @return This builder.
          */
         fun signFrom(signFrom: String) = apply { this.signFrom = signFrom }
+
+        /**
+         * Sets Optional FromPrior issuer kid.
+         *
+         * @param fromPriorIssuerKid FromPrior issuer kid
+         * @return This builder.
+         */
+        fun fromPriorIssuerKid(fromPriorIssuerKid: String) = apply { this.fromPriorIssuerKid = fromPriorIssuerKid }
 
         /**
          * Sets Optional DIDDoc resolver that can override a default DIDDoc resolver.
@@ -176,6 +190,7 @@ data class PackEncryptedParams(
             val from = this.from
             val to = this.to
             val signFrom = this.signFrom
+            val fromPriorIssuerKid = this.fromPriorIssuerKid
 
             if (!isDID(to))
                 throw DIDCommIllegalArgumentException(to)
@@ -191,6 +206,22 @@ data class PackEncryptedParams(
 
             if (from != null && this.message.from != null && this.message.from != divideDIDFragment(from).first())
                 throw DIDCommIllegalArgumentException(from)
+
+            if (fromPriorIssuerKid != null && (!isDID(fromPriorIssuerKid) || !isDIDFragment(fromPriorIssuerKid)))
+                throw DIDCommIllegalArgumentException(fromPriorIssuerKid)
+
+            if (message.fromPrior != null) {
+                if (message.fromPrior.sub == message.fromPrior.iss)
+                    throw DIDCommIllegalArgumentException(message.fromPrior.sub)
+
+                if (message.from != null && message.fromPrior.sub != message.from)
+                    throw DIDCommIllegalArgumentException(message.fromPrior.sub)
+
+                if (fromPriorIssuerKid != null &&
+                    divideDIDFragment(fromPriorIssuerKid).first() != message.fromPrior.iss
+                )
+                    throw DIDCommIllegalArgumentException(fromPriorIssuerKid)
+            }
 
             return PackEncryptedParams(this)
         }
