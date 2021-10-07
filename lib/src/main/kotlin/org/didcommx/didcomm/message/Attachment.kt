@@ -169,22 +169,22 @@ data class Attachment(
     }
 
     class Builder(val id: String, val data: Data) {
-        var filename: String? = null
+        internal var filename: String? = null
             private set
 
-        var format: String? = null
+        internal var format: String? = null
             private set
 
-        var lastModTime: Long? = null
+        internal var lastModTime: Long? = null
             private set
 
-        var description: String? = null
+        internal var description: String? = null
             private set
 
-        var mediaType: String? = null
+        internal var mediaType: String? = null
             private set
 
-        var byteCount: Long? = null
+        internal var byteCount: Long? = null
             private set
 
         fun filename(filename: String?) = apply { this.filename = filename }

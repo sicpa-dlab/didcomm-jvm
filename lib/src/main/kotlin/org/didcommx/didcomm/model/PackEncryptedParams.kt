@@ -55,37 +55,37 @@ data class PackEncryptedParams(
      * @property to      Identifiers (DID URLs) of recipient keys used for message encryption.
      */
     class Builder(val message: Message, val to: String) {
-        var from: String? = null
+        internal var from: String? = null
             private set
 
-        var signFrom: String? = null
+        internal var signFrom: String? = null
             private set
 
-        var fromPriorIssuerKid: String? = null
+        internal var fromPriorIssuerKid: String? = null
             private set
 
-        var didDocResolver: DIDDocResolver? = null
+        internal var didDocResolver: DIDDocResolver? = null
             private set
 
-        var secretResolver: SecretResolver? = null
+        internal var secretResolver: SecretResolver? = null
             private set
 
-        var encAlgAuth: AuthCryptAlg = AuthCryptAlg.A256CBC_HS512_ECDH_1PU_A256KW
+        internal var encAlgAuth: AuthCryptAlg = AuthCryptAlg.A256CBC_HS512_ECDH_1PU_A256KW
             private set
 
-        var encAlgAnon: AnonCryptAlg = AnonCryptAlg.XC20P_ECDH_ES_A256KW
+        internal var encAlgAnon: AnonCryptAlg = AnonCryptAlg.XC20P_ECDH_ES_A256KW
             private set
 
-        var protectSenderId: Boolean = false
+        internal var protectSenderId: Boolean = false
             private set
 
-        var forward: Boolean = true
+        internal var forward: Boolean = true
             private set
 
-        var forwardHeaders: Map<String, Any>? = null
+        internal var forwardHeaders: Map<String, Any>? = null
             private set
 
-        var forwardServiceId: String? = null
+        internal var forwardServiceId: String? = null
             private set
 
         /**
