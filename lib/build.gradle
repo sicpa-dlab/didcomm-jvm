@@ -22,6 +22,7 @@ dependencies {
     implementation "com.nimbusds:nimbus-jose-jwt:${nimbusJoseJWTVersion}"
     implementation "com.google.crypto.tink:tink:${googleTinkVersion}"
     testImplementation "org.jetbrains.kotlin:kotlin-test"
+    testImplementation "org.junit.jupiter:junit-jupiter:${jUnitJupiter}"
     testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     testImplementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonKotlinVersion}"
 }

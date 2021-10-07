@@ -944,6 +944,25 @@ class JWE {
                     }
         """.trimIndent()
 
+        val ANONCRYPT_MESSAGE_P256_XC20P_EPK_WRONG_POINT = """
+                {
+                    "protected": "eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLWVuY3J5cHRlZCtqc29uIiwiYWxnIjoiRUNESC1FUytBMjU2S1ciLCJlbmMiOiJYQzIwUCIsImFwdSI6bnVsbCwiYXB2Ijoiei1McXB2VlhEYl9zR1luM21qUUxwdXUyQ1FMZXdZdVpvVFdPSVhQSDNGTSIsImVwayI6eyJjcnYiOiJQLTI1NiIsImt0eSI6IkVDIiwieCI6IkZSQW1UQmljUFZJXy1aRnF2WEJwNzZhV2pZM0gzYlpGZlhocHRUNm1ETnciLCJ5IjoiLXZ0LTFIaHRvVjBwN2xrbGIxTnRvMWRhU0lqQnV3cVZzbGIwcC1uOWRrdyJ9fQ==",
+                    "recipients": [
+                        {
+                            "header": {"kid": "did:example:bob#key-p256-1"},
+                            "encrypted_key": "scQxV9YQ4mQrUHgl6yAnBFDXNZAiIs_15bmoErUmoYm0HtuRclPoQg",
+                        },
+                        {
+                            "header": {"kid": "did:example:bob#key-p256-2"},
+                            "encrypted_key": "CqZ-HDH2j0NC-eoUueNLKyAuMQXjQyw8bJHYM2f-lxJVm3eXCdmm2g",
+                        },
+                    ],
+                    "iv": "Vg1uyuQKrU6Kw8OJK38WCpYFxW0suAP9",
+                    "ciphertext": "2nIm3xQcFR3HXbUPF1HS_D92OGVDvL0nIi6O5ol5tnMIa09NxJtbVAYIG7ZrkT9314PqXn_Rq77hgGE6FAOgO7aNYLyUJh0JCC_i2p_XOWuk20BYyBsmmRvVpg0DY3I1Lb-Vg1pT9pEy09gsMSLhbfqk0_TFJB1rcqzR8W0YZB5mX_53nMRf1ZatDEg4rDogSekWEGTBnlTNRua8-zoI4573SfgJ-ONt7Z_KbGO-sdRkmqXhfYNcbUyoMF9JSa-kraVuWHZP9hTz8-7R020EXfb4jodMWVOMMAiJYk1Cd7tetHXpLPdtuokaapofmtL_SNftAX2CB6ULf0axrHUNtvUyjAPvpgvSuvQuMrDlaXn16MQJ_q55",
+                    "tag": "etLTQvKsTvF629fykLiUDg",
+                }
+        """.trimIndent()
+
         val NEGATIVE_TEST_VECTORS = listOf(
             NegativeTestVector(
                 packedMessage = "",
@@ -1091,6 +1110,16 @@ class JWE {
                     .Builder(
                         MESSAGE_PROTECTED_HEADER_IS_NOT_BASE64_ENCODED
                     )
+                    .expectDecryptByAllKeys(true)
+                    .build()
+            ),
+
+            NegativeTestVector(
+                packedMessage = ANONCRYPT_MESSAGE_P256_XC20P_EPK_WRONG_POINT,
+                expectedThrow = MalformedMessageException::
+                class,
+                expectedMessage = "Message cannot be parsed",
+                unpackParams = UnpackParams.Builder(ANONCRYPT_MESSAGE_P256_XC20P_EPK_WRONG_POINT)
                     .expectDecryptByAllKeys(true)
                     .build()
             )
