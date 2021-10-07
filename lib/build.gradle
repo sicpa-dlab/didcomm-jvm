@@ -85,9 +85,13 @@ java {
 
 publishing {
     publications {
-        maven(MavenPublication) {
+        // TODO switch to usual jar once all deps are available in Maven
+        // maven(MavenPublication) {
+        //     from components.java
+        shadow(MavenPublication) { publication ->
+            project.shadow.component(publication)
+
             artifactId = project.artifactId
-            from components.java
 
             pom {
                 name = "DIDComm"
@@ -141,7 +145,8 @@ signing {
     // useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
     useInMemoryPgpKeys(signingKey, signingPassword)
 
-    sign publishing.publications.maven
+    // TODO switch to maven once all deps are available in Maven
+    sign publishing.publications.shadow
 }
 
 
