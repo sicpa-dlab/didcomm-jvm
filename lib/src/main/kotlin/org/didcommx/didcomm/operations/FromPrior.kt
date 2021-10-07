@@ -11,8 +11,9 @@ import org.didcommx.didcomm.exceptions.MalformedMessageException
 import org.didcommx.didcomm.message.FromPrior
 import org.didcommx.didcomm.message.Message
 
-fun packFromPrior(message: Message, fromPriorIssuerKid: String?, keySelector: SenderKeySelector):
-        Pair<Message, String?> =
+fun packFromPrior(
+    message: Message, fromPriorIssuerKid: String?, keySelector: SenderKeySelector
+): Pair<Message, String?> =
     if (message.fromPrior != null) {
         val key = keySelector.findSigningKey(fromPriorIssuerKid ?: message.fromPrior.iss)
         val updatedMessage = message.copy(
