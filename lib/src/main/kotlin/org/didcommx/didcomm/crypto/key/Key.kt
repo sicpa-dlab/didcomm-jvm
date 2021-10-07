@@ -24,9 +24,9 @@ sealed interface Key {
 
         private fun wrap(kid: String, type: VerificationMethodType, verificationMaterial: VerificationMaterial): Key = when (type) {
             VerificationMethodType.JSON_WEB_KEY_2020 -> JsonWebKey(kid, verificationMaterial)
-            VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2019 -> TODO()
-            VerificationMethodType.ED25519_VERIFICATION_KEY_2018 -> TODO()
-            VerificationMethodType.ECDSA_SECP_256K1_VERIFICATION_KEY_2019 -> TODO()
+//            VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2019 -> TODO()
+//            VerificationMethodType.ED25519_VERIFICATION_KEY_2018 -> TODO()
+//            VerificationMethodType.ECDSA_SECP_256K1_VERIFICATION_KEY_2019 -> TODO()
             VerificationMethodType.OTHER -> throw UnsupportedSecretTypeException(type.name)
         }
     }

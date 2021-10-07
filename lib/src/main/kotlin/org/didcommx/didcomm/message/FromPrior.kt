@@ -68,22 +68,22 @@ data class FromPrior(
     }
 
     class Builder(val iss: String, val sub: String) {
-        var aud: String? = null
+        internal var aud: String? = null
             private set
 
-        var exp: Long? = null
+        internal var exp: Long? = null
             private set
 
-        var nbf: Long? = null
+        internal var nbf: Long? = null
             private set
 
-        var iat: Long? = null
+        internal var iat: Long? = null
             private set
 
-        var jti: String? = null
+        internal var jti: String? = null
             private set
 
-        var issKid: String? = null
+        internal var issKid: String? = null
             private set
 
         fun aud(aud: String?) = apply { this.aud = aud }

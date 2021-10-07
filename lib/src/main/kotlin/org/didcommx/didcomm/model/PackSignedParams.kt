@@ -34,10 +34,10 @@ data class PackSignedParams(
      * @property signFrom DID or key ID the sender uses for signing.
      */
     class Builder(val message: Message, val signFrom: String) {
-        var didDocResolver: DIDDocResolver? = null
+        internal var didDocResolver: DIDDocResolver? = null
             private set
 
-        var secretResolver: SecretResolver? = null
+        internal var secretResolver: SecretResolver? = null
             private set
 
         /**

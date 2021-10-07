@@ -1,5 +1,7 @@
 package org.didcommx.didcomm.utils
 
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import com.nimbusds.jose.shaded.json.JSONArray
 import com.nimbusds.jose.util.JSONObjectUtils
 import org.didcommx.didcomm.exceptions.MalformedMessageException
@@ -23,3 +25,12 @@ inline fun <reified T> JSONArray.getTyped(key: String): Array<T?> = this.map {
 }.toTypedArray()
 
 fun Map<String, Any?>.toJSONString(): String = JSONObjectUtils.toJSONString(this)
+
+fun toJson(value: Any?) =
+    GsonBuilder().create().toJson(value)
+
+fun fromJsonToList(value: String): List<Map<String, Any>> =
+    GsonBuilder().create().fromJson(value, object : TypeToken<List<Map<String, Any>>>() {}.type)
+
+fun fromJsonToMap(value: String): Map<String, Any> =
+    GsonBuilder().create().fromJson(value, object : TypeToken<Map<String, Any>>() {}.type)
