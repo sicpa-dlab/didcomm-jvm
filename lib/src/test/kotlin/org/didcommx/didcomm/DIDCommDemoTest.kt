@@ -201,8 +201,8 @@ class DIDCommDemoTest {
 
         with(unpackResult.metadata) {
             assertTrue { nonRepudiation }
+            assertTrue { authenticated }
             assertFalse { encrypted }
-            assertFalse { authenticated }
             assertFalse { anonymousSender }
             assertFalse { reWrappedInForward }
         }

@@ -40,6 +40,7 @@ private fun ParseResult.JWS.unpack(keySelector: RecipientKeySelector, metadataBu
         .signAlg(alg)
         .signFrom(kid)
         .nonRepudiation(true)
+        .authenticated(true)
         .signedMessage(rawMessage)
 
     return message
