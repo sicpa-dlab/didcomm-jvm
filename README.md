@@ -1,6 +1,11 @@
-# didcomm-jvm
+# DIDComm JVM
 
-Basic [DIDComm v2](https://identity.foundation/didcomm-messaging/spec) support in Java/Kotlin.
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Unit Tests](https://github.com/sicpa-dlab/didcomm-jvm/workflows/verify/badge.svg)](https://github.com/sicpa-dlab/didcomm-jvm/actions/workflows/verify.yml)
+
+
+Basic [DIDComm v2](https://identity.foundation/didcomm-messaging/spec) support in Java/Kotlin and Android.
+
 
 ## Installation
 Available from Maven Central.
