@@ -110,6 +110,10 @@ publishing {
             project.shadow.component(publication)
 
             artifactId = project.artifactId
+            // the following is required only for shadow
+            // https://github.com/johnrengelman/shadow/issues/544
+            artifact sourcesJar
+            artifact javadocJar
 
             pom {
                 name = "DIDComm"
