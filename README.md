@@ -2,6 +2,29 @@
 
 Basic [DIDComm v2](https://identity.foundation/didcomm-messaging/spec) support in Java/Kotlin.
 
+## Installation
+Available from Maven Central.
+
+Gradle:
+```
+dependencies {
+  implementation 'org.didcommx:didcomm:0.1.0'
+}
+```
+
+
+Maven:
+```
+<dependency>
+  <groupId>org.didcommx</groupId>
+  <artifactId>didcomm</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
+
+## DIDComm + peerdid Demo
+See https://github.com/sicpa-dlab/didcomm-demo.
+
 ## Assumptions and Limitations
 - In order to use the library, `SecretResolver` and `DIDDocResolver` interfaces must be implemented on the application level.
   Implementation of that interfaces is out of DIDComm library scope.
@@ -25,8 +48,6 @@ Basic [DIDComm v2](https://identity.foundation/didcomm-messaging/spec) support i
   - Forward protocol is not implemented 
   - Secp256k1 is supported on JDK < 15 only
 
-## DIDComm + peerdid Demo
-See https://github.com/sicpa-dlab/didcomm-demo.
 
 ## Examples
 
