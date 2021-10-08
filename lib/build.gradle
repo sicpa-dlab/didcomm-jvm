@@ -11,7 +11,7 @@ plugins {
     id "com.github.johnrengelman.shadow" version "${johnrengelmanShadow}"
 }
 
-group = "org.didcommx.didcomm"
+group = "org.didcommx"
 version = "${version}"
 project.ext.artifactId = rootProject.name
 archivesBaseName = project.artifactId
