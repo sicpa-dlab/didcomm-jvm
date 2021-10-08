@@ -23,7 +23,12 @@ kotlin {
 
 dependencies {
     implementation "com.nimbusds:nimbus-jose-jwt:${nimbusJoseJWTVersion}"
-    implementation "com.google.crypto.tink:tink:${googleTinkVersion}"
+    shadow "com.google.crypto.tink:tink:${googleTinkVersion}"
+
+    // TODO look for a better solution
+    // currently it's a workaround for shadow of the above deps
+    testImplementation "com.google.crypto.tink:tink:${googleTinkVersion}"
+
     testImplementation "org.jetbrains.kotlin:kotlin-test"
     testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     testImplementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonKotlinVersion}"
@@ -63,6 +68,19 @@ compileKotlin {
 
 compileTestKotlin {
     kotlinOptions.jvmTarget = "${jvmTarget}"
+}
+
+// TODO: remove once necessary version of Nimbus is published to Maven
+shadowJar {
+    // @see https://youtrack.jetbrains.com/issue/KT-25709
+    exclude("**/*.kotlin_metadata")
+    exclude("**/*.kotlin_builtins")
+
+    dependencies {
+        include(dependency("com.nimbusds:nimbus-jose-jwt"))
+    }
+
+    archiveClassifier.set("") // remove suffix `-all` as intellij can"t find the library otherwise
 }
 
 // TODO tune settings
@@ -154,13 +172,4 @@ javadoc {
     if(JavaVersion.current().isJava9Compatible()) {
         options.addBooleanOption("html5", true)
     }
-}
-
-// TODO: remove once published to Maven
-shadowJar {
-    // @see https://youtrack.jetbrains.com/issue/KT-25709
-    exclude("**/*.kotlin_metadata")
-    exclude("**/*.kotlin_builtins")
-
-    archiveClassifier.set("") // remove suffix `-all` as intellij can"t find the library otherwise
 }
