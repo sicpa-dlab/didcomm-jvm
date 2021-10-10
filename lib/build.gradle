@@ -23,6 +23,7 @@ kotlin {
 
 dependencies {
     implementation "com.nimbusds:nimbus-jose-jwt:${nimbusJoseJWTVersion}"
+    implementation "com.github.multiformats:java-multibase:${javaMultibase}"
     shadow "com.google.crypto.tink:tink:${googleTinkVersion}"
 
     // TODO look for a better solution

@@ -1,5 +1,8 @@
 package org.didcommx.didcomm.exceptions
 
+import org.didcommx.didcomm.common.VerificationMaterialFormat
+import org.didcommx.didcomm.common.VerificationMethodType
+
 /**
  * The base class for all DIDComm errors and exceptions.
  *
@@ -9,11 +12,42 @@ package org.didcommx.didcomm.exceptions
 open class DIDCommException(message: String, cause: Throwable? = null) : Throwable(message, cause)
 
 /**
- * This exception SHOULD be raised if secret can not be converted to JWK format.
+ * This exception SHOULD be raised if verification method type is not supported.
+ *
+ * @param type The verification method type.
+ */
+class UnsupportedVerificationMethodTypeException(type: VerificationMethodType) :
+    DIDCommException("${type.name} verification method type is not supported")
+
+/**
+ * This exception SHOULD be raised if material format is not supported for verification method type.
+ *
+ * @param format The verification material format.
+ * @param type The verification method type.
+ */
+class UnsupportedVerificationMethodMaterialFormatException(
+    format: VerificationMaterialFormat,
+    type: VerificationMethodType
+) : DIDCommException("${format.name} material format is not supported for ${type.name} verification method type")
+
+/**
+ * This exception SHOULD be raised if secret type is not supported.
  *
  * @param type The secret type.
  */
-class UnsupportedSecretTypeException(type: String) : DIDCommException("The secret type $type is unsupported")
+class UnsupportedSecretTypeException(type: VerificationMethodType) :
+    DIDCommException("${type.name} secret type is not supported")
+
+/**
+ * This exception SHOULD be raised if material format is not supported for secret type.
+ *
+ * @param format The verification material format.
+ * @param type The secret type.
+ */
+class UnsupportedSecretMaterialFormatException(
+    format: VerificationMaterialFormat,
+    type: VerificationMethodType
+) : DIDCommException("${format.name} material format is not supported for ${type.name} secret type")
 
 /**
  * This exception SHOULD be raised if argument is illegal.
