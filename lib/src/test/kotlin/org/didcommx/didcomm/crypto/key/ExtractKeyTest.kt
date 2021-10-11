@@ -204,7 +204,7 @@ class ExtractKeyTest {
                 type = VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2020,
                 verificationMaterial = VerificationMaterial(
                     format = VerificationMaterialFormat.MULTIBASE,
-                    value = "zJhNWeSVLMYccCk7iopQW4guaSJTojqpMEELgSLhKwRr",
+                    value = "z6LSbysY2xFMRpGMhb7tFTLMpeuPRaqaWM1yECx2AtzE3KCc",
                 ),
                 controller = "did:example:dave#key-x25519-2",
             )
@@ -230,7 +230,7 @@ class ExtractKeyTest {
                 type = VerificationMethodType.ED25519_VERIFICATION_KEY_2020,
                 verificationMaterial = VerificationMaterial(
                     format = VerificationMaterialFormat.MULTIBASE,
-                    value = "zByHnpUCFb1vAfh9CFZ8ZkmUZguURW8nSw889hy6rD8L7",
+                    value = "z6MkqRYqQiSgvZQdnBytw86Qbs2ZWUkGv22od935YF4s8M7V",
                 ),
                 controller = "did:example:dave#key-ed25519-2",
             )

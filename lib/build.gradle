@@ -25,10 +25,12 @@ dependencies {
     implementation "com.nimbusds:nimbus-jose-jwt:${nimbusJoseJWTVersion}"
     implementation "com.github.multiformats:java-multibase:${javaMultibase}"
     shadow "com.google.crypto.tink:tink:${googleTinkVersion}"
+    shadow "com.zmannotes:varint:${zmanVarint}"
 
     // TODO look for a better solution
     // currently it's a workaround for shadow of the above deps
     testImplementation "com.google.crypto.tink:tink:${googleTinkVersion}"
+    testImplementation "com.zmannotes:varint:${zmanVarint}"
 
     testImplementation "org.jetbrains.kotlin:kotlin-test"
     testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"

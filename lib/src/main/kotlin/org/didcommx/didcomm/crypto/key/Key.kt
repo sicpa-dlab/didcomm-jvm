@@ -9,12 +9,15 @@ import io.ipfs.multibase.Multibase
 import org.didcommx.didcomm.common.VerificationMaterialFormat
 import org.didcommx.didcomm.common.VerificationMethodType
 import org.didcommx.didcomm.diddoc.VerificationMethod
+import org.didcommx.didcomm.exceptions.UnsupportedCurveException
 import org.didcommx.didcomm.exceptions.UnsupportedJWKException
 import org.didcommx.didcomm.exceptions.UnsupportedSecretMaterialFormatException
 import org.didcommx.didcomm.exceptions.UnsupportedSecretTypeException
 import org.didcommx.didcomm.exceptions.UnsupportedVerificationMethodMaterialFormatException
 import org.didcommx.didcomm.exceptions.UnsupportedVerificationMethodTypeException
 import org.didcommx.didcomm.secret.Secret
+import org.didcommx.didcomm.utils.Codec
+import org.didcommx.didcomm.utils.fromMulticodec
 
 sealed interface Key {
     val id: String
@@ -41,10 +44,11 @@ sealed interface Key {
                         method.verificationMaterial.format, method.type
                     )
                 val curve =
-                    if (method.type == VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2019)
-                        X25519
-                    else
-                        ED25519
+                    when (method.type) {
+                        VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2019 -> X25519
+                        VerificationMethodType.ED25519_VERIFICATION_KEY_2018 -> ED25519
+                        else -> throw UnsupportedVerificationMethodTypeException(method.type)
+                    }
                 Base58Key(method.id, curve, method.verificationMaterial.value)
             }
 
@@ -55,10 +59,11 @@ sealed interface Key {
                         method.verificationMaterial.format, method.type
                     )
                 val curve =
-                    if (method.type == VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2020)
-                        X25519
-                    else
-                        ED25519
+                    when (method.type) {
+                        VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2020 -> X25519
+                        VerificationMethodType.ED25519_VERIFICATION_KEY_2020 -> ED25519
+                        else -> throw UnsupportedVerificationMethodTypeException(method.type)
+                    }
                 MultibaseKey(method.id, curve, method.verificationMaterial.value)
             }
 
@@ -135,7 +140,21 @@ sealed interface Key {
             private set
 
         init {
-            val rawValue = Multibase.decode(materialValue)
+            val prefixedRawValue = Multibase.decode(materialValue)
+            val (codec, rawValue) = fromMulticodec(prefixedRawValue)
+
+            val expectedCodec = when (curve) {
+                X25519 -> Codec.X25519_PUB
+                ED25519 -> Codec.ED25519_PUB
+                else -> throw UnsupportedCurveException(curve)
+            }
+
+            if (codec != expectedCodec) {
+                throw IllegalArgumentException(
+                    "Multicoded prefix ${codec.prefix} is not valid for publicKeyMultibase and $curve curve"
+                )
+            }
+
             val base64URLValue = Base64URL.encode(rawValue).toString()
 
             val jwkJson: Map<String, Any> = mapOf(
