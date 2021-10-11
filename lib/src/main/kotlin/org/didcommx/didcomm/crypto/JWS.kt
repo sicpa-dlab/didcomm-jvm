@@ -25,7 +25,7 @@ import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.exceptions.UnsupportedCurveException
 import org.didcommx.didcomm.exceptions.UnsupportedJWKException
 import org.didcommx.didcomm.utils.asKey
-import java.security.InvalidAlgorithmParameterException
+import java.security.SignatureException
 
 fun sign(payload: String, key: Key): String {
     val jwk = key.jwk
@@ -52,8 +52,10 @@ fun sign(payload: String, key: Key): String {
             try {
                 sign(jwsProtectedHeader, jwsUnprotectedHeader, signer)
             } catch (e: JOSEException) {
-                if (e.cause?.cause is InvalidAlgorithmParameterException) {
-                    throw UnsupportedAlgorithm("Unsupported signature algorithm", e.cause?.cause)
+                // this can be thrown if the signature type is not supported
+                // example: curve256k1 is not supported in JDK >= 15
+                if (e.cause is SignatureException) {
+                    throw UnsupportedAlgorithm("Unsupported signature algorithm", e.cause)
                 }
                 throw DIDCommException("JWS cannot be signed", e)
             }
@@ -78,8 +80,10 @@ fun verify(signature: JWSObjectJSON.Signature, signAlg: SignAlg, key: Key) {
         if (!signature.verify(verifier))
             throw MalformedMessageException("Invalid signature")
     } catch (e: JOSEException) {
-        if (e.cause?.cause is InvalidAlgorithmParameterException) {
-            throw UnsupportedAlgorithm("Unsupported signature algorithm", e.cause?.cause)
+        // this can be thrown if the signature type is not supported
+        // example: curve256k1 is not supported in JDK >= 15
+        if (e.cause is SignatureException) {
+            throw UnsupportedAlgorithm("Unsupported signature algorithm", e.cause)
         }
         throw DIDCommException("JWS signature cannot be verified", e)
     }

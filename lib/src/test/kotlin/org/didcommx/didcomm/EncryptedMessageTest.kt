@@ -3,6 +3,7 @@ package org.didcommx.didcomm
 import com.nimbusds.jose.util.JSONObjectUtils
 import org.didcommx.didcomm.common.SignAlg
 import org.didcommx.didcomm.exceptions.MalformedMessageException
+import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.fixtures.JWE
 import org.didcommx.didcomm.fixtures.JWE.Companion.TEST_VECTORS
 import org.didcommx.didcomm.fixtures.JWM
@@ -71,22 +72,22 @@ class EncryptedMessageTest {
         }
     }
 
-//    @Test
-//    fun `Test_unsupported_exception_es256k_jdk15+`() {
-//        if (!isJDK15Plus())
-//            return
-//        val testVectors = TEST_VECTORS.filter { it.expectedMetadata.signAlg == SignAlg.ES256K }
-//        for (tv in testVectors) {
-//            val didComm = DIDComm(DIDDocResolverMock(), BobSecretResolverMock())
-//            assertThrows<UnsupportedAlgorithm> {
-//                didComm.unpack(
-//                    UnpackParams.Builder(tv.message)
-//                        .expectDecryptByAllKeys(true)
-//                        .build()
-//                )
-//            }
-//        }
-//    }
+    @Test
+    fun `Test_unsupported_exception_es256k_jdk15+`() {
+        if (!isJDK15Plus())
+            return
+        val testVectors = TEST_VECTORS.filter { it.expectedMetadata.signAlg == SignAlg.ES256K }
+        for (tv in testVectors) {
+            val didComm = DIDComm(DIDDocResolverMock(), BobSecretResolverMock())
+            assertThrows<UnsupportedAlgorithm> {
+                didComm.unpack(
+                    UnpackParams.Builder(tv.message)
+                        .expectDecryptByAllKeys(true)
+                        .build()
+                )
+            }
+        }
+    }
 
     @Test
     fun `Test_decrypt_message_for_part_of_the_keys`() {
