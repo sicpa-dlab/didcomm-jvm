@@ -3,7 +3,6 @@ package org.didcommx.didcomm
 import com.nimbusds.jose.util.JSONObjectUtils
 import org.didcommx.didcomm.common.SignAlg
 import org.didcommx.didcomm.exceptions.MalformedMessageException
-import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.fixtures.JWE
 import org.didcommx.didcomm.fixtures.JWE.Companion.TEST_VECTORS
 import org.didcommx.didcomm.fixtures.JWM

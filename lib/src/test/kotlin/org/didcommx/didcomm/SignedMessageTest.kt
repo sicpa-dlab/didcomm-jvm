@@ -3,7 +3,6 @@ package org.didcommx.didcomm
 import com.nimbusds.jose.JWSObjectJSON
 import com.nimbusds.jose.util.JSONObjectUtils
 import org.didcommx.didcomm.common.SignAlg
-import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.fixtures.JWM
 import org.didcommx.didcomm.fixtures.JWS
 import org.didcommx.didcomm.mock.AliceRotatedToCharlieSecretResolverMock
@@ -17,7 +16,6 @@ import org.didcommx.didcomm.utils.divideDIDFragment
 import org.didcommx.didcomm.utils.isDID
 import org.didcommx.didcomm.utils.isDIDFragment
 import org.didcommx.didcomm.utils.isJDK15Plus
-import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
