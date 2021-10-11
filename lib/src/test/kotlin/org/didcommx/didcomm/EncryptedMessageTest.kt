@@ -3,8 +3,8 @@ package org.didcommx.didcomm
 import com.nimbusds.jose.util.JSONObjectUtils
 import org.didcommx.didcomm.common.SignAlg
 import org.didcommx.didcomm.exceptions.DIDCommIllegalArgumentException
-import org.didcommx.didcomm.exceptions.DIDDocException
 import org.didcommx.didcomm.exceptions.DIDDocNotResolvedException
+import org.didcommx.didcomm.exceptions.DIDUrlNotFoundException
 import org.didcommx.didcomm.exceptions.IncompatibleCryptoException
 import org.didcommx.didcomm.exceptions.MalformedMessageException
 import org.didcommx.didcomm.exceptions.SecretNotFoundException
@@ -334,7 +334,7 @@ class EncryptedMessageTest {
     fun `Test_to_unknown_did_url`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
-        assertThrows<DIDDocException> {
+        assertThrows<DIDUrlNotFoundException> {
             didComm.packEncrypted(
                 PackEncryptedParams.Builder(JWM.PLAINTEXT_MESSAGE, JWM.BOB_DID + "#unknown-key")
                     .from(JWM.ALICE_DID)

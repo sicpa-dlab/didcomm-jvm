@@ -2,7 +2,6 @@ package org.didcommx.didcomm.crypto.key
 
 import org.didcommx.didcomm.KeyAgreementCurveType
 import org.didcommx.didcomm.Person
-import org.didcommx.didcomm.exceptions.DIDDocException
 import org.didcommx.didcomm.exceptions.DIDUrlNotFoundException
 import org.didcommx.didcomm.exceptions.IncompatibleCryptoException
 import org.didcommx.didcomm.exceptions.SecretNotFoundException
@@ -21,7 +20,6 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
 class RecipientKeySelectorTest {
     @Test
@@ -150,11 +148,11 @@ class RecipientKeySelectorTest {
     @Test
     fun `Test_verification_method_not_found`() {
         val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
-        val expected = "Verification method 'did:example:bob#key-4' not found in DID Doc 'did:example:bob'"
+        val expected = "The DID URL 'did:example:bob#key-4' not found in DID Doc 'did:example:bob'"
         val didUrl = "did:example:bob#key-4"
 
         run {
-            val actual = assertFailsWith<DIDDocException> {
+            val actual = assertFailsWith<DIDUrlNotFoundException> {
                 recipientKeySelector.findAuthCryptKeys(didUrl, listOf(didUrl))
             }
 
@@ -162,7 +160,7 @@ class RecipientKeySelectorTest {
         }
 
         run {
-            val actual = assertFailsWith<DIDDocException> {
+            val actual = assertFailsWith<DIDUrlNotFoundException> {
                 recipientKeySelector.findVerificationKey(didUrl)
             }
 
@@ -175,7 +173,7 @@ class RecipientKeySelectorTest {
         val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
         val did = JWM.NONA_DID
         val didUrl = "$did#key-1"
-        val expected = "The DID URL '$did' not found"
+        val expected = "The DID URL '$didUrl' not found in DID Doc '$did'"
 
         run {
             val actual = assertFailsWith<DIDUrlNotFoundException> {
@@ -198,10 +196,10 @@ class RecipientKeySelectorTest {
     fun `Test_empty_DID_Doc`() {
         val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
         val didUrl = "${JWM.ELLIE_DID}#key-2"
-        val expected = "Verification method '$didUrl' not found in DID Doc 'did:example:ellie'"
+        val expected = "The DID URL '$didUrl' not found in DID Doc 'did:example:ellie'"
 
         run {
-            val actual = assertFailsWith<DIDDocException> {
+            val actual = assertFailsWith<DIDUrlNotFoundException> {
                 recipientKeySelector.findVerificationKey(didUrl)
             }
 
@@ -209,7 +207,7 @@ class RecipientKeySelectorTest {
         }
 
         run {
-            val actual = assertFailsWith<DIDDocException> {
+            val actual = assertFailsWith<DIDUrlNotFoundException> {
                 recipientKeySelector.findAuthCryptKeys(didUrl, listOf())
             }
 
@@ -262,8 +260,8 @@ class RecipientKeySelectorTest {
 
         val secrets = getKeyAgreementSecrets(Person.BOB).map { s -> Key.fromSecret(s) }
         val kids = secrets.map { s -> s.id }
-        val expected = secrets.map {it.jwk.toPublicJWK()}
-        val res = keySelector.findAnonCryptKeys(kids).map {it.jwk.toPublicJWK()}.toList()
+        val expected = secrets.map { it.jwk.toPublicJWK() }
+        val res = keySelector.findAnonCryptKeys(kids).map { it.jwk.toPublicJWK() }.toList()
 
         assertEquals(expected, res)
     }
@@ -295,7 +293,7 @@ class RecipientKeySelectorTest {
             val secrets = getKeyAgreementSecrets(Person.BOB, data.curveType)
             val toKids = secrets.map { s -> s.kid }
 
-            val res = keySelector.findAnonCryptKeys(toKids).map {it.jwk.toPublicJWK()}.toList()
+            val res = keySelector.findAnonCryptKeys(toKids).map { it.jwk.toPublicJWK() }.toList()
 
             val keySecrets = secrets.map { s -> Key.fromSecret(s).jwk.toPublicJWK() }
             assertContentEquals(keySecrets, res)
@@ -321,7 +319,7 @@ class RecipientKeySelectorTest {
             val validKids = secrets.map { s -> s.kid }
             val toKids = listOf("did:example:unknown1#key-1", "$BOB_DID#unknown-key-2") + validKids
 
-            val res = keySelector.findAnonCryptKeys(toKids).map {it.jwk.toPublicJWK()}
+            val res = keySelector.findAnonCryptKeys(toKids).map { it.jwk.toPublicJWK() }
 
             val keySecrets = secrets.map { s -> Key.fromSecret(s).jwk.toPublicJWK() }
             assertContentEquals(keySecrets, res.toList())

@@ -18,7 +18,7 @@ class RecipientKeySelector(private val didDocResolver: DIDDocResolver, private v
             val (did) = divideDIDFragment(signFrom)
             didDocResolver.resolve(did)
                 .map { it.findVerificationMethod(signFrom) }
-                .orElseThrow { throw DIDUrlNotFoundException(did) }
+                .orElseThrow { throw DIDUrlNotFoundException(signFrom, did) }
         }
     )
 
@@ -30,7 +30,7 @@ class RecipientKeySelector(private val didDocResolver: DIDDocResolver, private v
             .map { it.findVerificationMethod(from) }
             .map { Key.fromVerificationMethod(it) }
             .map { Pair(it, findRecipientKeys(to, it.curve)) }
-            .orElseThrow { DIDUrlNotFoundException(did) }
+            .orElseThrow { DIDUrlNotFoundException(from, did) }
     }
 
     fun findAnonCryptKeys(to: List<String>): Sequence<Key> = to

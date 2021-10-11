@@ -99,7 +99,7 @@ class DIDDocNotResolvedException(did: String) : DIDDocException("The DID Doc '$d
  *
  * @param didUrl The did url.
  */
-class DIDUrlNotFoundException(didUrl: String) : DIDDocException("The DID URL '$didUrl' not found")
+class DIDUrlNotFoundException(didUrl: String, did: String) : DIDDocException("The DID URL '$didUrl' not found in DID Doc '$did'")
 
 /**
  * This exception SHOULD be raised if Secret can not be found.

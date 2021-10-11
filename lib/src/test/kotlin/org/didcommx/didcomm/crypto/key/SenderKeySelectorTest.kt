@@ -5,6 +5,7 @@ import org.didcommx.didcomm.Person
 import org.didcommx.didcomm.diddoc.DID_DOC_BOB_WITH_NO_SECRETS
 import org.didcommx.didcomm.exceptions.DIDDocException
 import org.didcommx.didcomm.exceptions.DIDDocNotResolvedException
+import org.didcommx.didcomm.exceptions.DIDUrlNotFoundException
 import org.didcommx.didcomm.exceptions.IncompatibleCryptoException
 import org.didcommx.didcomm.exceptions.SecretNotFoundException
 import org.didcommx.didcomm.fixtures.JWM
@@ -191,11 +192,11 @@ class SenderKeySelectorTest {
     @Test
     fun `Test_verification_method_not_found_by_DID_URL`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
-        val expected = "Verification method 'did:example:bob#key-4' not found in DID Doc 'did:example:bob'"
+        val expected = "The DID URL 'did:example:bob#key-4' not found in DID Doc 'did:example:bob'"
         val didUrl = "did:example:bob#key-4"
 
         run {
-            val actual = assertFailsWith<DIDDocException> {
+            val actual = assertFailsWith<DIDUrlNotFoundException> {
                 senderKeySelector.findAnonCryptKeys(didUrl)
             }
 
@@ -203,7 +204,7 @@ class SenderKeySelectorTest {
         }
 
         run {
-            val actual = assertFailsWith<DIDDocException> {
+            val actual = assertFailsWith<DIDUrlNotFoundException> {
                 senderKeySelector.findAuthCryptKeys(JWM.ALICE_DID, didUrl)
             }
 
