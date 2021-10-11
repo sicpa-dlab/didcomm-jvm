@@ -16,7 +16,7 @@ open class DIDCommException(message: String, cause: Throwable? = null) : Throwab
  *
  * @param message - the detail message.
  */
-open class DIDCommUnsupportedValueException(message: String) : DIDCommException(message)
+open class DIDCommUnsupportedValueException(message: String, cause: Throwable? = null) : DIDCommException(message, cause)
 
 /**
  * This exception SHOULD be raised if verification method type is not supported.
@@ -78,7 +78,7 @@ class UnsupportedJWKException(jwk: String) : DIDCommUnsupportedValueException("T
  *
  * @param alg JWA
  */
-class UnsupportedAlgorithm(alg: String) : DIDCommUnsupportedValueException("The algorithm $alg is not supported")
+class UnsupportedAlgorithm(alg: String, cause: Throwable? = null) : DIDCommUnsupportedValueException("The algorithm $alg is not supported", cause)
 
 /**
  * The base class for DID Doc exceptions

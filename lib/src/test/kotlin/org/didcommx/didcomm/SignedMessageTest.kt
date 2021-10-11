@@ -2,6 +2,8 @@ package org.didcommx.didcomm
 
 import com.nimbusds.jose.JWSObjectJSON
 import com.nimbusds.jose.util.JSONObjectUtils
+import org.didcommx.didcomm.common.SignAlg
+import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.fixtures.JWM
 import org.didcommx.didcomm.fixtures.JWS
 import org.didcommx.didcomm.mock.AliceRotatedToCharlieSecretResolverMock
@@ -14,6 +16,8 @@ import org.didcommx.didcomm.model.UnpackParams
 import org.didcommx.didcomm.utils.divideDIDFragment
 import org.didcommx.didcomm.utils.isDID
 import org.didcommx.didcomm.utils.isDIDFragment
+import org.didcommx.didcomm.utils.isJDK15Plus
+import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
@@ -25,6 +29,10 @@ class SignedMessageTest {
     @Test
     fun `Test_signed_message_test_vectors`() {
         for (test in JWS.TEST_VECTORS) {
+            // TODO: secp256k1 is not supported with JDK 15+
+            if (isJDK15Plus() && test.expectedMetadata.signAlg == SignAlg.ES256K) {
+                continue
+            }
             val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
             val packed = didComm.packSigned(
@@ -38,12 +46,34 @@ class SignedMessageTest {
             val expected = JWSObjectJSON.parse(test.expected)
             val signed = JWSObjectJSON.parse(packed.packedMessage)
 
-            assertEquals(expected.header.toString(), signed.header.toString())
+            assertEquals(expected.signatures.first().header.toString(), signed.signatures.first().header.toString())
 
             assertEquals(
                 JSONObjectUtils.toJSONString(JWM.PLAINTEXT_MESSAGE.toJSONObject()),
                 JSONObjectUtils.toJSONString(unpacked.message.toJSONObject())
             )
+
+            assertEquals(false, unpacked.metadata.encrypted)
+            assertEquals(true, unpacked.metadata.authenticated)
+            assertEquals(true, unpacked.metadata.nonRepudiation)
+            assertEquals(false, unpacked.metadata.anonymousSender)
+            assertEquals(test.expectedMetadata.signFrom, unpacked.metadata.signFrom)
+            assertEquals(test.expectedMetadata.signAlg, unpacked.metadata.signAlg)
+        }
+    }
+
+    @Test
+    fun `Test_unsupported_exception_es256k_jdk15+`() {
+        if (!isJDK15Plus())
+            return
+        val testVectors = JWS.TEST_VECTORS.filter { it.expectedMetadata.signAlg == SignAlg.ES256K }
+        for (test in testVectors) {
+            val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
+            assertThrows<UnsupportedAlgorithm> {
+                didComm.packSigned(
+                    PackSignedParams.builder(JWM.PLAINTEXT_MESSAGE, test.from).build()
+                )
+            }
         }
     }
 

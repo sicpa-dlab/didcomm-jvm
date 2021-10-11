@@ -31,6 +31,7 @@ Maven:
 See https://github.com/sicpa-dlab/didcomm-demo.
 
 ## Assumptions and Limitations
+- Java 8+
 - In order to use the library, `SecretResolver` and `DIDDocResolver` interfaces must be implemented on the application level.
   Implementation of that interfaces is out of DIDComm library scope.
     - Verification materials in DID Docs and secrets are expected in JWK format only.
@@ -46,12 +47,13 @@ See https://github.com/sicpa-dlab/didcomm-demo.
             - A256CBC-HS512 (default for authcrypt)
         - Key wrapping algorithms: ECDH-ES+A256KW, ECDH-1PU+A256KW
     - Signing:
-        - Curves: Ed25519, Secp256k1 (JDK < 15), P-256
-        - Algorithms: EdDSA (with crv=Ed25519), ES256, ES256K
+        - Curves: Ed25519, Secp256k1 (currently JDK < 15 only), P-256
+        - Algorithms: EdDSA (with crv=Ed25519), ES256, ES256K (currently JDK < 15 only)
 - DID rotation (`fromPrior` field) is supported.
 - Limitations and known issues:
   - Forward protocol is not implemented 
   - Secp256k1 is supported on JDK < 15 only
+- DIDComm has been implemented under the following [Assumptions](https://hackmd.io/i3gLqgHQR2ihVFV5euyhqg)
 
 
 ## Examples

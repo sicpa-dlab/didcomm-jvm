@@ -52,7 +52,7 @@ fun authEncrypt(payload: String, auth: AuthCryptAlg, from: Key, to: List<Key>): 
         .build()
 
     val sender = from.jwk
-    val recipients = to.map { Pair.of(UnprotectedHeader.Builder(it.id).build(), it.jwk) }
+    val recipients = to.map { Pair.of(UnprotectedHeader.Builder().keyID(it.id).build(), it.jwk) }
 
     val encryptor = try {
         when (sender) {
@@ -91,7 +91,7 @@ fun anonEncrypt(payload: String, anon: AnonCryptAlg, to: List<Key>): EncryptResu
         .agreementPartyVInfo(apv)
         .build()
 
-    val recipients = to.map { Pair.of(UnprotectedHeader.Builder(it.id).build(), it.jwk) }
+    val recipients = to.map { Pair.of(UnprotectedHeader.Builder().keyID(it.id).build(), it.jwk) }
 
     val encryptor = try {
         when (val recipient = recipients.first().right) {
@@ -148,7 +148,7 @@ private fun anonDecryptForOneKey(jwe: JWEObjectJSON, to: Sequence<Key>) = to.map
 
 private fun authDecryptForAllKeys(jwe: JWEObjectJSON, from: Key, to: List<Key>): DecryptResult {
     val sender = from.jwk
-    val recipients = to.map { Pair.of(UnprotectedHeader.Builder(it.id).build(), it.jwk) }
+    val recipients = to.map { Pair.of(UnprotectedHeader.Builder().keyID(it.id).build(), it.jwk) }
 
     val decrypter =
         when (sender) {
@@ -175,7 +175,7 @@ private fun authDecryptForAllKeys(jwe: JWEObjectJSON, from: Key, to: List<Key>):
 }
 
 private fun anonDecryptForAllKeys(jwe: JWEObjectJSON, to: List<Key>): DecryptResult {
-    val recipients = to.map { Pair.of(UnprotectedHeader.Builder(it.id).build(), it.jwk) }
+    val recipients = to.map { Pair.of(UnprotectedHeader.Builder().keyID(it.id).build(), it.jwk) }
 
     val decrypter =
         when (val recipient = recipients.first().right) {

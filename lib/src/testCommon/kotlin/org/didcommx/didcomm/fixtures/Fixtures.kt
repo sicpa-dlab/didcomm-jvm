@@ -482,7 +482,7 @@ class JWM {
 }
 
 class JWS {
-    data class TestVector(val from: String, val expected: String)
+    data class TestVector(val from: String, val expected: String, val expectedMetadata: Metadata)
 
     companion object {
         val TEST_VECTORS = listOf(
@@ -501,7 +501,14 @@ class JWS {
                           }
                        ]
                     }
-                """.trimIndent()
+                """.trimIndent(),
+                expectedMetadata = Metadata(
+                    encrypted = false,
+                    authenticated = true,
+                    nonRepudiation = true,
+                    signFrom = "did:example:alice#key-1",
+                    signAlg = SignAlg.ED25519,
+                )
             ),
 
             TestVector(
@@ -519,7 +526,14 @@ class JWS {
                           }
                        ]
                     }
-                """.trimIndent()
+                """.trimIndent(),
+                expectedMetadata = Metadata(
+                    encrypted = false,
+                    authenticated = true,
+                    nonRepudiation = true,
+                    signFrom = "did:example:alice#key-2",
+                    signAlg = SignAlg.ES256,
+                )
             ),
 
             TestVector(
@@ -537,7 +551,14 @@ class JWS {
                           }
                        ]
                     }
-                """.trimIndent()
+                """.trimIndent(),
+                expectedMetadata = Metadata(
+                    encrypted = false,
+                    authenticated = true,
+                    nonRepudiation = true,
+                    signFrom = "did:example:alice#key-3",
+                    signAlg = SignAlg.ES256K,
+                )
             )
         )
     }

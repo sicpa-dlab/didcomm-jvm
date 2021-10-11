@@ -25,6 +25,7 @@ import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.exceptions.UnsupportedCurveException
 import org.didcommx.didcomm.exceptions.UnsupportedJWKException
 import org.didcommx.didcomm.utils.asKey
+import java.security.SignatureException
 
 fun sign(payload: String, key: Key): String {
     val jwk = key.jwk
@@ -41,22 +42,28 @@ fun sign(payload: String, key: Key): String {
         throw UnsupportedAlgorithm(alg.name)
     }
 
-    val jwsHeader = JWSHeader.Builder(alg)
+    val jwsProtectedHeader = JWSHeader.Builder(alg)
         .type(JOSEObjectType(Typ.Signed.typ))
         .build()
 
-    return JWSObjectJSON(jwsHeader, Payload(Base64URL.encode(payload)))
+    val jwsUnprotectedHeader = UnprotectedHeader.Builder().keyID(key.id).build()
+    return JWSObjectJSON(Payload(Base64URL.encode(payload)))
         .apply {
             try {
-                sign(UnprotectedHeader.Builder(key.id).build(), signer)
+                sign(jwsProtectedHeader, jwsUnprotectedHeader, signer)
             } catch (e: JOSEException) {
+                // this can be thrown if the signature type is not supported
+                // example: curve256k1 is not supported in JDK >= 15
+                if (e.cause is SignatureException) {
+                    throw UnsupportedAlgorithm("Unsupported signature algorithm", e.cause)
+                }
                 throw DIDCommException("JWS cannot be signed", e)
             }
         }
-        .serialize()
+        .serializeGeneral()
 }
 
-fun verify(jws: JWSObjectJSON, signAlg: SignAlg, key: Key): Map<String, Any> {
+fun verify(signature: JWSObjectJSON.Signature, signAlg: SignAlg, key: Key) {
     val jwk = key.jwk
 
     val verifier = try {
@@ -69,19 +76,27 @@ fun verify(jws: JWSObjectJSON, signAlg: SignAlg, key: Key): Map<String, Any> {
         throw UnsupportedAlgorithm(signAlg.name)
     }
 
-    if (!jws.verify(verifier))
-        throw MalformedMessageException("Invalid signature")
-
-    return jws.payload.toJSONObject()
+    try {
+        if (!signature.verify(verifier))
+            throw MalformedMessageException("Invalid signature")
+    } catch (e: JOSEException) {
+        // this can be thrown if the signature type is not supported
+        // example: curve256k1 is not supported in JDK >= 15
+        if (e.cause is SignatureException) {
+            throw UnsupportedAlgorithm("Unsupported signature algorithm", e.cause)
+        }
+        throw DIDCommException("JWS signature cannot be verified", e)
+    }
 }
 
-fun getCryptoAlg(jws: JWSObjectJSON): SignAlg =
-    when (val alg = jws.header.algorithm) {
+fun getCryptoAlg(signature: JWSObjectJSON.Signature): SignAlg {
+    return when (val alg = signature.header.algorithm) {
         JWSAlgorithm.ES256 -> SignAlg.ES256
         JWSAlgorithm.ES256K -> SignAlg.ES256K
         JWSAlgorithm.EdDSA -> SignAlg.ED25519
         else -> throw UnsupportedAlgorithm(alg.name)
     }
+}
 
 fun getJWSAlgorithm(jwk: JWK) = when (jwk) {
     is ECKey -> when (jwk.curve) {

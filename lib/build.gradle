@@ -26,6 +26,7 @@ dependencies {
     implementation "com.github.multiformats:java-multibase:${javaMultibase}"
     shadow "com.google.crypto.tink:tink:${googleTinkVersion}"
     shadow "com.zmannotes:varint:${zmanVarint}"
+    // implementation 'org.bouncycastle:bcprov-jdk15on:1.69'
 
     // TODO look for a better solution
     // currently it's a workaround for shadow of the above deps

@@ -50,6 +50,7 @@ class DIDCommDemoTest {
         )
         println("Got ${unpackResult.message} message")
 
+        assertEquals(message, unpackResult.message)
         with(unpackResult.metadata) {
             assertTrue { encrypted }
             assertTrue { authenticated }
@@ -85,6 +86,7 @@ class DIDCommDemoTest {
         )
         println("Got ${unpackResult.message} message")
 
+        assertEquals(message, unpackResult.message)
         with(unpackResult.metadata) {
             assertTrue { encrypted }
             assertTrue { anonymousSender }
@@ -124,6 +126,7 @@ class DIDCommDemoTest {
         )
         println("Got ${unpackResult.message} message")
 
+        assertEquals(message, unpackResult.message)
         with(unpackResult.metadata) {
             assertTrue { encrypted }
             assertTrue { authenticated }
@@ -164,6 +167,7 @@ class DIDCommDemoTest {
         )
         println("Got ${unpackResult.message} message")
 
+        assertEquals(message, unpackResult.message)
         with(unpackResult.metadata) {
             assertTrue { encrypted }
             assertTrue { authenticated }
@@ -199,6 +203,7 @@ class DIDCommDemoTest {
         )
         println("Got ${unpackResult.message} message")
 
+        assertEquals(message, unpackResult.message)
         with(unpackResult.metadata) {
             assertTrue { nonRepudiation }
             assertTrue { authenticated }
@@ -234,6 +239,7 @@ class DIDCommDemoTest {
         )
         println("Got ${unpackResult.message} message")
 
+        assertEquals(message, unpackResult.message)
         with(unpackResult.metadata) {
             assertFalse { nonRepudiation }
             assertFalse { encrypted }
@@ -306,6 +312,8 @@ class DIDCommDemoTest {
             assertFalse { reWrappedInForward }
         }
 
+        assertEquals(message, unpackResultBob.message)
+        assertEquals(message, unpackResultCharlie.message)
         val unpackMessageBob = unpackResultBob.message.copy(to = null)
         val unpackMessageCharlie = unpackResultCharlie.message.copy(to = null)
         val unpackMetadataBob = unpackResultCharlie.metadata.copy(encryptedTo = null, signedMessage = null)
