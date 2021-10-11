@@ -36,16 +36,24 @@ private fun ParseResult.JWM.unpack(keySelector: RecipientKeySelector, metadataBu
 }
 
 private fun ParseResult.JWS.unpack(keySelector: RecipientKeySelector, metadataBuilder: Metadata.Builder): Message {
-    val kid = message.unprotectedHeader?.keyID
-        ?: throw MalformedMessageException("JWS Unprotected Per-Signature header must be present")
+    if (message.signatures.isEmpty())
+        throw MalformedMessageException("Empty signatures")
+    message.signatures.forEach {
+        val kid = it.unprotectedHeader?.keyID
+            ?: throw MalformedMessageException("JWS Unprotected Per-Signature header must be present")
+        val key = keySelector.findVerificationKey(kid)
+        val alg = getCryptoAlg(it)
+        verify(it, alg, key)
 
-    val key = keySelector.findVerificationKey(kid)
-    val alg = getCryptoAlg(message)
-    val unpackedMessage = verify(message, alg, key)
+        // TODO: support multiple signatures on Metadata level
+        metadataBuilder
+            .signAlg(alg)
+            .signFrom(kid)
+    }
+
+    val unpackedMessage = message.payload.toJSONObject()
 
     metadataBuilder
-        .signAlg(alg)
-        .signFrom(kid)
         .nonRepudiation(true)
         .authenticated(true)
         .signedMessage(rawMessage)

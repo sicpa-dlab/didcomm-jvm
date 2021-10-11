@@ -1,12 +1,6 @@
 package org.didcommx.didcomm.crypto
 
-import com.nimbusds.jose.JOSEException
-import com.nimbusds.jose.JOSEObjectType
-import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jose.JWSHeader
-import com.nimbusds.jose.JWSObjectJSON
-import com.nimbusds.jose.Payload
-import com.nimbusds.jose.UnprotectedHeader
+import com.nimbusds.jose.*
 import com.nimbusds.jose.crypto.ECDSASigner
 import com.nimbusds.jose.crypto.ECDSAVerifier
 import com.nimbusds.jose.crypto.Ed25519Signer
@@ -41,22 +35,23 @@ fun sign(payload: String, key: Key): String {
         throw UnsupportedAlgorithm(alg.name)
     }
 
-    val jwsHeader = JWSHeader.Builder(alg)
+    val jwsProtectedHeader = JWSHeader.Builder(alg)
         .type(JOSEObjectType(Typ.Signed.typ))
         .build()
 
-    return JWSObjectJSON(jwsHeader, Payload(Base64URL.encode(payload)))
+    val jwsUnprotectedHeader = UnprotectedHeader.Builder().keyID(key.id).build()
+    return JWSObjectJSON(Payload(Base64URL.encode(payload)))
         .apply {
             try {
-                sign(UnprotectedHeader.Builder(key.id).build(), signer)
+                sign(jwsProtectedHeader, jwsUnprotectedHeader, signer)
             } catch (e: JOSEException) {
                 throw DIDCommException("JWS cannot be signed", e)
             }
         }
-        .serialize()
+        .serializeGeneral()
 }
 
-fun verify(jws: JWSObjectJSON, signAlg: SignAlg, key: Key): Map<String, Any> {
+fun verify(signature: JWSObjectJSON.Signature, signAlg: SignAlg, key: Key) {
     val jwk = key.jwk
 
     val verifier = try {
@@ -69,19 +64,18 @@ fun verify(jws: JWSObjectJSON, signAlg: SignAlg, key: Key): Map<String, Any> {
         throw UnsupportedAlgorithm(signAlg.name)
     }
 
-    if (!jws.verify(verifier))
+    if (!signature.verify(verifier))
         throw MalformedMessageException("Invalid signature")
-
-    return jws.payload.toJSONObject()
 }
 
-fun getCryptoAlg(jws: JWSObjectJSON): SignAlg =
-    when (val alg = jws.header.algorithm) {
+fun getCryptoAlg(signature: JWSObjectJSON.Signature): SignAlg {
+    return when (val alg = signature.header.algorithm) {
         JWSAlgorithm.ES256 -> SignAlg.ES256
         JWSAlgorithm.ES256K -> SignAlg.ES256K
         JWSAlgorithm.EdDSA -> SignAlg.ED25519
         else -> throw UnsupportedAlgorithm(alg.name)
     }
+}
 
 fun getJWSAlgorithm(jwk: JWK) = when (jwk) {
     is ECKey -> when (jwk.curve) {

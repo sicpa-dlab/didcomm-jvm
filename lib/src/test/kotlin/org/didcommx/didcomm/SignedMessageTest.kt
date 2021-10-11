@@ -38,7 +38,7 @@ class SignedMessageTest {
             val expected = JWSObjectJSON.parse(test.expected)
             val signed = JWSObjectJSON.parse(packed.packedMessage)
 
-            assertEquals(expected.header.toString(), signed.header.toString())
+            assertEquals(expected.signatures.first().header.toString(), signed.signatures.first().header.toString())
 
             assertEquals(
                 JSONObjectUtils.toJSONString(JWM.PLAINTEXT_MESSAGE.toJSONObject()),
