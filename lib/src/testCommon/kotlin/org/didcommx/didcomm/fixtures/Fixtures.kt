@@ -1184,7 +1184,7 @@ class JWE {
                 packedMessage = BOB_MESSAGE_UNSUPPORTED_ALG_HEADER,
                 expectedThrow = UnsupportedAlgorithm::
                 class,
-                expectedMessage = "The algorithm ECDH-ES+A255KW+XC20P is unsupported",
+                expectedMessage = "The algorithm ECDH-ES+A255KW+XC20P is not supported",
                 unpackParams = UnpackParams
                     .Builder(BOB_MESSAGE_UNSUPPORTED_ALG_HEADER)
                     .expectDecryptByAllKeys(true)
@@ -1195,7 +1195,7 @@ class JWE {
                 packedMessage = BOB_MESSAGE_UNSUPPORTED_ENC_HEADER,
                 expectedThrow = UnsupportedAlgorithm::
                 class,
-                expectedMessage = "The algorithm ECDH-ES+A256KW+XC202 is unsupported",
+                expectedMessage = "The algorithm ECDH-ES+A256KW+XC202 is not supported",
                 unpackParams = UnpackParams
                     .Builder(BOB_MESSAGE_UNSUPPORTED_ENC_HEADER)
                     .expectDecryptByAllKeys(true)
