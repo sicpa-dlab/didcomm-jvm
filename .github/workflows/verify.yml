@@ -6,7 +6,6 @@ on: [ pull_request ]
 jobs:
 
   release-ready:
-    name: Check is ready for release
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'stable'
     steps:
