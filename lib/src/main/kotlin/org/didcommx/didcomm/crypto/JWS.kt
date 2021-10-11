@@ -1,6 +1,12 @@
 package org.didcommx.didcomm.crypto
 
-import com.nimbusds.jose.*
+import com.nimbusds.jose.JOSEException
+import com.nimbusds.jose.JOSEObjectType
+import com.nimbusds.jose.JWSAlgorithm
+import com.nimbusds.jose.JWSHeader
+import com.nimbusds.jose.JWSObjectJSON
+import com.nimbusds.jose.Payload
+import com.nimbusds.jose.UnprotectedHeader
 import com.nimbusds.jose.crypto.ECDSASigner
 import com.nimbusds.jose.crypto.ECDSAVerifier
 import com.nimbusds.jose.crypto.Ed25519Signer
