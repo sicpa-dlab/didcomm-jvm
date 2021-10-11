@@ -15,6 +15,7 @@ import org.didcommx.didcomm.mock.AliceSecretResolverMock
 import org.didcommx.didcomm.mock.BobSecretResolverMock
 import org.didcommx.didcomm.mock.CharlieSecretResolverMock
 import org.didcommx.didcomm.mock.DIDDocResolverMock
+import org.didcommx.didcomm.mock.DIDDocResolverMockWithNoSecrets
 import org.didcommx.didcomm.model.PackEncryptedParams
 import org.didcommx.didcomm.model.UnpackParams
 import org.junit.jupiter.api.assertThrows
@@ -140,7 +141,7 @@ class EncryptedMessageTest {
 
     @Test
     fun `Test_from_is_not_a_did_or_did_url`() {
-        val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
+        val didComm = DIDComm(DIDDocResolverMockWithNoSecrets(), AliceSecretResolverMock())
 
         assertThrows<DIDCommIllegalArgumentException> {
             didComm.packEncrypted(
@@ -348,7 +349,7 @@ class EncryptedMessageTest {
 
     @Test
     fun `Test_from_not_in_secrets`() {
-        val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
+        val didComm = DIDComm(DIDDocResolverMockWithNoSecrets(), AliceSecretResolverMock())
 
         val frm = getKeyAgreementMethodsNotInSecrets(Person.ALICE)[0].id
         assertThrows<SecretNotFoundException> {
@@ -362,7 +363,7 @@ class EncryptedMessageTest {
 
     @Test
     fun `Test_signFrom_not_in_secrets`() {
-        val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
+        val didComm = DIDComm(DIDDocResolverMockWithNoSecrets(), AliceSecretResolverMock())
 
         val frm = getKeyAgreementMethodsNotInSecrets(Person.ALICE)[0].id
         assertThrows<SecretNotFoundException> {
@@ -377,7 +378,7 @@ class EncryptedMessageTest {
 
     @Test
     fun `Test_to_not_in_secrets_positive`() {
-        val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
+        val didComm = DIDComm(DIDDocResolverMockWithNoSecrets(), AliceSecretResolverMock())
 
         val to = getKeyAgreementMethodsNotInSecrets(Person.BOB)[0].id
         didComm.packEncrypted(

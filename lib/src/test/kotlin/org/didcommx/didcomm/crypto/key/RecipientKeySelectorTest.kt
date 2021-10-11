@@ -2,14 +2,12 @@ package org.didcommx.didcomm.crypto.key
 
 import org.didcommx.didcomm.KeyAgreementCurveType
 import org.didcommx.didcomm.Person
-import org.didcommx.didcomm.diddoc.DID_DOC_BOB_WITH_NO_SECRETS
 import org.didcommx.didcomm.exceptions.DIDDocException
 import org.didcommx.didcomm.exceptions.DIDUrlNotFoundException
 import org.didcommx.didcomm.exceptions.IncompatibleCryptoException
 import org.didcommx.didcomm.exceptions.SecretNotFoundException
 import org.didcommx.didcomm.fixtures.JWM
 import org.didcommx.didcomm.fixtures.JWM.Companion.BOB_DID
-import org.didcommx.didcomm.getKeyAgreementMethods
 import org.didcommx.didcomm.getKeyAgreementMethodsNotInSecrets
 import org.didcommx.didcomm.getKeyAgreementSecrets
 import org.didcommx.didcomm.getSecretsResolver
@@ -18,7 +16,6 @@ import org.didcommx.didcomm.mock.DIDDocResolverMock
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import java.util.stream.Stream
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -236,65 +233,12 @@ class RecipientKeySelectorTest {
     }
 
     @Test
-    fun `Test_find_anoncrypt_pack_recipient_public_keys_by_did_positive`() {
-        val keySelector = RecipientKeySelector(DIDDocResolverMock(), getSecretsResolver(Person.BOB))
-
-        val expected = getKeyAgreementMethods(Person.BOB, KeyAgreementCurveType.X25519)
-        val res = keySelector.findAnonCryptKeys(listOf(JWM.BOB_DID)).toList()
-
-        val exp = expected.map { vm -> Key.wrapVerificationMethod(vm) }
-
-        assertEquals(res, exp)
-        assertEquals(expected[0], DID_DOC_BOB_WITH_NO_SECRETS.verificationMethods[0])
-    }
-
-    @Test
-    fun `Test_find_anoncrypt_pack_recipient_public_keys_by_kid_positive`() {
-        val keySelector = RecipientKeySelector(DIDDocResolverMock(), getSecretsResolver(Person.BOB))
-
-        DID_DOC_BOB_WITH_NO_SECRETS.verificationMethods.forEach { vm ->
-            val res = keySelector.findAnonCryptKeys(listOf(vm.id)).map { it.jwk.toPublicJWK() }
-//            res.forEach { key -> key.jwk = key.jwk.toPublicJWK() }
-            val listOfVM = listOf(Key.wrapVerificationMethod(vm))
-            assertTrue { ReflectionEquals(res).matches(listOfVM) }
-        }
-    }
-
-    @Test
-    fun `Test_find_anoncrypt_pack_recipient_public_keys_by_did_unknown_did`() {
-        val keySelector = RecipientKeySelector(DIDDocResolverMock(), getSecretsResolver(Person.BOB))
-
-        // TODO wrap in DIDComm exception
-        assertThrows<IllegalStateException> {
-            keySelector.findAnonCryptKeys(listOf("did:example:unknown"))
-        }
-    }
-
-    @Test
-    fun `Test_find_anoncrypt_pack_recipient_public_keys_by_kid_unknown_did`() {
-        val keySelector = RecipientKeySelector(DIDDocResolverMock(), getSecretsResolver(Person.BOB))
-
-        assertThrows<SecretNotFoundException> {
-            keySelector.findAnonCryptKeys(listOf("did:example:unknown#key-1"))
-        }
-    }
-
-    @Test
-    fun `Test_find_anoncrypt_pack_recipient_public_keys_by_kid_unknown_kid`() {
-        val keySelector = RecipientKeySelector(DIDDocResolverMock(), getSecretsResolver(Person.BOB))
-
-        assertThrows<SecretNotFoundException> {
-            keySelector.findAnonCryptKeys(listOf(JWM.BOB_DID + "unknown#key-1"))
-        }
-    }
-
-    @Test
     fun `Test_find_anoncrypt_unpack_recipient_private_keys_positive_single_key`() {
         val keySelector = RecipientKeySelector(DIDDocResolverMock(), getSecretsResolver(Person.BOB))
 
         for (vm in getKeyAgreementSecrets(Person.BOB)) {
-            val res = keySelector.findAnonCryptKeys(listOf(vm.kid)).toList()
-            assertTrue { ReflectionEquals(listOf(Key.wrapSecret(vm))).matches(res) }
+            val res = keySelector.findAnonCryptKeys(listOf(vm.kid)).map { it.jwk.toPublicJWK() }.toList()
+            assertContentEquals(listOf(Key.wrapSecret(vm).jwk.toPublicJWK()), res)
         }
     }
 
@@ -312,16 +256,17 @@ class RecipientKeySelectorTest {
         }
     }
 
-//    @Test
-//    fun `Test_find_anoncrypt_unpack_recipient_private_keys_different_curves`() {
-//        val keySelector = RecipientKeySelector(DIDDocResolverMock(), getSecretsResolver(Person.BOB))
-//
-//        val secrets = getKeyAgreementSecrets(Person.BOB).map { s -> Key.wrapVerificationMethod(s) }
-//        val kids = secrets.map { s -> s.id }
-//        val res = keySelector.findAnonCryptKeys(kids).toList()
-//
-//        assertEquals(res, secrets)
-//    }
+    @Test
+    fun `Test_find_anoncrypt_unpack_recipient_private_keys_different_curves`() {
+        val keySelector = RecipientKeySelector(DIDDocResolverMock(), getSecretsResolver(Person.BOB))
+
+        val secrets = getKeyAgreementSecrets(Person.BOB).map { s -> Key.wrapSecret(s) }
+        val kids = secrets.map { s -> s.id }
+        val expected = secrets.map {it.jwk.toPublicJWK()}
+        val res = keySelector.findAnonCryptKeys(kids).map {it.jwk.toPublicJWK()}.toList()
+
+        assertEquals(expected, res)
+    }
 
     data class DifferentCurveTypesTestData(
         val curveType: KeyAgreementCurveType,
@@ -350,10 +295,10 @@ class RecipientKeySelectorTest {
             val secrets = getKeyAgreementSecrets(Person.BOB, data.curveType)
             val toKids = secrets.map { s -> s.kid }
 
-            val res = keySelector.findAnonCryptKeys(toKids)
+            val res = keySelector.findAnonCryptKeys(toKids).map {it.jwk.toPublicJWK()}.toList()
 
-            val keySecrets = secrets.map { s -> Key.wrapSecret(s) }
-            assertTrue { ReflectionEquals(keySecrets).matches(res.toList()) }
+            val keySecrets = secrets.map { s -> Key.wrapSecret(s).jwk.toPublicJWK() }
+            assertContentEquals(keySecrets, res)
         }
 
         @ParameterizedTest
@@ -376,10 +321,10 @@ class RecipientKeySelectorTest {
             val validKids = secrets.map { s -> s.kid }
             val toKids = listOf("did:example:unknown1#key-1", "$BOB_DID#unknown-key-2") + validKids
 
-            val res = keySelector.findAnonCryptKeys(toKids)
+            val res = keySelector.findAnonCryptKeys(toKids).map {it.jwk.toPublicJWK()}
 
-            val keySecrets = secrets.map { s -> Key.wrapSecret(s) }
-            assertTrue { ReflectionEquals(keySecrets).matches(res.toList()) }
+            val keySecrets = secrets.map { s -> Key.wrapSecret(s).jwk.toPublicJWK() }
+            assertContentEquals(keySecrets, res.toList())
         }
 
         @ParameterizedTest
@@ -392,10 +337,10 @@ class RecipientKeySelectorTest {
             val notInSecretKids = getKeyAgreementMethodsNotInSecrets(Person.BOB, data.curveType).map { s -> s.id }
             val kids = notInSecretKids + validKids
 
-            val res = keySelector.findAnonCryptKeys(kids)
+            val res = keySelector.findAnonCryptKeys(kids).map { it.jwk.toPublicJWK() }.toList()
 
-            val keySecrets = secrets.map { s -> Key.wrapSecret(s) }
-            assertTrue { ReflectionEquals(keySecrets).matches(res.toList()) }
+            val keySecrets = secrets.map { s -> Key.wrapSecret(s).jwk.toPublicJWK() }.toList()
+            assertContentEquals(keySecrets, res)
         }
     }
 }
