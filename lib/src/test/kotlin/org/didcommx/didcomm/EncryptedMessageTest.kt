@@ -18,6 +18,10 @@ import org.didcommx.didcomm.mock.DIDDocResolverMock
 import org.didcommx.didcomm.mock.DIDDocResolverMockWithNoSecrets
 import org.didcommx.didcomm.model.PackEncryptedParams
 import org.didcommx.didcomm.model.UnpackParams
+import org.didcommx.didcomm.utils.divideDIDFragment
+import org.didcommx.didcomm.utils.isDID
+import org.didcommx.didcomm.utils.isDIDFragment
+import org.didcommx.didcomm.utils.isJDK15Plus
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -32,6 +36,10 @@ class EncryptedMessageTest {
     @Test
     fun `Test_encrypted_message_test_vectors`() {
         for (tv in TEST_VECTORS) {
+            // TODO: secp256k1 is not supported with JDK 15+
+            if (isJDK15Plus() && tv.expectedMetadata.signAlg == SignAlg.ES256K) {
+                continue
+            }
             val didComm = DIDComm(DIDDocResolverMock(), BobSecretResolverMock())
 
             val unpacked = didComm.unpack(
@@ -63,6 +71,23 @@ class EncryptedMessageTest {
                 val expectedSignedMessage = tv.expectedMetadata.signedMessage?.let { true } ?: false
                 val actualSignedMessage = signedMessage?.let { true } ?: false
                 assertEquals(expectedSignedMessage, actualSignedMessage)
+            }
+        }
+    }
+
+    @Test
+    fun `Test_unsupported_exception_es256k_jdk15+`() {
+        if (!isJDK15Plus())
+            return
+        val testVectors = TEST_VECTORS.filter { it.expectedMetadata.signAlg == SignAlg.ES256K }
+        for (tv in testVectors) {
+            val didComm = DIDComm(DIDDocResolverMock(), BobSecretResolverMock())
+            assertThrows<UnsupportedAlgorithm> {
+                didComm.unpack(
+                    UnpackParams.Builder(tv.message)
+                        .expectDecryptByAllKeys(true)
+                        .build()
+                )
             }
         }
     }

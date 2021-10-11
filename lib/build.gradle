@@ -11,7 +11,7 @@ plugins {
     id "com.github.johnrengelman.shadow" version "${johnrengelmanShadow}"
 }
 
-group = "org.didcommx.didcomm"
+group = "org.didcommx"
 version = "${version}"
 project.ext.artifactId = rootProject.name
 archivesBaseName = project.artifactId
@@ -23,7 +23,16 @@ kotlin {
 
 dependencies {
     implementation "com.nimbusds:nimbus-jose-jwt:${nimbusJoseJWTVersion}"
-    implementation "com.google.crypto.tink:tink:${googleTinkVersion}"
+    implementation "com.github.multiformats:java-multibase:${javaMultibase}"
+    shadow "com.google.crypto.tink:tink:${googleTinkVersion}"
+    shadow "com.zmannotes:varint:${zmanVarint}"
+    // implementation 'org.bouncycastle:bcprov-jdk15on:1.69'
+
+    // TODO look for a better solution
+    // currently it's a workaround for shadow of the above deps
+    testImplementation "com.google.crypto.tink:tink:${googleTinkVersion}"
+    testImplementation "com.zmannotes:varint:${zmanVarint}"
+
     testImplementation "org.jetbrains.kotlin:kotlin-test"
     testImplementation "org.junit.jupiter:junit-jupiter:${jUnitJupiter}"
     testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
@@ -66,6 +75,20 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "${jvmTarget}"
 }
 
+// TODO: remove once necessary version of Nimbus is published to Maven
+shadowJar {
+    // @see https://youtrack.jetbrains.com/issue/KT-25709
+    exclude("**/*.kotlin_metadata")
+    exclude("**/*.kotlin_builtins")
+
+    dependencies {
+        include(dependency("com.nimbusds:nimbus-jose-jwt"))
+        include(dependency("com.github.multiformats:java-multibase"))
+    }
+
+    archiveClassifier.set("") // remove suffix `-all` as intellij can"t find the library otherwise
+}
+
 // TODO tune settings
 jmh {
     benchmarkMode = ["thrpt", "avgt"]
@@ -86,9 +109,17 @@ java {
 
 publishing {
     publications {
-        maven(MavenPublication) {
+        // TODO switch to usual jar once all deps are available in Maven
+        // maven(MavenPublication) {
+        //     from components.java
+        shadow(MavenPublication) { publication ->
+            project.shadow.component(publication)
+
             artifactId = project.artifactId
-            from components.java
+            // the following is required only for shadow
+            // https://github.com/johnrengelman/shadow/issues/544
+            artifact sourcesJar
+            artifact javadocJar
 
             pom {
                 name = "DIDComm"
@@ -142,7 +173,8 @@ signing {
     // useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
     useInMemoryPgpKeys(signingKey, signingPassword)
 
-    sign publishing.publications.maven
+    // TODO switch to maven once all deps are available in Maven
+    sign publishing.publications.shadow
 }
 
 
@@ -150,13 +182,4 @@ javadoc {
     if(JavaVersion.current().isJava9Compatible()) {
         options.addBooleanOption("html5", true)
     }
-}
-
-// TODO: remove once published to Maven
-shadowJar {
-    // @see https://youtrack.jetbrains.com/issue/KT-25709
-    exclude("**/*.kotlin_metadata")
-    exclude("**/*.kotlin_builtins")
-
-    archiveClassifier.set("") // remove suffix `-all` as intellij can"t find the library otherwise
 }

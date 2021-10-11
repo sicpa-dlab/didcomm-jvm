@@ -482,7 +482,7 @@ class JWM {
 }
 
 class JWS {
-    data class TestVector(val from: String, val expected: String)
+    data class TestVector(val from: String, val expected: String, val expectedMetadata: Metadata)
 
     companion object {
         val TEST_VECTORS = listOf(
@@ -501,7 +501,14 @@ class JWS {
                           }
                        ]
                     }
-                """.trimIndent()
+                """.trimIndent(),
+                expectedMetadata = Metadata(
+                    encrypted = false,
+                    authenticated = true,
+                    nonRepudiation = true,
+                    signFrom = "did:example:alice#key-1",
+                    signAlg = SignAlg.ED25519,
+                )
             ),
 
             TestVector(
@@ -519,7 +526,14 @@ class JWS {
                           }
                        ]
                     }
-                """.trimIndent()
+                """.trimIndent(),
+                expectedMetadata = Metadata(
+                    encrypted = false,
+                    authenticated = true,
+                    nonRepudiation = true,
+                    signFrom = "did:example:alice#key-2",
+                    signAlg = SignAlg.ES256,
+                )
             ),
 
             TestVector(
@@ -537,7 +551,14 @@ class JWS {
                           }
                        ]
                     }
-                """.trimIndent()
+                """.trimIndent(),
+                expectedMetadata = Metadata(
+                    encrypted = false,
+                    authenticated = true,
+                    nonRepudiation = true,
+                    signFrom = "did:example:alice#key-3",
+                    signAlg = SignAlg.ES256K,
+                )
             )
         )
     }
@@ -1182,7 +1203,7 @@ class JWE {
                 packedMessage = BOB_MESSAGE_UNSUPPORTED_ALG_HEADER,
                 expectedThrow = UnsupportedAlgorithm::
                 class,
-                expectedMessage = "The algorithm ECDH-ES+A255KW+XC20P is unsupported",
+                expectedMessage = "The algorithm ECDH-ES+A255KW+XC20P is not supported",
                 unpackParams = UnpackParams
                     .Builder(BOB_MESSAGE_UNSUPPORTED_ALG_HEADER)
                     .expectDecryptByAllKeys(true)
@@ -1193,7 +1214,7 @@ class JWE {
                 packedMessage = BOB_MESSAGE_UNSUPPORTED_ENC_HEADER,
                 expectedThrow = UnsupportedAlgorithm::
                 class,
-                expectedMessage = "The algorithm ECDH-ES+A256KW+XC202 is unsupported",
+                expectedMessage = "The algorithm ECDH-ES+A256KW+XC202 is not supported",
                 unpackParams = UnpackParams
                     .Builder(BOB_MESSAGE_UNSUPPORTED_ENC_HEADER)
                     .expectDecryptByAllKeys(true)
