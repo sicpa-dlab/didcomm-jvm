@@ -31,6 +31,7 @@ Maven:
 See https://github.com/sicpa-dlab/didcomm-demo.
 
 ## Assumptions and Limitations
+- Java 8+
 - In order to use the library, `SecretResolver` and `DIDDocResolver` interfaces must be implemented on the application level.
   Implementation of that interfaces is out of DIDComm library scope.
     - Verification materials in DID Docs and secrets are expected in JWK format only.
@@ -52,6 +53,7 @@ See https://github.com/sicpa-dlab/didcomm-demo.
 - Limitations and known issues:
   - Forward protocol is not implemented 
   - Secp256k1 is supported on JDK < 15 only
+- DIDComm has been implemented under the following [Assumptions](https://hackmd.io/i3gLqgHQR2ihVFV5euyhqg)
 
 
 ## Examples
