@@ -4,7 +4,7 @@ import org.didcommx.didcomm.common.VerificationMaterialFormat
 import org.didcommx.didcomm.common.VerificationMethodType
 
 /**
- * The base class for all DIDComm errors and exceptions.
+ * The base class for all DIDComm exceptions.
  *
  * @param message - the detail message.
  * @param cause - the cause of this.
@@ -12,12 +12,19 @@ import org.didcommx.didcomm.common.VerificationMethodType
 open class DIDCommException(message: String, cause: Throwable? = null) : Throwable(message, cause)
 
 /**
+ * The base class for DIDComm exceptions about unsupported values.
+ *
+ * @param message - the detail message.
+ */
+open class DIDCommUnsupportedValueException(message: String) : DIDCommException(message)
+
+/**
  * This exception SHOULD be raised if verification method type is not supported.
  *
  * @param type The verification method type.
  */
 class UnsupportedVerificationMethodTypeException(type: VerificationMethodType) :
-    DIDCommException("${type.name} verification method type is not supported")
+    DIDCommUnsupportedValueException("${type.name} verification method type is not supported")
 
 /**
  * This exception SHOULD be raised if material format is not supported for verification method type.
@@ -28,7 +35,9 @@ class UnsupportedVerificationMethodTypeException(type: VerificationMethodType) :
 class UnsupportedVerificationMethodMaterialFormatException(
     format: VerificationMaterialFormat,
     type: VerificationMethodType
-) : DIDCommException("${format.name} material format is not supported for ${type.name} verification method type")
+) : DIDCommUnsupportedValueException(
+    "${format.name} material format is not supported for ${type.name} verification method type"
+)
 
 /**
  * This exception SHOULD be raised if secret type is not supported.
@@ -36,7 +45,7 @@ class UnsupportedVerificationMethodMaterialFormatException(
  * @param type The secret type.
  */
 class UnsupportedSecretTypeException(type: VerificationMethodType) :
-    DIDCommException("${type.name} secret type is not supported")
+    DIDCommUnsupportedValueException("${type.name} secret type is not supported")
 
 /**
  * This exception SHOULD be raised if material format is not supported for secret type.
@@ -47,18 +56,32 @@ class UnsupportedSecretTypeException(type: VerificationMethodType) :
 class UnsupportedSecretMaterialFormatException(
     format: VerificationMaterialFormat,
     type: VerificationMethodType
-) : DIDCommException("${format.name} material format is not supported for ${type.name} secret type")
+) : DIDCommUnsupportedValueException("${format.name} material format is not supported for ${type.name} secret type")
 
 /**
- * This exception SHOULD be raised if argument is illegal.
+ * This exception SHOULD be raised if curve is not supported.
  *
- * @param argument illegal argument.
+ * @param curve The curve.
  */
-class DIDCommIllegalArgumentException(argument: String) :
-    DIDCommException("The argument $argument is not valid")
+class UnsupportedCurveException(curve: String) : DIDCommUnsupportedValueException("The curve $curve is not supported")
 
 /**
- * The base exception for DID Doc errors
+ * This exception SHOULD be raised if JWK is not supported.
+ * For example, if JWK is RSA Key.
+ *
+ * @param jwk The JWK.
+ */
+class UnsupportedJWKException(jwk: String) : DIDCommUnsupportedValueException("The JWK $jwk is not supported")
+
+/**
+ * This exception SHOULD be raises if algorithm is not supported.
+ *
+ * @param alg JWA
+ */
+class UnsupportedAlgorithm(alg: String) : DIDCommUnsupportedValueException("The algorithm $alg is not supported")
+
+/**
+ * The base class for DID Doc exceptions
  *
  * @param message - the detail message.
  */
@@ -86,26 +109,11 @@ class DIDUrlNotFoundException(didUrl: String) : DIDDocException("The DID URL '$d
 class SecretNotFoundException(kid: String) : DIDCommException("The Secret '$kid' not found")
 
 /**
- * This exception SHOULD be raised if curve is not supported.
+ * This exception SHOULD be raised if argument is illegal.
  *
- * @param curve The curve.
+ * @param argument illegal argument.
  */
-class UnsupportedCurveException(curve: String) : DIDCommException("The curve $curve is unsupported")
-
-/**
- * This exception SHOULD be raised if JWK is not supported.
- * For example, if JWK is RSA Key.
- *
- * @param jwk The JWK.
- */
-class UnsupportedJWKException(jwk: String) : DIDCommException("The JWK $jwk is unsupported")
-
-/**
- * This exception SHOULD be raises if algorithm is not supported.
- *
- * @param alg JWA
- */
-class UnsupportedAlgorithm(alg: String) : DIDCommException("The algorithm $alg is unsupported")
+class DIDCommIllegalArgumentException(argument: String) : DIDCommException("The argument $argument is not valid")
 
 /**
  * Signals that packed message is malformed.
