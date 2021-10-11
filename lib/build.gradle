@@ -79,6 +79,7 @@ shadowJar {
 
     dependencies {
         include(dependency("com.nimbusds:nimbus-jose-jwt"))
+        include(dependency("com.github.multiformats:java-multibase"))
     }
 
     archiveClassifier.set("") // remove suffix `-all` as intellij can"t find the library otherwise
