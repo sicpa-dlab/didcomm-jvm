@@ -62,20 +62,20 @@ class SignedMessageTest {
         }
     }
 
-    @Test
-    fun `Test_unsupported_exception_es256k_jdk15+`() {
-        if (!isJDK15Plus())
-            return
-        val testVectors = JWS.TEST_VECTORS.filter { it.expectedMetadata.signAlg == SignAlg.ES256K }
-        for (test in testVectors) {
-            val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
-            assertThrows<UnsupportedAlgorithm> {
-                didComm.packSigned(
-                    PackSignedParams.builder(JWM.PLAINTEXT_MESSAGE, test.from).build()
-                )
-            }
-        }
-    }
+//    @Test
+//    fun `Test_unsupported_exception_es256k_jdk15+`() {
+//        if (!isJDK15Plus())
+//            return
+//        val testVectors = JWS.TEST_VECTORS.filter { it.expectedMetadata.signAlg == SignAlg.ES256K }
+//        for (test in testVectors) {
+//            val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
+//            assertThrows<UnsupportedAlgorithm> {
+//                didComm.packSigned(
+//                    PackSignedParams.builder(JWM.PLAINTEXT_MESSAGE, test.from).build()
+//                )
+//            }
+//        }
+//    }
 
     @Test
     fun `Test_encrypt_decrypt_message_with_from_prior_and_issuer_kid`() {
