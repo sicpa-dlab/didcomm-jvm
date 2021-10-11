@@ -343,7 +343,7 @@ class SenderKeySelectorTest {
 
         DID_DOC_BOB_WITH_NO_SECRETS.verificationMethods.forEach { vm ->
             val res = keySelector.findAnonCryptKeys(vm.id).map { it.jwk.toPublicJWK() }.toList()
-            val listOfVM = listOf(Key.wrapVerificationMethod(vm).jwk.toPublicJWK())
+            val listOfVM = listOf(Key.fromVerificationMethod(vm).jwk.toPublicJWK())
             assertContentEquals(listOfVM, res)
         }
     }
@@ -353,7 +353,7 @@ class SenderKeySelectorTest {
         val keySelector = SenderKeySelector(DIDDocResolverMockWithNoSecrets(), getSecretsResolver(Person.BOB))
 
         val expected = getKeyAgreementMethods(Person.BOB, KeyAgreementCurveType.X25519)
-            .map { Key.wrapVerificationMethod(it).jwk.toPublicJWK() }
+            .map { Key.fromVerificationMethod(it).jwk.toPublicJWK() }
         val res = keySelector.findAnonCryptKeys(JWM.BOB_DID).map { it.jwk.toPublicJWK() }.toList()
 
         assertEquals(expected, res)

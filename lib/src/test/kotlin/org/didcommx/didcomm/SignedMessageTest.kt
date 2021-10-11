@@ -2,17 +2,16 @@ package org.didcommx.didcomm
 
 import com.nimbusds.jose.JWSObjectJSON
 import com.nimbusds.jose.util.JSONObjectUtils
+import org.didcommx.didcomm.common.SignAlg
 import org.didcommx.didcomm.exceptions.DIDCommIllegalArgumentException
 import org.didcommx.didcomm.exceptions.SecretNotFoundException
+import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.fixtures.JWM
 import org.didcommx.didcomm.fixtures.JWS
 import org.didcommx.didcomm.mock.AliceSecretResolverMock
 import org.didcommx.didcomm.mock.DIDDocResolverMock
 import org.didcommx.didcomm.model.PackSignedParams
 import org.didcommx.didcomm.model.UnpackParams
-import org.didcommx.didcomm.utils.divideDIDFragment
-import org.didcommx.didcomm.utils.isDID
-import org.didcommx.didcomm.utils.isDIDFragment
 import org.didcommx.didcomm.utils.isJDK15Plus
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test

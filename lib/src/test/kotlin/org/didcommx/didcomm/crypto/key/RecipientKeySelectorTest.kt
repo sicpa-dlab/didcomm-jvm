@@ -238,7 +238,7 @@ class RecipientKeySelectorTest {
 
         for (vm in getKeyAgreementSecrets(Person.BOB)) {
             val res = keySelector.findAnonCryptKeys(listOf(vm.kid)).map { it.jwk.toPublicJWK() }.toList()
-            assertContentEquals(listOf(Key.wrapSecret(vm).jwk.toPublicJWK()), res)
+            assertContentEquals(listOf(Key.fromSecret(vm).jwk.toPublicJWK()), res)
         }
     }
 
@@ -260,7 +260,7 @@ class RecipientKeySelectorTest {
     fun `Test_find_anoncrypt_unpack_recipient_private_keys_different_curves`() {
         val keySelector = RecipientKeySelector(DIDDocResolverMock(), getSecretsResolver(Person.BOB))
 
-        val secrets = getKeyAgreementSecrets(Person.BOB).map { s -> Key.wrapSecret(s) }
+        val secrets = getKeyAgreementSecrets(Person.BOB).map { s -> Key.fromSecret(s) }
         val kids = secrets.map { s -> s.id }
         val expected = secrets.map {it.jwk.toPublicJWK()}
         val res = keySelector.findAnonCryptKeys(kids).map {it.jwk.toPublicJWK()}.toList()
@@ -297,7 +297,7 @@ class RecipientKeySelectorTest {
 
             val res = keySelector.findAnonCryptKeys(toKids).map {it.jwk.toPublicJWK()}.toList()
 
-            val keySecrets = secrets.map { s -> Key.wrapSecret(s).jwk.toPublicJWK() }
+            val keySecrets = secrets.map { s -> Key.fromSecret(s).jwk.toPublicJWK() }
             assertContentEquals(keySecrets, res)
         }
 
@@ -323,7 +323,7 @@ class RecipientKeySelectorTest {
 
             val res = keySelector.findAnonCryptKeys(toKids).map {it.jwk.toPublicJWK()}
 
-            val keySecrets = secrets.map { s -> Key.wrapSecret(s).jwk.toPublicJWK() }
+            val keySecrets = secrets.map { s -> Key.fromSecret(s).jwk.toPublicJWK() }
             assertContentEquals(keySecrets, res.toList())
         }
 
@@ -339,7 +339,7 @@ class RecipientKeySelectorTest {
 
             val res = keySelector.findAnonCryptKeys(kids).map { it.jwk.toPublicJWK() }.toList()
 
-            val keySecrets = secrets.map { s -> Key.wrapSecret(s).jwk.toPublicJWK() }.toList()
+            val keySecrets = secrets.map { s -> Key.fromSecret(s).jwk.toPublicJWK() }.toList()
             assertContentEquals(keySecrets, res)
         }
     }

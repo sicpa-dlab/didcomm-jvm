@@ -1,12 +1,14 @@
 package org.didcommx.didcomm
 
 import com.nimbusds.jose.util.JSONObjectUtils
+import org.didcommx.didcomm.common.SignAlg
 import org.didcommx.didcomm.exceptions.DIDCommIllegalArgumentException
 import org.didcommx.didcomm.exceptions.DIDDocException
 import org.didcommx.didcomm.exceptions.DIDDocNotResolvedException
 import org.didcommx.didcomm.exceptions.IncompatibleCryptoException
 import org.didcommx.didcomm.exceptions.MalformedMessageException
 import org.didcommx.didcomm.exceptions.SecretNotFoundException
+import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.fixtures.JWE
 import org.didcommx.didcomm.fixtures.JWE.Companion.TEST_VECTORS
 import org.didcommx.didcomm.fixtures.JWM
@@ -18,9 +20,6 @@ import org.didcommx.didcomm.mock.DIDDocResolverMock
 import org.didcommx.didcomm.mock.DIDDocResolverMockWithNoSecrets
 import org.didcommx.didcomm.model.PackEncryptedParams
 import org.didcommx.didcomm.model.UnpackParams
-import org.didcommx.didcomm.utils.divideDIDFragment
-import org.didcommx.didcomm.utils.isDID
-import org.didcommx.didcomm.utils.isDIDFragment
 import org.didcommx.didcomm.utils.isJDK15Plus
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
