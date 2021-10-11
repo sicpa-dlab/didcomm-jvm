@@ -71,7 +71,7 @@ class UnsupportedJWKException(jwk: String) : DIDCommException("The JWK $jwk is u
  *
  * @param alg JWA
  */
-class UnsupportedAlgorithm(alg: String) : DIDCommException("The algorithm $alg is unsupported")
+class UnsupportedAlgorithm(alg: String, cause: Throwable? = null) : DIDCommException("The algorithm $alg is unsupported", cause)
 
 /**
  * Signals that packed message is malformed.
