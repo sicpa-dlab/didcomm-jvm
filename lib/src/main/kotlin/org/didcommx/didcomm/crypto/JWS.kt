@@ -25,6 +25,7 @@ import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.exceptions.UnsupportedCurveException
 import org.didcommx.didcomm.exceptions.UnsupportedJWKException
 import org.didcommx.didcomm.utils.asKey
+import org.didcommx.didcomm.utils.isJDK15Plus
 
 fun sign(payload: String, key: Key): String {
     val jwk = key.jwk
@@ -33,7 +34,11 @@ fun sign(payload: String, key: Key): String {
     val signer = try {
         when (alg) {
             JWSAlgorithm.ES256 -> ECDSASigner(jwk.asKey<ECKey>())
-            JWSAlgorithm.ES256K -> ECDSASigner(jwk.asKey<ECKey>())
+            JWSAlgorithm.ES256K -> {
+                if (isJDK15Plus())
+                    throw UnsupportedAlgorithm("ES256K is not supported for JDK 15+")
+                ECDSASigner(jwk.asKey<ECKey>())
+            }
             JWSAlgorithm.EdDSA -> Ed25519Signer(jwk.asKey())
             else -> throw UnsupportedAlgorithm(alg.name)
         }
@@ -63,7 +68,11 @@ fun verify(signature: JWSObjectJSON.Signature, signAlg: SignAlg, key: Key) {
     val verifier = try {
         when (signAlg) {
             SignAlg.ES256 -> ECDSAVerifier(jwk.asKey<ECKey>())
-            SignAlg.ES256K -> ECDSAVerifier(jwk.asKey<ECKey>())
+            SignAlg.ES256K -> {
+                if (isJDK15Plus())
+                    throw UnsupportedAlgorithm("ES256K is not supported for JDK 15+")
+                ECDSAVerifier(jwk.asKey<ECKey>())
+            }
             SignAlg.ED25519 -> Ed25519Verifier(jwk.asKey())
         }
     } catch (e: JOSEException) {

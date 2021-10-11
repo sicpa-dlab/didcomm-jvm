@@ -47,8 +47,8 @@ See https://github.com/sicpa-dlab/didcomm-demo.
             - A256CBC-HS512 (default for authcrypt)
         - Key wrapping algorithms: ECDH-ES+A256KW, ECDH-1PU+A256KW
     - Signing:
-        - Curves: Ed25519, Secp256k1 (JDK < 15), P-256
-        - Algorithms: EdDSA (with crv=Ed25519), ES256, ES256K
+        - Curves: Ed25519, Secp256k1 (currently JDK < 15 only), P-256
+        - Algorithms: EdDSA (with crv=Ed25519), ES256, ES256K (currently JDK < 15 only)
 - DID rotation (`fromPrior` field) is supported.
 - Limitations and known issues:
   - Forward protocol is not implemented 

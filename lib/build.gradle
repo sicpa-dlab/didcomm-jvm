@@ -25,7 +25,7 @@ dependencies {
     implementation "com.nimbusds:nimbus-jose-jwt:${nimbusJoseJWTVersion}"
     shadow "com.google.crypto.tink:tink:${googleTinkVersion}"
 // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on
-    implementation 'org.bouncycastle:bcprov-jdk15on:1.69'
+    // implementation 'org.bouncycastle:bcprov-jdk15on:1.69'
 
     // TODO look for a better solution
     // currently it's a workaround for shadow of the above deps
