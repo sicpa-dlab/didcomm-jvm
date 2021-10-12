@@ -169,10 +169,11 @@ jobs:
 
       - name: Publish to Maven Central
         env:
-          ORG_GRADLE_PROJECT_mavenOSSRHUsername: ${{ secrets.ORG_GRADLE_PROJECT_mavenOSSRHUsername }}
-          ORG_GRADLE_PROJECT_mavenOSSRHPassword: ${{ secrets.ORG_GRADLE_PROJECT_mavenOSSRHPassword }}
-          ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.ORG_GRADLE_PROJECT_signingKeyId }}
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ORG_GRADLE_PROJECT_signingKey }}
-          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.ORG_GRADLE_PROJECT_signingPassword }}
+          ORG_GRADLE_PROJECT_mavenOSSRHUsername: ${{ secrets.MAVEN_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenOSSRHPassword: ${{ secrets.MAVEN_PASSWORD }}
+          # creds of for an ascii-armored GPG subkey to sign for Maven
+          # https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.MAVEN_GPG_ARMORED_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.MAVEN_GPG_PASSWORD }}
         run: gradle publish
         shell: bash
