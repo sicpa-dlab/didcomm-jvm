@@ -34,7 +34,10 @@ See https://github.com/sicpa-dlab/didcomm-demo.
 - Java 8+
 - In order to use the library, `SecretResolver` and `DIDDocResolver` interfaces must be implemented on the application level.
   Implementation of that interfaces is out of DIDComm library scope.
-    - Verification materials in DID Docs and secrets are expected in JWK format only.
+    - Verification materials are expected in JWK, Base58 and Multibase formats.
+        - In Base58 and Multibase formats, keys using only X25519 and Ed25519 curves are supported.
+        - For private keys in Base58 and Multibase formats, the verification material value contains both private and public parts (concatenated bytes).
+        - In Multibase format, bytes of the verification material value is prefixed with the corresponding Multicodec code.
     - Key IDs (kids) used in `SecretResolver` must match the corresponding key IDs from DID Doc verification methods.
     - Key IDs (kids) in DID Doc verification methods and secrets must be a full [DID Fragment](https://www.w3.org/TR/did-core/#fragment), that is `did#key-id`.
     - Verification methods referencing another DID Document are not supported (see [Referring to Verification Methods](https://www.w3.org/TR/did-core/#referring-to-verification-methods)).

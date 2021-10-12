@@ -28,6 +28,8 @@ sealed interface Key {
         private const val X25519 = "X25519"
         private const val ED25519 = "Ed25519"
 
+        private const val CURVE25519_POINT_SIZE = 32
+
         fun fromVerificationMethod(method: VerificationMethod): Key = when (method.type) {
             VerificationMethodType.JSON_WEB_KEY_2020 -> {
                 if (method.verificationMaterial.format != VerificationMaterialFormat.JWK)
@@ -49,7 +51,7 @@ sealed interface Key {
                         VerificationMethodType.ED25519_VERIFICATION_KEY_2018 -> ED25519
                         else -> throw UnsupportedVerificationMethodTypeException(method.type)
                     }
-                Base58Key(method.id, curve, method.verificationMaterial.value)
+                Base58PublicKey(method.id, curve, method.verificationMaterial.value)
             }
 
             VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2020,
@@ -64,7 +66,7 @@ sealed interface Key {
                         VerificationMethodType.ED25519_VERIFICATION_KEY_2020 -> ED25519
                         else -> throw UnsupportedVerificationMethodTypeException(method.type)
                     }
-                MultibaseKey(method.id, curve, method.verificationMaterial.value)
+                MultibasePublicKey(method.id, curve, method.verificationMaterial.value)
             }
 
             else -> {
@@ -79,6 +81,36 @@ sealed interface Key {
                         secret.verificationMaterial.format, secret.type
                     )
                 JsonWebKey(secret.kid, secret.verificationMaterial.value)
+            }
+
+            VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2019,
+            VerificationMethodType.ED25519_VERIFICATION_KEY_2018 -> {
+                if (secret.verificationMaterial.format != VerificationMaterialFormat.BASE58)
+                    throw UnsupportedSecretMaterialFormatException(
+                        secret.verificationMaterial.format, secret.type
+                    )
+                val curve =
+                    when (secret.type) {
+                        VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2019 -> X25519
+                        VerificationMethodType.ED25519_VERIFICATION_KEY_2018 -> ED25519
+                        else -> throw UnsupportedSecretTypeException(secret.type)
+                    }
+                Base58PrivateKey(secret.kid, curve, secret.verificationMaterial.value)
+            }
+
+            VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2020,
+            VerificationMethodType.ED25519_VERIFICATION_KEY_2020 -> {
+                if (secret.verificationMaterial.format != VerificationMaterialFormat.MULTIBASE)
+                    throw UnsupportedSecretMaterialFormatException(
+                        secret.verificationMaterial.format, secret.type
+                    )
+                val curve =
+                    when (secret.type) {
+                        VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2020 -> X25519
+                        VerificationMethodType.ED25519_VERIFICATION_KEY_2020 -> ED25519
+                        else -> throw UnsupportedSecretTypeException(secret.type)
+                    }
+                MultibasePrivateKey(secret.kid, curve, secret.verificationMaterial.value)
             }
 
             else -> {
@@ -105,7 +137,7 @@ sealed interface Key {
         }
     }
 
-    private class Base58Key(override val id: String, curve: String, materialValue: String) : Key {
+    private class Base58PublicKey(override val id: String, curve: String, materialValue: String) : Key {
         override lateinit var jwk: JWK
             private set
 
@@ -132,7 +164,40 @@ sealed interface Key {
         }
     }
 
-    private class MultibaseKey(override val id: String, curve: String, materialValue: String) : Key {
+    private class Base58PrivateKey(override val id: String, curve: String, materialValue: String) : Key {
+        override lateinit var jwk: JWK
+            private set
+
+        override lateinit var curve: Curve
+            private set
+
+        init {
+            val rawValue = Base58.decode(materialValue)
+
+            val rawValueD = rawValue.sliceArray(0 until CURVE25519_POINT_SIZE)
+            val rawValueX = rawValue.sliceArray(CURVE25519_POINT_SIZE until rawValue.size)
+
+            val base64URLValueD = Base64URL.encode(rawValueD).toString()
+            val base64URLValueX = Base64URL.encode(rawValueX).toString()
+
+            val jwkJson: Map<String, Any> = mapOf(
+                "kty" to "OKP",
+                "crv" to curve,
+                "x" to base64URLValueX,
+                "d" to base64URLValueD
+            )
+
+            val jwk = JWK.parse(jwkJson)
+
+            if (jwk !is CurveBasedJWK)
+                throw UnsupportedJWKException(jwk::class.java.name)
+
+            this.jwk = jwk
+            this.curve = jwk.curve
+        }
+    }
+
+    private class MultibasePublicKey(override val id: String, curve: String, materialValue: String) : Key {
         override lateinit var jwk: JWK
             private set
 
@@ -161,6 +226,52 @@ sealed interface Key {
                 "kty" to "OKP",
                 "crv" to curve,
                 "x" to base64URLValue
+            )
+
+            val jwk = JWK.parse(jwkJson)
+
+            if (jwk !is CurveBasedJWK)
+                throw UnsupportedJWKException(jwk::class.java.name)
+
+            this.jwk = jwk
+            this.curve = jwk.curve
+        }
+    }
+
+    private class MultibasePrivateKey(override val id: String, curve: String, materialValue: String) : Key {
+        override lateinit var jwk: JWK
+            private set
+
+        override lateinit var curve: Curve
+            private set
+
+        init {
+            val prefixedRawValue = Multibase.decode(materialValue)
+            val (codec, rawValue) = fromMulticodec(prefixedRawValue)
+
+            val expectedCodec = when (curve) {
+                X25519 -> Codec.X25519_PRIV
+                ED25519 -> Codec.ED25519_PRIV
+                else -> throw UnsupportedCurveException(curve)
+            }
+
+            if (codec != expectedCodec) {
+                throw IllegalArgumentException(
+                    "Multicoded prefix ${codec.prefix} is not valid for publicKeyMultibase and $curve curve"
+                )
+            }
+
+            val rawValueD = rawValue.sliceArray(0 until CURVE25519_POINT_SIZE)
+            val rawValueX = rawValue.sliceArray(CURVE25519_POINT_SIZE until rawValue.size)
+
+            val base64URLValueD = Base64URL.encode(rawValueD).toString()
+            val base64URLValueX = Base64URL.encode(rawValueX).toString()
+
+            val jwkJson: Map<String, Any> = mapOf(
+                "kty" to "OKP",
+                "crv" to curve,
+                "x" to base64URLValueX,
+                "d" to base64URLValueD
             )
 
             val jwk = JWK.parse(jwkJson)
