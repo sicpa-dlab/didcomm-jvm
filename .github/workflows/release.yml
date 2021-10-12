@@ -150,14 +150,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # NOTE it's always in SNAPSHOT state for now
-      # - name: set SNAPSHOT version
-      #   run: |
-      #     # TODO decide
-      #     # sed -i -r "s~^version=(.+)~version=\1-0.dev.${{ github.event.inputs.devN }}~" ./gradle.properties
-      #     sed -i -r "s~^version=(.+)~version=\1-SNAPSHOT~" ./gradle.properties
-      #     grep version ./gradle.properties
-      #   shell: bash
+      - name: set SNAPSHOT version
+        run: |
+          # TODO decide
+          # sed -i -r "s~^version=(.+)~version=\1-0.dev.${{ github.event.inputs.devN }}~" ./gradle.properties
+          sed -i -r "s~^version=(.+)~version=\1-SNAPSHOT~" ./gradle.properties
+          grep version ./gradle.properties
+        shell: bash
 
         # XXX do we need that here
       - name: Set up JDK 8
