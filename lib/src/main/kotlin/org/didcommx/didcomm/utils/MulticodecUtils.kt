@@ -5,7 +5,9 @@ import java.nio.ByteBuffer
 
 enum class Codec(val prefix: Int) {
     X25519_PUB(0xEC),
-    ED25519_PUB(0xED);
+    ED25519_PUB(0xED),
+    ED25519_PRIV(0x1300),
+    X25519_PRIV(0x1302),
 }
 
 fun fromMulticodec(value: ByteArray): Pair<Codec, ByteArray> {

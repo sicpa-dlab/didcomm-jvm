@@ -104,6 +104,9 @@ fun getJWSAlgorithm(jwk: JWK) = when (jwk) {
         Curve.SECP256K1 -> JWSAlgorithm.ES256K
         else -> throw UnsupportedCurveException(jwk.curve.name)
     }
-    is OctetKeyPair -> JWSAlgorithm.EdDSA
+    is OctetKeyPair -> when (jwk.curve) {
+        Curve.Ed25519 -> JWSAlgorithm.EdDSA
+        else -> throw UnsupportedCurveException(jwk.curve.name)
+    }
     else -> throw UnsupportedJWKException(jwk.javaClass.name)
 }
