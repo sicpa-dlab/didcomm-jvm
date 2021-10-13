@@ -12,6 +12,14 @@ fun isDID(str: String): Boolean {
     return parts.size >= 3 && parts[0] == "did"
 }
 
+fun isDIDUrl(str: String): Boolean {
+    val strSplit = str.split("#")
+    if (strSplit.size != 2) return false
+    val before = strSplit[0]
+    val after = strSplit[1]
+    return after != "" && isDID(before)
+}
+
 fun calculateAPV(kids: List<String>): Base64URL? {
     val digest = MessageDigest.getInstance("SHA-256")
     return Base64URL.encode(digest.digest(kids.sorted().joinToString(".").encodeToByteArray()))
