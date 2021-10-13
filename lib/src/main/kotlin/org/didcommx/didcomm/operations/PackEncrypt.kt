@@ -6,6 +6,7 @@ import org.didcommx.didcomm.crypto.authEncrypt
 import org.didcommx.didcomm.crypto.key.Key
 import org.didcommx.didcomm.crypto.key.SenderKeySelector
 import org.didcommx.didcomm.crypto.sign
+import org.didcommx.didcomm.diddoc.DIDCommService
 import org.didcommx.didcomm.model.PackEncryptedParams
 
 fun signIfNeeded(message: String, params: PackEncryptedParams, keySelector: SenderKeySelector) =
@@ -31,3 +32,42 @@ fun protectSenderIfNeeded(params: PackEncryptedParams, encryptResult: EncryptRes
     } else {
         encryptResult
     }
+
+fun wrapInForwardIfNeeded(
+    packedMessage: Map<String, Any>,
+    params: PackEncryptedParams,
+    didServicesChain: List<DIDCommService>,
+    senderKeySelector: SenderKeySelector
+): WrapInForwardResult? {
+
+    if (!(params.forward && didServicesChain.size > 0))
+        return null
+
+    // last service is for 'to' DID
+    var routingKeys = didServicesChain.last().routingKeys
+
+    // prepend routing with alternative endpoints
+    // starting from the second mediator if any
+    // (the first one considered to have URI endpoint)
+    // cases:
+    //   ==1 usual sender forward process
+    //   >1 alternative endpoints
+    //   >2 alternative endpoints recursion
+    // TODO
+    //   - case: a mediator's service has non-empty routing keys
+    //     list (not covered by the spec for now)
+    if (didServicesChain.size > 1)
+        routingKeys = (
+            didServicesChain.drop(1).map { it.serviceEndpoint } +
+                routingKeys
+            )
+
+    return wrapInForward(
+        packedMessage,
+        params.to,
+        senderKeySelector,
+        params.encAlgAnon,
+        routingKeys,
+        params.forwardHeaders
+    )
+}

@@ -16,6 +16,17 @@ import org.didcommx.didcomm.message.Message
 data class UnpackResult(val message: Message, val metadata: Metadata)
 
 /**
+ * Result of unpackForward operation.
+ *
+ * TODO docs
+ */
+data class UnpackForwardResult(
+    val forwardMsg: Message,
+    val forwardedMsg: Map<String, Any>,
+    val forwardedMsgEncryptedTo: List<String>? = null
+)
+
+/**
  * Metadata with details about the packed messaged. Can be used for MTC (message trust context) analysis.
  *
  * @property encrypted          Whether the message has been encrypted.

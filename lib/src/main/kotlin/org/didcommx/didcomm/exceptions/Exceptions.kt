@@ -116,6 +116,14 @@ class SecretNotFoundException(kid: String) : DIDCommException("The Secret '$kid'
 class DIDCommIllegalArgumentException(argument: String) : DIDCommException("The argument $argument is not valid")
 
 /**
+ * This exception SHOULD be raised if DIDCommService is invalid.
+ *
+ * @param did The did.
+ * @param msg Error.
+ */
+class DIDCommServiceException(did: String, msg: String) : DIDDocException("Invalid DIDCommService for DID Doc '$did': $msg")
+
+/**
  * Signals that packed message is malformed.
  *
  * @param message - the detail message.
