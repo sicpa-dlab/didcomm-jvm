@@ -3,6 +3,8 @@ package org.didcommx.didcomm.diddoc
 import org.didcommx.didcomm.common.VerificationMaterial
 import org.didcommx.didcomm.common.VerificationMaterialFormat
 import org.didcommx.didcomm.common.VerificationMethodType
+import org.didcommx.didcomm.protocols.routing.PROFILE_DIDCOMM_AIP2_ENV_RFC587
+import org.didcommx.didcomm.protocols.routing.PROFILE_DIDCOMM_V2
 
 val ALICE_VERIFICATION_METHOD_KEY_AGREEM_X25519_NOT_IN_SECRET = VerificationMethod(
     id = "did:example:alice#key-x25519-not-in-secrets-1",

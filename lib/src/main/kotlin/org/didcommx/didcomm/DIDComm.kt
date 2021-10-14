@@ -7,7 +7,6 @@ import org.didcommx.didcomm.crypto.key.SenderKeySelector
 import org.didcommx.didcomm.crypto.sign
 import org.didcommx.didcomm.diddoc.DIDDoc
 import org.didcommx.didcomm.diddoc.DIDDocResolver
-import org.didcommx.didcomm.diddoc.resolveDidServicesChain
 import org.didcommx.didcomm.model.PackEncryptedParams
 import org.didcommx.didcomm.model.PackEncryptedResult
 import org.didcommx.didcomm.model.PackPlaintextParams
@@ -15,7 +14,6 @@ import org.didcommx.didcomm.model.PackPlaintextResult
 import org.didcommx.didcomm.model.PackSignedParams
 import org.didcommx.didcomm.model.PackSignedResult
 import org.didcommx.didcomm.model.ServiceMetadata
-import org.didcommx.didcomm.model.UnpackForwardResult
 import org.didcommx.didcomm.model.UnpackParams
 import org.didcommx.didcomm.model.UnpackResult
 import org.didcommx.didcomm.operations.encrypt
@@ -23,8 +21,8 @@ import org.didcommx.didcomm.operations.packFromPrior
 import org.didcommx.didcomm.operations.protectSenderIfNeeded
 import org.didcommx.didcomm.operations.signIfNeeded
 import org.didcommx.didcomm.operations.unpack
-import org.didcommx.didcomm.operations.unpackForward
 import org.didcommx.didcomm.operations.wrapInForwardIfNeeded
+import org.didcommx.didcomm.protocols.routing.resolveDIDCommServicesChain
 import org.didcommx.didcomm.secret.SecretResolver
 
 /**
@@ -155,7 +153,7 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         val (encryptedResult, recipientKeys) = encrypt(params, payload, senderKeySelector)
         var (packedMessage) = protectSenderIfNeeded(params, encryptedResult, recipientKeys)
 
-        val didServicesChain = resolveDidServicesChain(
+        val didServicesChain = resolveDIDCommServicesChain(
             didDocResolver, params.to, params.forwardServiceId
         )
 
@@ -193,19 +191,5 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         val recipientKeySelector = RecipientKeySelector(didDocResolver, secretResolver)
 
         return unpack(params, recipientKeySelector)
-    }
-
-    /**
-     *  Unpacks the packed DIDComm Forward message by doing decryption and verifying the signatures.
-     *
-     *  @param params Unpack Parameters.
-     *  @return Result of Unpack Forward Operation.
-     */
-    fun unpackForward(params: UnpackParams): UnpackForwardResult {
-        val didDocResolver = params.didDocResolver ?: this.didDocResolver
-        val secretResolver = params.secretResolver ?: this.secretResolver
-        val recipientKeySelector = RecipientKeySelector(didDocResolver, secretResolver)
-
-        return unpackForward(params, recipientKeySelector)
     }
 }

@@ -12,7 +12,6 @@ import org.didcommx.didcomm.crypto.verify
 import org.didcommx.didcomm.exceptions.MalformedMessageException
 import org.didcommx.didcomm.message.Message
 import org.didcommx.didcomm.model.Metadata
-import org.didcommx.didcomm.model.UnpackForwardResult
 import org.didcommx.didcomm.model.UnpackParams
 import org.didcommx.didcomm.model.UnpackResult
 import org.didcommx.didcomm.utils.calculateAPV
@@ -29,27 +28,6 @@ fun unpack(params: UnpackParams, keySelector: RecipientKeySelector): UnpackResul
     }
 
     return UnpackResult(msg, metadataBuilder.build())
-}
-
-fun unpackForward(params: UnpackParams, keySelector: RecipientKeySelector): UnpackForwardResult {
-    val metadataBuilder = Metadata.Builder()
-
-    val msg = when (val parseResult = parse(params.packedMessage)) {
-        is ParseResult.JWE -> parseResult.unpack(keySelector, params.expectDecryptByAllKeys, metadataBuilder, false)
-        else -> throw MalformedMessageException("JWE with anonymous encryption is expected around Forward message")
-    }
-
-    val forwardedMsg = msg.forwardedMsg
-
-    if (forwardedMsg != null) {
-        return UnpackForwardResult(
-            msg,
-            forwardedMsg,
-            metadataBuilder.build().encryptedTo
-        )
-    } else {
-        throw MalformedMessageException("Not a Forward message")
-    }
 }
 
 private fun ParseResult.JWM.unpack(keySelector: RecipientKeySelector, metadataBuilder: Metadata.Builder): Message {

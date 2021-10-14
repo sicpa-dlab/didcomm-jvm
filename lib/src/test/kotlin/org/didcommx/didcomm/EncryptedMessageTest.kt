@@ -2,6 +2,7 @@ package org.didcommx.didcomm
 
 import com.nimbusds.jose.util.JSONObjectUtils
 import org.didcommx.didcomm.common.SignAlg
+import org.didcommx.didcomm.crypto.key.RecipientKeySelector
 import org.didcommx.didcomm.exceptions.DIDCommIllegalArgumentException
 import org.didcommx.didcomm.exceptions.DIDDocNotResolvedException
 import org.didcommx.didcomm.exceptions.DIDUrlNotFoundException
@@ -22,6 +23,7 @@ import org.didcommx.didcomm.mock.Mediator1SecretResolverMock
 import org.didcommx.didcomm.mock.Mediator2SecretResolverMock
 import org.didcommx.didcomm.model.PackEncryptedParams
 import org.didcommx.didcomm.model.UnpackParams
+import org.didcommx.didcomm.protocols.routing.unpackForward
 import org.didcommx.didcomm.utils.isJDK15Plus
 import org.didcommx.didcomm.utils.toJson
 import org.junit.jupiter.api.assertThrows
@@ -108,19 +110,21 @@ class EncryptedMessageTest {
 
         // TODO make focused on initial subject (without forward)
         // CHARLIE's first mediator (MEDIATOR2)
-        var forwardCharlie = didComm.unpackForward(
-            UnpackParams.Builder(packed.packedMessage)
-                .secretResolver(Mediator2SecretResolverMock())
-                .build()
+        var forwardCharlie = unpackForward(
+            packed.packedMessage,
+            RecipientKeySelector(
+                DIDDocResolverMock(), Mediator2SecretResolverMock()
+            )
         )
 
         var forwardedMsg = toJson(forwardCharlie.forwardedMsg)
 
         // CHARLIE's second mediator (MEDIATOR1)
-        forwardCharlie = didComm.unpackForward(
-            UnpackParams.Builder(forwardedMsg)
-                .secretResolver(Mediator1SecretResolverMock())
-                .build()
+        forwardCharlie = unpackForward(
+            forwardedMsg,
+            RecipientKeySelector(
+                DIDDocResolverMock(), Mediator1SecretResolverMock()
+            )
         )
 
         forwardedMsg = toJson(forwardCharlie.forwardedMsg)

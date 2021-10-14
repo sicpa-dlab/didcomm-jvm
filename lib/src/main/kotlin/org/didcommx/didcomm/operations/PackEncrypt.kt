@@ -8,6 +8,8 @@ import org.didcommx.didcomm.crypto.key.SenderKeySelector
 import org.didcommx.didcomm.crypto.sign
 import org.didcommx.didcomm.diddoc.DIDCommService
 import org.didcommx.didcomm.model.PackEncryptedParams
+import org.didcommx.didcomm.protocols.routing.WrapInForwardResult
+import org.didcommx.didcomm.protocols.routing.wrapInForward
 import org.didcommx.didcomm.utils.fromJsonToMap
 
 fun signIfNeeded(message: String, params: PackEncryptedParams, keySelector: SenderKeySelector) =
@@ -46,6 +48,10 @@ fun wrapInForwardIfNeeded(
 
     // last service is for 'to' DID
     var routingKeys = didServicesChain.last().routingKeys
+
+    // TODO test
+    if (routingKeys.size == 0)
+        return null
 
     // prepend routing with alternative endpoints
     // starting from the second mediator if any
