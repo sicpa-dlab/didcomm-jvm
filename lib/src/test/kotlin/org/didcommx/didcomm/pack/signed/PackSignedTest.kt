@@ -38,26 +38,15 @@ class PackSignedTest {
             val signedFromList = getAuthMethodsInSecrets(Person.ALICE).map { it.id }.toMutableList()
             signedFromList.add(JWM.ALICE_DID)
 
-            val cartesianProduct = cartesianProduct(
+            return cartesianProduct(
                 listOf(JWM.PLAINTEXT_MESSAGE, attachmentMulti1msg(), attachmentJsonMsg()),
                 signedFromList
-            )
-
-            var stream = Stream.of<PackSignedTestData>()
-
-            for (i in cartesianProduct.indices) {
-                stream = Stream.concat(
-                    stream,
-                    Stream.of(
-                        PackSignedTestData(
-                            cartesianProduct[i][0] as Message,
-                            cartesianProduct[i][1] as String,
-                        )
-                    )
+            ).map {
+                PackSignedTestData(
+                    it[0] as Message,
+                    it[1] as String
                 )
-            }
-
-            return stream
+            }.stream()
         }
     }
 

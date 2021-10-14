@@ -5,7 +5,6 @@ import org.didcommx.didcomm.KeyAgreementCurveType
 import org.didcommx.didcomm.Person
 import org.didcommx.didcomm.cartesianProduct
 import org.didcommx.didcomm.common.AnonCryptAlg
-import org.didcommx.didcomm.crypto.key.RecipientKeySelector
 import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.fixtures.JWM
 import org.didcommx.didcomm.getAuthMethodsInSecrets
@@ -49,7 +48,7 @@ class PackAnonEncryptedTest {
             val signedFromList = getAuthMethodsInSecrets(Person.ALICE).map { it.id }.toMutableList()
             signedFromList.add(JWM.ALICE_DID)
 
-            val cartesianProduct = cartesianProduct(
+            return cartesianProduct(
                 listOf(JWM.PLAINTEXT_MESSAGE, attachmentMulti1msg(), attachmentJsonMsg()),
                 listOf(
                     AnonCryptAlg.A256CBC_HS512_ECDH_ES_A256KW,
@@ -58,25 +57,15 @@ class PackAnonEncryptedTest {
                 ),
                 toList, signedFromList,
                 listOf(true, false)
-            )
-            var stream = Stream.of<PackAnonEncryptedTestData>()
-
-            for (i in cartesianProduct.indices) {
-                stream = Stream.concat(
-                    stream,
-                    Stream.of(
-                        PackAnonEncryptedTestData(
-                            cartesianProduct[i][0] as Message,
-                            cartesianProduct[i][1] as AnonCryptAlg,
-                            cartesianProduct[i][2] as String,
-                            cartesianProduct[i][3] as String,
-                            cartesianProduct[i][4] as Boolean
-                        )
-                    )
+            ).map {
+                PackAnonEncryptedTestData(
+                    it[0] as Message,
+                    it[1] as AnonCryptAlg,
+                    it[2] as String,
+                    it[3] as String,
+                    it[4] as Boolean
                 )
-            }
-
-            return stream
+            }.stream()
         }
     }
 
@@ -114,10 +103,8 @@ class PackAnonEncryptedTest {
         assertEquals(packResult.signFromKid, expectedSignFrm)
         assertNotNull(packResult.packedMessage)
 
-        val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
-
-        val unpackResult = unpack(
-            keySelector = recipientKeySelector,
+        val didCommUnpack = DIDComm(DIDDocResolverMock(), BobSecretResolverMock())
+        val unpackResult = didCommUnpack.unpack(
             params = UnpackParams.Builder(packResult.packedMessage)
                 .expectDecryptByAllKeys(true)
                 .build()

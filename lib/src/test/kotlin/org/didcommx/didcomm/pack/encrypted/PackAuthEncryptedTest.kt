@@ -36,10 +36,8 @@ data class PackAuthEncryptedTestData(
     val authAlg: AuthCryptAlg,
     val anonAlg: AnonCryptAlg,
     var curveType: KeyAgreementCurveType,
-    val signedFrom: String,
     val protectSenderId: Boolean,
-    var to: String,
-    var from: String
+    val signedFrom: String
 )
 
 class PackAuthEncryptedTest {
@@ -47,17 +45,10 @@ class PackAuthEncryptedTest {
 
         @JvmStatic
         fun packAuthEncryptedTest(): Stream<PackAuthEncryptedTestData> {
-            val toList =
-                getKeyAgreementMethodsInSecrets(Person.BOB, KeyAgreementCurveType.X25519).map { it.id }.toMutableList()
-            toList.add(JWM.BOB_DID)
-
-            val fromList = getKeyAgreementMethodsInSecrets(Person.ALICE).map { it.id }.toMutableList()
-            fromList.add(JWM.ALICE_DID)
-
             val signedFromList = getAuthMethodsInSecrets(Person.ALICE).map { it.id }.toMutableList()
             signedFromList.add(JWM.ALICE_DID)
 
-            val cartesianProduct = cartesianProduct(
+            return cartesianProduct(
                 listOf(JWM.PLAINTEXT_MESSAGE, attachmentMulti1msg(), attachmentJsonMsg()),
                 listOf(
                     AuthCryptAlg.A256CBC_HS512_ECDH_1PU_A256KW
@@ -73,59 +64,72 @@ class PackAuthEncryptedTest {
                     KeyAgreementCurveType.P521,
                     KeyAgreementCurveType.P384
                 ),
-                signedFromList,
                 listOf(true, false),
-                toList,
-                fromList
-            )
-            var stream = Stream.of<PackAuthEncryptedTestData>()
-
-            for (i in cartesianProduct.indices) {
-                stream = Stream.concat(
-                    stream,
-                    Stream.of(
-                        PackAuthEncryptedTestData(
-                            cartesianProduct[i][0] as Message,
-                            cartesianProduct[i][1] as AuthCryptAlg,
-                            cartesianProduct[i][2] as AnonCryptAlg,
-                            cartesianProduct[i][3] as KeyAgreementCurveType,
-                            cartesianProduct[i][4] as String,
-                            cartesianProduct[i][5] as Boolean,
-                            cartesianProduct[i][6] as String,
-                            cartesianProduct[i][7] as String
-                        )
-                    )
+                signedFromList
+            ).map {
+                PackAuthEncryptedTestData(
+                    it[0] as Message,
+                    it[1] as AuthCryptAlg,
+                    it[2] as AnonCryptAlg,
+                    it[3] as KeyAgreementCurveType,
+                    it[4] as Boolean,
+                    it[5] as String
                 )
-            }
-
-            return stream
+            }.stream()
         }
     }
 
     @ParameterizedTest
     @MethodSource("packAuthEncryptedTest")
     fun testAuthcryptSenderDIDRecipientDID(data: PackAuthEncryptedTestData) {
-        data.to = JWM.BOB_DID
         data.curveType = KeyAgreementCurveType.X25519
-        data.from = JWM.ALICE_DID
-        checkAuthcrypt(data)
+        checkAuthcrypt(data, JWM.ALICE_DID, JWM.BOB_DID)
     }
 
     @ParameterizedTest
     @MethodSource("packAuthEncryptedTest")
     fun testAuthcryptSenderDIDRecipientKid(data: PackAuthEncryptedTestData) {
-        data.curveType = KeyAgreementCurveType.X25519
-        data.from = JWM.ALICE_DID
-        checkAuthcrypt(data)
+        val toList =
+            getKeyAgreementMethodsInSecrets(Person.BOB, KeyAgreementCurveType.X25519).map { it.id }.toMutableList()
+        toList.add(JWM.BOB_DID)
+        for (to in toList) {
+            data.curveType = KeyAgreementCurveType.X25519
+            checkAuthcrypt(data, JWM.ALICE_DID, to)
+        }
     }
 
-    fun checkAuthcrypt(data: PackAuthEncryptedTestData) {
+    @ParameterizedTest
+    @MethodSource("packAuthEncryptedTest")
+    fun testAuthcryptSenderKidRecipientDID(data: PackAuthEncryptedTestData) {
+        val fromList = getKeyAgreementMethodsInSecrets(Person.ALICE, data.curveType).map { it.id }.toMutableList()
+
+        for (from in fromList) {
+            checkAuthcrypt(data, from, JWM.BOB_DID)
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("packAuthEncryptedTest")
+    fun testAuthcryptSenderKidRecipientKid(data: PackAuthEncryptedTestData) {
+        val fromList = getKeyAgreementMethodsInSecrets(Person.ALICE, data.curveType).map { it.id }.toMutableList()
+
+        val toList =
+            getKeyAgreementMethodsInSecrets(Person.BOB, data.curveType).map { it.id }.toMutableList()
+
+        for (from in fromList) {
+            for (to in toList) {
+                checkAuthcrypt(data, from, to)
+            }
+        }
+    }
+
+    fun checkAuthcrypt(data: PackAuthEncryptedTestData, from: String, to: String) {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val packResult = try {
             didComm.packEncrypted(
-                PackEncryptedParams.builder(message = data.msg, to = data.to)
-                    .from(data.from)
+                PackEncryptedParams.builder(message = data.msg, to = to)
+                    .from(from)
                     .signFrom(data.signedFrom)
                     .protectSenderId(data.protectSenderId)
                     .encAlgAuth(data.authAlg)
@@ -137,8 +141,8 @@ class PackAuthEncryptedTest {
             throw e
         }
 
-        var expectedTo = listOf(data.to)
-        if (!isDIDUrl(data.to)) {
+        var expectedTo = listOf(to)
+        if (!isDIDUrl(to)) {
             expectedTo =
                 getKeyAgreementMethodsInSecrets(
                     Person.BOB,
@@ -146,8 +150,8 @@ class PackAuthEncryptedTest {
                 ).map { it.id }
         }
 
-        var expectedFrom = data.from
-        if (!isDIDUrl(data.from)) {
+        var expectedFrom = from
+        if (!isDIDUrl(from)) {
             expectedFrom =
                 getKeyAgreementMethodsInSecrets(
                     Person.ALICE
