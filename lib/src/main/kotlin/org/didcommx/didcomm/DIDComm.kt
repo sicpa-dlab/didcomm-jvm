@@ -160,7 +160,7 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         )
 
         val wrapInForwardResult = wrapInForwardIfNeeded(
-            params, didServicesChain, senderKeySelector
+            packedMessage, params, didServicesChain, senderKeySelector
         )
 
         if (wrapInForwardResult != null)

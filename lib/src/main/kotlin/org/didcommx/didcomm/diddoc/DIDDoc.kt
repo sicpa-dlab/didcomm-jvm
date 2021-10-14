@@ -72,10 +72,9 @@ data class DIDCommService(
 )
 
 // not used for now
-// const val PROFILE_DIDCOMM_AIP1 = "didcomm/aip1"
-// const val PROFILE_DIDCOMM_AIP2_ENV_RFC19 = "didcomm/aip2;env=rfc19"
-// const val PROFILE_DIDCOMM_AIP2_ENV_RFC587 = "didcomm/aip2;env=rfc587"
-
+const val PROFILE_DIDCOMM_AIP1 = "didcomm/aip1"
+const val PROFILE_DIDCOMM_AIP2_ENV_RFC19 = "didcomm/aip2;env=rfc19"
+const val PROFILE_DIDCOMM_AIP2_ENV_RFC587 = "didcomm/aip2;env=rfc587"
 const val PROFILE_DIDCOMM_V2 = "didcomm/v2"
 
 fun findDidService(

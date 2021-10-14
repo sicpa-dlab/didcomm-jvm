@@ -8,6 +8,7 @@ import org.didcommx.didcomm.crypto.key.SenderKeySelector
 import org.didcommx.didcomm.crypto.sign
 import org.didcommx.didcomm.diddoc.DIDCommService
 import org.didcommx.didcomm.model.PackEncryptedParams
+import org.didcommx.didcomm.utils.fromJsonToMap
 
 fun signIfNeeded(message: String, params: PackEncryptedParams, keySelector: SenderKeySelector) =
     if (params.signFrom != null) {
@@ -34,7 +35,7 @@ fun protectSenderIfNeeded(params: PackEncryptedParams, encryptResult: EncryptRes
     }
 
 fun wrapInForwardIfNeeded(
-    packedMessage: Map<String, Any>,
+    packedMessage: String,
     params: PackEncryptedParams,
     didServicesChain: List<DIDCommService>,
     senderKeySelector: SenderKeySelector
@@ -63,7 +64,7 @@ fun wrapInForwardIfNeeded(
             )
 
     return wrapInForward(
-        packedMessage,
+        fromJsonToMap(packedMessage),
         params.to,
         senderKeySelector,
         params.encAlgAnon,

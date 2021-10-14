@@ -153,7 +153,7 @@ val DID_DOC_ALICE_SPEC_TEST_VECTORS = DIDDoc(
         DIDCommService(
             id = "did:example:123456789abcdefghi#didcomm-1",
             serviceEndpoint = "did:example:mediator1",
-            accept = listOf("PROFILE_DIDCOMM_V2", "PROFILE_DIDCOMM_AIP2_ENV_RFC587"),
+            accept = listOf(PROFILE_DIDCOMM_V2, PROFILE_DIDCOMM_AIP2_ENV_RFC587),
             routingKeys = listOf(
                 "did:example:mediator2#key-p521-1",
             ),

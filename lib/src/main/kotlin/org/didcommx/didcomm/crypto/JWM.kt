@@ -18,7 +18,7 @@ fun parse(str: String): ParseResult = try {
 fun parse(json: Map<String, Any>): ParseResult = when {
     json.containsKey("signatures") -> ParseResult.JWS(json)
     json.containsKey("recipients") -> ParseResult.JWE(json)
-    else -> ParseResult.Forward(Message.parse(json))
+    else -> ParseResult.JWM(Message.parse(json))
 }
 
 sealed class ParseResult {
