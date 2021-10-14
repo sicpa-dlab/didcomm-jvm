@@ -150,3 +150,10 @@ private fun mapCureToType(vm: VerificationMethod): KeyAgreementCurveType {
     }
     throw IllegalArgumentException("Unknown verification methods curve type: $vm")
 }
+
+fun cartesianProduct(a: List<*>, b: List<*>, vararg lists: List<*>): List<List<*>> =
+    (listOf(a, b).plus(lists))
+        .fold(listOf(listOf<Any?>())) { acc, set ->
+            acc.flatMap { list -> set.map { element -> list + element } }
+        }
+        .toList()
