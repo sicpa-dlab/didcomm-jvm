@@ -2,7 +2,8 @@ package org.didcommx.didcomm.pack.signed
 
 import org.didcommx.didcomm.DIDComm
 import org.didcommx.didcomm.Person
-import org.didcommx.didcomm.crypto.key.RecipientKeySelector
+import org.didcommx.didcomm.cartesianProduct
+import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.fixtures.JWM
 import org.didcommx.didcomm.getAuthMethodsInSecrets
 import org.didcommx.didcomm.message.Message
@@ -13,7 +14,8 @@ import org.didcommx.didcomm.mock.BobSecretResolverMock
 import org.didcommx.didcomm.mock.DIDDocResolverMock
 import org.didcommx.didcomm.model.PackSignedParams
 import org.didcommx.didcomm.model.UnpackParams
-import org.didcommx.didcomm.operations.unpack
+import org.didcommx.didcomm.utils.isJDK15Plus
+import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
@@ -24,8 +26,8 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 data class PackSignedTestData(
-    val msgList: List<Message>,
-    val signedFromList: List<String>
+    val msg: Message,
+    val signedFrom: String
 )
 
 class PackSignedTest {
@@ -36,52 +38,65 @@ class PackSignedTest {
             val signedFromList = getAuthMethodsInSecrets(Person.ALICE).map { it.id }.toMutableList()
             signedFromList.add(JWM.ALICE_DID)
 
-            return Stream.of(
-                PackSignedTestData(
-                    listOf(JWM.PLAINTEXT_MESSAGE, attachmentMulti1msg(), attachmentJsonMsg()),
-                    signedFromList
-                ),
+            val cartesianProduct = cartesianProduct(
+                listOf(JWM.PLAINTEXT_MESSAGE, attachmentMulti1msg(), attachmentJsonMsg()),
+                signedFromList
             )
+
+            var stream = Stream.of<PackSignedTestData>()
+
+            for (i in cartesianProduct.indices) {
+                stream = Stream.concat(
+                    stream,
+                    Stream.of(
+                        PackSignedTestData(
+                            cartesianProduct[i][0] as Message,
+                            cartesianProduct[i][1] as String,
+                        )
+                    )
+                )
+            }
+
+            return stream
         }
     }
 
     @ParameterizedTest
     @MethodSource("packSignedTest")
-    fun testAnoncrypt(data: PackSignedTestData) {
+    fun testSigned(data: PackSignedTestData) {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
 
-        for (msg in data.msgList) {
-            for (signFrom in data.signedFromList) {
-                val packResult = didComm.packSigned(
-                    PackSignedParams.builder(message = msg, signFrom = signFrom).build()
-                )
-
-                var expectedSignFrm = getAuthMethodsInSecrets(Person.ALICE)[0].id
-                if (signFrom != JWM.ALICE_DID) {
-                    expectedSignFrm = signFrom
-                }
-
-                assertEquals(packResult.signFromKid, expectedSignFrm)
-                assertNotNull(packResult.packedMessage)
-
-                val recipientKeySelector = RecipientKeySelector(DIDDocResolverMock(), BobSecretResolverMock())
-
-                val unpackResult = unpack(
-                    keySelector = recipientKeySelector,
-                    params = UnpackParams.Builder(packResult.packedMessage)
-                        .secretResolver(BobSecretResolverMock())
-                        .expectDecryptByAllKeys(true)
-                        .build()
-                )
-                assertEquals(unpackResult.message.toString(), msg.toString())
-                assertTrue(unpackResult.metadata.nonRepudiation)
-                assertTrue(unpackResult.metadata.authenticated)
-                assertNull(unpackResult.metadata.encAlgAnon)
-                assertNull(unpackResult.metadata.encAlgAuth)
-                assertFalse(unpackResult.metadata.anonymousSender)
-                assertFalse(unpackResult.metadata.encrypted)
-                assertFalse(unpackResult.metadata.reWrappedInForward)
-            }
+        val packResult = try {
+            didComm.packSigned(
+                PackSignedParams.builder(message = data.msg, signFrom = data.signedFrom).build()
+            )
+        } catch (e: UnsupportedAlgorithm) {
+            Assumptions.assumeTrue(!isJDK15Plus())
+            throw e
         }
+
+        var expectedSignFrm = getAuthMethodsInSecrets(Person.ALICE)[0].id
+        if (data.signedFrom != JWM.ALICE_DID) {
+            expectedSignFrm = data.signedFrom
+        }
+
+        assertEquals(packResult.signFromKid, expectedSignFrm)
+        assertNotNull(packResult.packedMessage)
+
+        val unpackResult = didComm.unpack(
+            params = UnpackParams.Builder(packResult.packedMessage)
+                .secretResolver(BobSecretResolverMock())
+                .expectDecryptByAllKeys(true)
+                .build()
+        )
+
+        assertEquals(unpackResult.message.toString(), data.msg.toString())
+        assertTrue(unpackResult.metadata.nonRepudiation)
+        assertTrue(unpackResult.metadata.authenticated)
+        assertNull(unpackResult.metadata.encAlgAnon)
+        assertNull(unpackResult.metadata.encAlgAuth)
+        assertFalse(unpackResult.metadata.anonymousSender)
+        assertFalse(unpackResult.metadata.encrypted)
+        assertFalse(unpackResult.metadata.reWrappedInForward)
     }
 }
