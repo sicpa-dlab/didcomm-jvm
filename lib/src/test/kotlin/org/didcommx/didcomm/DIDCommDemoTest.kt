@@ -5,9 +5,9 @@ import org.didcommx.didcomm.message.Message
 import org.didcommx.didcomm.mock.AliceSecretResolverMock
 import org.didcommx.didcomm.mock.BobSecretResolverMock
 import org.didcommx.didcomm.mock.CharlieSecretResolverMock
+import org.didcommx.didcomm.mock.DIDDocResolverMock
 import org.didcommx.didcomm.mock.Mediator1SecretResolverMock
 import org.didcommx.didcomm.mock.Mediator2SecretResolverMock
-import org.didcommx.didcomm.mock.DIDDocResolverMock
 import org.didcommx.didcomm.model.PackEncryptedParams
 import org.didcommx.didcomm.model.PackPlaintextParams
 import org.didcommx.didcomm.model.PackSignedParams
