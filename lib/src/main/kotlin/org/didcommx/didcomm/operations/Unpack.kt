@@ -165,13 +165,17 @@ private fun ParseResult.JWE.anonUnpack(
     val decrypted = anonDecrypt(message, decryptByAllKeys, to)
 
     var unpackedMessage = decrypted.unpackedMessage
-    val unpackedMsgObj = Message.parse(unpackedMessage)
+
+    val parseResult = parse(unpackedMessage)
 
     var reWrappedInForward = false
-    val forwardedMsg = unpackedMsgObj.forwardedMsg
-    if (forwardedMsg != null && unwrapReWrappingForward) {
-        unpackedMessage = forwardedMsg
-        reWrappedInForward = true
+    if (parseResult is ParseResult.JWM) {
+        val forwardedMsg = parseResult.message.forwardedMsg
+
+        if (forwardedMsg != null && unwrapReWrappingForward) {
+            unpackedMessage = forwardedMsg
+            reWrappedInForward = true
+        }
     }
 
     metadataBuilder

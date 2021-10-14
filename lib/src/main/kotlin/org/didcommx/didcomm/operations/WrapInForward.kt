@@ -55,10 +55,9 @@ fun wrapInForward(
 
         val fwdMsgBuilder = Message.builder(
             didcommIdGeneratorDefault(),
-            mapOf(_next to "next"),
+            mapOf("next" to _next),
             DIDCommMessageProtocolTypes.Forward.typ
-        )
-            .attachments(listOf(fwdAttach))
+        ).attachments(listOf(fwdAttach))
 
         headers?.forEach { (name, value) ->
             fwdMsgBuilder.customHeader(name, value)

@@ -164,7 +164,7 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         )
 
         if (wrapInForwardResult != null)
-            packedMessage = wrapInForwardResult.msg.toString()
+            packedMessage = wrapInForwardResult.msgEncrypted.packedMessage
 
         val serviceMetadata = if (didServicesChain.isEmpty()) null else ServiceMetadata(
             didServicesChain.last().id,

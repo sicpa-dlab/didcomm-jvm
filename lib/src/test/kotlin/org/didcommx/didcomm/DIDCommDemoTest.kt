@@ -5,11 +5,14 @@ import org.didcommx.didcomm.message.Message
 import org.didcommx.didcomm.mock.AliceSecretResolverMock
 import org.didcommx.didcomm.mock.BobSecretResolverMock
 import org.didcommx.didcomm.mock.CharlieSecretResolverMock
+import org.didcommx.didcomm.mock.Mediator1SecretResolverMock
+import org.didcommx.didcomm.mock.Mediator2SecretResolverMock
 import org.didcommx.didcomm.mock.DIDDocResolverMock
 import org.didcommx.didcomm.model.PackEncryptedParams
 import org.didcommx.didcomm.model.PackPlaintextParams
 import org.didcommx.didcomm.model.PackSignedParams
 import org.didcommx.didcomm.model.UnpackParams
+import org.didcommx.didcomm.utils.toJson
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -297,8 +300,27 @@ class DIDCommDemoTest {
         )
         println("Sending ${packResultCharlie.packedMessage} to ${packResultCharlie.serviceMetadata?.serviceEndpoint ?: ""} for Charlie")
 
-        val unpackResultCharlie = didComm.unpack(
+        // TODO make focused on initial subject (without forward)
+        // CHARLIE's first mediator (MEDIATOR2)
+        var forwardCharlie = didComm.unpackForward(
             UnpackParams.Builder(packResultCharlie.packedMessage)
+                .secretResolver(Mediator2SecretResolverMock())
+                .build()
+        )
+
+        var forwardedMsg = toJson(forwardCharlie.forwardedMsg)
+
+        // CHARLIE's second mediator (MEDIATOR1)
+        forwardCharlie = didComm.unpackForward(
+            UnpackParams.Builder(forwardedMsg)
+                .secretResolver(Mediator1SecretResolverMock())
+                .build()
+        )
+
+        forwardedMsg = toJson(forwardCharlie.forwardedMsg)
+
+        val unpackResultCharlie = didComm.unpack(
+            UnpackParams.Builder(forwardedMsg)
                 .secretResolver(CharlieSecretResolverMock())
                 .build()
         )

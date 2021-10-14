@@ -1,13 +1,12 @@
 package org.didcommx.didcomm
 
-import org.didcommx.didcomm.message.Attachment
 import org.didcommx.didcomm.message.Message
-import org.didcommx.didcomm.mock.*
+import org.didcommx.didcomm.mock.AliceSecretResolverMock
+import org.didcommx.didcomm.mock.BobSecretResolverMock
+import org.didcommx.didcomm.mock.DIDDocResolverMockWithNoSecrets
+import org.didcommx.didcomm.mock.Mediator1SecretResolverMock
 import org.didcommx.didcomm.model.PackEncryptedParams
-import org.didcommx.didcomm.model.PackPlaintextParams
-import org.didcommx.didcomm.model.PackSignedParams
 import org.didcommx.didcomm.model.UnpackParams
-import org.didcommx.didcomm.operations.unpackForward
 import org.didcommx.didcomm.utils.toJson
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,7 +21,7 @@ class DIDCommForwardTest {
 
     @Test
     fun `Test_single_mediator`() {
-        val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
+        val didComm = DIDComm(DIDDocResolverMockWithNoSecrets(), AliceSecretResolverMock())
 
         val message = Message.builder(
             id = "1234567890",
@@ -50,7 +49,7 @@ class DIDCommForwardTest {
         )
 
         val forwardedMsg = toJson(forwardBob.forwardedMsg)
-        println("Sending ${forwardedMsg} to Bob")
+        println("Sending $forwardedMsg to Bob")
 
         // BOB
         val unpackResult = didComm.unpack(
