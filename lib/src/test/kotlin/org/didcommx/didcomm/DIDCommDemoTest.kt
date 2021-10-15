@@ -1,6 +1,5 @@
 package org.didcommx.didcomm
 
-import org.didcommx.didcomm.crypto.key.RecipientKeySelector
 import org.didcommx.didcomm.message.Attachment
 import org.didcommx.didcomm.message.Message
 import org.didcommx.didcomm.mock.AliceSecretResolverMock
@@ -13,7 +12,7 @@ import org.didcommx.didcomm.model.PackEncryptedParams
 import org.didcommx.didcomm.model.PackPlaintextParams
 import org.didcommx.didcomm.model.PackSignedParams
 import org.didcommx.didcomm.model.UnpackParams
-import org.didcommx.didcomm.protocols.routing.unpackForward
+import org.didcommx.didcomm.protocols.routing.Routing
 import org.didcommx.didcomm.utils.toJson
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -257,6 +256,7 @@ class DIDCommDemoTest {
     @Test
     fun `Test_multi_recipient_support`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
+        val routing = Routing(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val message = Message.builder(
             id = "1234567890",
@@ -304,21 +304,17 @@ class DIDCommDemoTest {
 
         // TODO make focused on initial subject (without forward)
         // CHARLIE's first mediator (MEDIATOR2)
-        var forwardCharlie = unpackForward(
+        var forwardCharlie = routing.unpackForward(
             packResultCharlie.packedMessage,
-            RecipientKeySelector(
-                DIDDocResolverMock(), Mediator2SecretResolverMock()
-            )
+            secretResolver = Mediator2SecretResolverMock()
         )
 
         var forwardedMsg = toJson(forwardCharlie.forwardedMsg)
 
         // CHARLIE's second mediator (MEDIATOR1)
-        forwardCharlie = unpackForward(
+        forwardCharlie = routing.unpackForward(
             forwardedMsg,
-            RecipientKeySelector(
-                DIDDocResolverMock(), Mediator1SecretResolverMock()
-            )
+            secretResolver = Mediator1SecretResolverMock()
         )
 
         forwardedMsg = toJson(forwardCharlie.forwardedMsg)

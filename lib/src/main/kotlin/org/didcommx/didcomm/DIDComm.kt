@@ -153,12 +153,14 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         val (encryptedResult, recipientKeys) = encrypt(params, payload, senderKeySelector)
         var (packedMessage) = protectSenderIfNeeded(params, encryptedResult, recipientKeys)
 
+        // TODO make that (along with service metadata) as
+        //      an internal part of routing routine
         val didServicesChain = resolveDIDCommServicesChain(
             didDocResolver, params.to, params.forwardServiceId
         )
 
         val wrapInForwardResult = wrapInForwardIfNeeded(
-            packedMessage, params, didServicesChain, senderKeySelector
+            packedMessage, params, didServicesChain, didDocResolver, secretResolver
         )
 
         if (wrapInForwardResult != null)

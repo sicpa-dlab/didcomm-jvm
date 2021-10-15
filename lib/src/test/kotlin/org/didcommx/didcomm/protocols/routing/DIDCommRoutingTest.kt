@@ -1,7 +1,6 @@
-package org.didcommx.didcomm
+package org.didcommx.didcomm.protocols.routing
 
-import org.didcommx.didcomm.crypto.key.RecipientKeySelector
-import org.didcommx.didcomm.crypto.key.SenderKeySelector
+import org.didcommx.didcomm.DIDComm
 import org.didcommx.didcomm.message.Message
 import org.didcommx.didcomm.mock.AliceSecretResolverMock
 import org.didcommx.didcomm.mock.BobSecretResolverMock
@@ -11,8 +10,6 @@ import org.didcommx.didcomm.mock.Mediator1SecretResolverMock
 import org.didcommx.didcomm.mock.Mediator2SecretResolverMock
 import org.didcommx.didcomm.model.PackEncryptedParams
 import org.didcommx.didcomm.model.UnpackParams
-import org.didcommx.didcomm.protocols.routing.unpackForward
-import org.didcommx.didcomm.protocols.routing.wrapInForward
 import org.didcommx.didcomm.utils.toJson
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -20,7 +17,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class DIDCommForwardTest {
+class DIDCommRoutingTest {
 
     val ALICE_DID = "did:example:alice"
     val BOB_DID = "did:example:bob"
@@ -34,7 +31,7 @@ class DIDCommForwardTest {
     val mediator1SecretResolver = Mediator1SecretResolverMock()
     val mediator2SecretResolver = Mediator2SecretResolverMock()
     val didComm = DIDComm(didDocResolver, aliceSecretResolver)
-    val senderKeySelector = SenderKeySelector(didDocResolver, aliceSecretResolver)
+    val routing = Routing(didDocResolver, aliceSecretResolver)
 
     @Test
     fun `Test_single_mediator`() {
@@ -57,9 +54,9 @@ class DIDCommForwardTest {
 
         // BOB MEDIATOR
         // TODO ??? why do we need the recipients selector (question to 'unpack' actually)
-        val forwardBob = unpackForward(
+        val forwardBob = routing.unpackForward(
             packResult.packedMessage,
-            RecipientKeySelector(didDocResolver, mediator1SecretResolver)
+            secretResolver = mediator1SecretResolver
         )
 
         val forwardedMsg = toJson(forwardBob.forwardedMsg)
@@ -102,17 +99,17 @@ class DIDCommForwardTest {
 
         // TODO make focused on initial subject (without forward)
         // CHARLIE's first mediator (MEDIATOR2)
-        var forwardCharlie = unpackForward(
+        var forwardCharlie = routing.unpackForward(
             packResult.packedMessage,
-            RecipientKeySelector(didDocResolver, mediator2SecretResolver)
+            secretResolver = mediator2SecretResolver
         )
 
         var forwardedMsg = toJson(forwardCharlie.forwardedMsg)
 
         // CHARLIE's second mediator (MEDIATOR1)
-        forwardCharlie = unpackForward(
+        forwardCharlie = routing.unpackForward(
             forwardedMsg,
-            RecipientKeySelector(didDocResolver, mediator1SecretResolver)
+            secretResolver = mediator1SecretResolver
         )
 
         forwardedMsg = toJson(forwardCharlie.forwardedMsg)
@@ -155,19 +152,18 @@ class DIDCommForwardTest {
         )
 
         // BOB's MEDIATOR
-        var forwardBob = unpackForward(
+        var forwardBob = routing.unpackForward(
             packResult.packedMessage,
-            RecipientKeySelector(didDocResolver, mediator1SecretResolver)
+            secretResolver = mediator1SecretResolver
         )
 
         val nextTo = forwardBob.forwardMsg.forwardNext
         assertNotNull(nextTo)
 
         // re-wrap to unexpected mediator (MEDIATOR2 here)
-        val wrapResult = wrapInForward(
+        val wrapResult = routing.wrapInForward(
             forwardBob.forwardedMsg,
             nextTo,
-            senderKeySelector,
             routingKeys = listOf(MEDIATOR2_DID),
             headers = mapOf("somefield" to 99999)
         )
@@ -175,9 +171,9 @@ class DIDCommForwardTest {
         assertNotNull(wrapResult)
 
         // MEDIATOR2
-        forwardBob = unpackForward(
+        forwardBob = routing.unpackForward(
             wrapResult.msgEncrypted.packedMessage,
-            RecipientKeySelector(didDocResolver, mediator2SecretResolver)
+            secretResolver = mediator2SecretResolver
         )
 
         val forwardedMsg = toJson(forwardBob.forwardedMsg)
@@ -219,19 +215,18 @@ class DIDCommForwardTest {
         )
 
         // BOB's MEDIATOR
-        val forwardBob = unpackForward(
+        val forwardBob = routing.unpackForward(
             packResult.packedMessage,
-            RecipientKeySelector(didDocResolver, mediator1SecretResolver)
+            secretResolver = mediator1SecretResolver
         )
 
         val nextTo = forwardBob.forwardMsg.forwardNext
         assertNotNull(nextTo)
 
         // re-wrap to the receiver
-        val wrapResult = wrapInForward(
+        val wrapResult = routing.wrapInForward(
             forwardBob.forwardedMsg,
             nextTo,
-            senderKeySelector,
             routingKeys = listOf(nextTo),
             headers = mapOf("somefield" to 99999)
         )

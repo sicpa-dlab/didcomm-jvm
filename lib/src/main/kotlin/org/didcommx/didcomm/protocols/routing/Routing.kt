@@ -19,6 +19,7 @@ import org.didcommx.didcomm.model.PackEncryptedResult
 import org.didcommx.didcomm.model.UnpackParams
 import org.didcommx.didcomm.operations.encrypt
 import org.didcommx.didcomm.operations.unpack
+import org.didcommx.didcomm.secret.SecretResolver
 import org.didcommx.didcomm.utils.didcommIdGeneratorDefault
 import org.didcommx.didcomm.utils.getDid
 import org.didcommx.didcomm.utils.isDIDOrDidUrl
@@ -130,102 +131,114 @@ internal fun resolveDIDCommServicesChain(
     return res
 }
 
-fun wrapInForward(
-    packedMsg: Map<String, Any>,
-    to: String,
-    keySelector: SenderKeySelector,
-    encAlgAnon: AnonCryptAlg? = null,
-    routingKeys: List<String>? = null,
-    headers: Map<String, Any?>? = null
-): WrapInForwardResult? {
-    // means forward protocol is not needed
-    if (routingKeys == null)
-        return null
+/**
+ * Routing protocol operations
+ */
+class Routing(private val didDocResolver: DIDDocResolver, private val secretResolver: SecretResolver) {
 
-    // TODO
-    //  - headers validation against ForwardMessage
-    //  - logging
-    //  - id generator as an argument
+    fun wrapInForward(
+        packedMsg: Map<String, Any>,
+        to: String,
+        encAlgAnon: AnonCryptAlg? = null,
+        routingKeys: List<String>? = null,
+        headers: Map<String, Any?>? = null,
+        didDocResolver: DIDDocResolver? = null,
+        secretResolver: SecretResolver? = null
+    ): WrapInForwardResult? {
+        // means forward protocol is not needed
+        if (routingKeys == null || routingKeys.isEmpty())
+            return null
 
-    var fwdMsg: Message? = null
-    var forwardedMsg = packedMsg
-    var encryptedResult: EncryptResult? = null
+        val _didDocResolver = didDocResolver ?: this.didDocResolver
+        val _secretResolver = secretResolver ?: this.secretResolver
+        val keySelector = SenderKeySelector(_didDocResolver, _secretResolver)
 
-    val tos = routingKeys.asReversed()
-    val nexts = (routingKeys.drop(1) + to).asReversed()
+        // TODO
+        //  - headers validation against ForwardMessage
+        //  - logging
+        //  - id generator as an argument
 
-    // wrap forward msgs in reversed order so the message to final
-    // recipient 'to' will be the innermost one
-    for ((_to, _next) in tos.zip(nexts)) {
-        val fwdAttach = Attachment.builder(
-            didcommIdGeneratorDefault(), Attachment.Data.Json(forwardedMsg)
-        ).build()
-        // TODO ??? .mediaType("application/json")
+        lateinit var fwdMsg: Message
+        var forwardedMsg = packedMsg
+        lateinit var encryptedResult: EncryptResult
 
-        val fwdMsgBuilder = Message.builder(
-            didcommIdGeneratorDefault(),
-            mapOf("next" to _next),
-            DIDCommMessageProtocolTypes.Forward.typ
-        ).attachments(listOf(fwdAttach))
+        val tos = routingKeys.asReversed()
+        val nexts = (routingKeys.drop(1) + to).asReversed()
 
-        headers?.forEach { (name, value) ->
-            fwdMsgBuilder.customHeader(name, value)
+        // wrap forward msgs in reversed order so the message to final
+        // recipient 'to' will be the innermost one
+        for ((_to, _next) in tos.zip(nexts)) {
+            val fwdAttach = Attachment.builder(
+                didcommIdGeneratorDefault(), Attachment.Data.Json(forwardedMsg)
+            ).build()
+            // TODO ??? .mediaType("application/json")
+
+            val fwdMsgBuilder = Message.builder(
+                didcommIdGeneratorDefault(),
+                mapOf("next" to _next),
+                DIDCommMessageProtocolTypes.Forward.typ
+            ).attachments(listOf(fwdAttach))
+
+            headers?.forEach { (name, value) ->
+                fwdMsgBuilder.customHeader(name, value)
+            }
+
+            fwdMsg = fwdMsgBuilder.build()
+
+            // TODO improve: do not rebuild each time 'to' is changed
+            val packParamsBuilder = PackEncryptedParams.Builder(fwdMsg, _to)
+
+            if (encAlgAnon != null)
+                packParamsBuilder.encAlgAnon(encAlgAnon)
+
+            encryptedResult = encrypt(
+                packParamsBuilder.build(), fwdMsg.toString(), keySelector
+            ).first
+
+            forwardedMsg = JSONObjectUtils.parse(encryptedResult.packedMessage)
         }
 
-        fwdMsg = fwdMsgBuilder.build()
-
-        // TODO improve: do not rebuild each time 'to' is changed
-        val packParamsBuilder = PackEncryptedParams.Builder(fwdMsg, _to)
-
-        if (encAlgAnon != null)
-            packParamsBuilder.encAlgAnon(encAlgAnon)
-
-        encryptedResult = encrypt(
-            packParamsBuilder.build(), fwdMsg.toString(), keySelector
-        ).first
-
-        forwardedMsg = JSONObjectUtils.parse(encryptedResult.packedMessage)
+        return WrapInForwardResult(
+            fwdMsg,
+            PackEncryptedResult(
+                encryptedResult.packedMessage,
+                encryptedResult.toKids,
+                encryptedResult.fromKid,
+            )
+        )
     }
 
-    encryptedResult = encryptedResult!!
+    /**
+     *  Unpacks the packed DIDComm Forward message by doing decryption and verifying the signatures.
+     *
+     *  @param params Unpack Parameters.
+     *  @return Result of Unpack Forward Operation.
+     */
+    fun unpackForward(
+        packedMessage: String,
+        expectDecryptByAllKeys: Boolean = false,
+        didDocResolver: DIDDocResolver? = null,
+        secretResolver: SecretResolver? = null
+    ): UnpackForwardResult {
+        val _didDocResolver = didDocResolver ?: this.didDocResolver
+        val _secretResolver = secretResolver ?: this.secretResolver
+        val recipientKeySelector = RecipientKeySelector(_didDocResolver, _secretResolver)
 
-    return WrapInForwardResult(
-        fwdMsg!!,
-        PackEncryptedResult(
-            encryptedResult.packedMessage,
-            encryptedResult.toKids,
-            encryptedResult.fromKid,
+        val unpackResult = unpack(
+            UnpackParams.Builder(packedMessage)
+                .expectDecryptByAllKeys(expectDecryptByAllKeys)
+                .unwrapReWrappingForward(false)
+                .build(),
+            recipientKeySelector
         )
-    )
-}
+        val forwardedMsg = unpackResult.message.forwardedMsg
 
-/**
- *  Unpacks the packed DIDComm Forward message by doing decryption and verifying the signatures.
- *
- *  @param params Unpack Parameters.
- *  @return Result of Unpack Forward Operation.
- */
-fun unpackForward(
-    packedMessage: String,
-    recipientKeySelector: RecipientKeySelector,
-    expectDecryptByAllKeys: Boolean = false,
-): UnpackForwardResult {
-    val unpackResult = unpack(
-        UnpackParams.Builder(packedMessage)
-            .expectDecryptByAllKeys(expectDecryptByAllKeys)
-            .unwrapReWrappingForward(false)
-            .build(),
-        recipientKeySelector
-    )
-    val forwardedMsg = unpackResult.message.forwardedMsg
-
-    if (forwardedMsg != null) {
-        return UnpackForwardResult(
-            unpackResult.message,
-            forwardedMsg,
-            unpackResult.metadata.encryptedTo
-        )
-    } else {
-        throw MalformedMessageException("Not a Forward message")
+        return forwardedMsg?.let {
+            UnpackForwardResult(
+                unpackResult.message,
+                forwardedMsg,
+                unpackResult.metadata.encryptedTo
+            )
+        } ?: throw MalformedMessageException("Not a Forward message")
     }
 }

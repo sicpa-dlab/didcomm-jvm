@@ -28,6 +28,9 @@ data class Message(
     val pthid: String?,
     val customHeaders: Map<String, Any?>,
 ) {
+    // TODO a kind of temporary solution, need to design
+    //      to separate the routing protocol
+    //      from base Message abstraction
     var forwardNext: String? = null
     var forwardedMsg: Map<String, Any>? = null
 
@@ -163,9 +166,11 @@ data class Message(
         }
     }
 
+    /*
     fun isForward(): Boolean {
         return forwardedMsg != null
     }
+    */
 
     class Builder(val id: String, val body: Map<String, Any?>, val type: String) {
         internal var typ: Typ = Typ.Plaintext

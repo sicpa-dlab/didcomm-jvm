@@ -7,9 +7,11 @@ import org.didcommx.didcomm.crypto.key.Key
 import org.didcommx.didcomm.crypto.key.SenderKeySelector
 import org.didcommx.didcomm.crypto.sign
 import org.didcommx.didcomm.diddoc.DIDCommService
+import org.didcommx.didcomm.diddoc.DIDDocResolver
 import org.didcommx.didcomm.model.PackEncryptedParams
+import org.didcommx.didcomm.protocols.routing.Routing
 import org.didcommx.didcomm.protocols.routing.WrapInForwardResult
-import org.didcommx.didcomm.protocols.routing.wrapInForward
+import org.didcommx.didcomm.secret.SecretResolver
 import org.didcommx.didcomm.utils.fromJsonToMap
 
 fun signIfNeeded(message: String, params: PackEncryptedParams, keySelector: SenderKeySelector) =
@@ -40,7 +42,8 @@ fun wrapInForwardIfNeeded(
     packedMessage: String,
     params: PackEncryptedParams,
     didServicesChain: List<DIDCommService>,
-    senderKeySelector: SenderKeySelector
+    didDocResolver: DIDDocResolver,
+    secretResolver: SecretResolver
 ): WrapInForwardResult? {
 
     if (!(params.forward && didServicesChain.size > 0))
@@ -50,7 +53,7 @@ fun wrapInForwardIfNeeded(
     var routingKeys = didServicesChain.last().routingKeys
 
     // TODO test
-    if (routingKeys.size == 0)
+    if (routingKeys.isEmpty())
         return null
 
     // prepend routing with alternative endpoints
@@ -69,10 +72,9 @@ fun wrapInForwardIfNeeded(
                 routingKeys
             )
 
-    return wrapInForward(
+    return Routing(didDocResolver, secretResolver).wrapInForward(
         fromJsonToMap(packedMessage),
         params.to,
-        senderKeySelector,
         params.encAlgAnon,
         routingKeys,
         params.forwardHeaders
