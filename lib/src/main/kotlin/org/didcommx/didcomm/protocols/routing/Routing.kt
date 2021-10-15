@@ -2,7 +2,6 @@ package org.didcommx.didcomm.protocols.routing
 
 import com.nimbusds.jose.util.JSONObjectUtils
 import org.didcommx.didcomm.common.AnonCryptAlg
-import org.didcommx.didcomm.common.DIDCommMessageProtocolTypes
 import org.didcommx.didcomm.crypto.EncryptResult
 import org.didcommx.didcomm.crypto.key.RecipientKeySelector
 import org.didcommx.didcomm.crypto.key.SenderKeySelector
@@ -12,8 +11,6 @@ import org.didcommx.didcomm.exceptions.DIDCommServiceException
 import org.didcommx.didcomm.exceptions.DIDDocException
 import org.didcommx.didcomm.exceptions.DIDDocNotResolvedException
 import org.didcommx.didcomm.exceptions.MalformedMessageException
-import org.didcommx.didcomm.message.Attachment
-import org.didcommx.didcomm.message.Message
 import org.didcommx.didcomm.model.PackEncryptedParams
 import org.didcommx.didcomm.model.PackEncryptedResult
 import org.didcommx.didcomm.model.UnpackParams
@@ -27,21 +24,22 @@ import org.didcommx.didcomm.utils.isDIDOrDidUrl
 /**
  * Result of wrapInForward message operation.
  *
- * TODO docs
+ * @property msg the forward message wrapping the original one
+ * @property msgEncrypted the forward message encryption result
  */
 data class WrapInForwardResult(
-    val msg: Message,
+    val msg: ForwardMessage,
     val msgEncrypted: PackEncryptedResult
 )
 
 /**
  * Result of unpackForward operation.
  *
- * TODO docs
+ * @property forwardMsg the unpacked forward message
+ * @property forwardedMsgEncryptedTo Target key IDs used for encryption
  */
 data class UnpackForwardResult(
-    val forwardMsg: Message,
-    val forwardedMsg: Map<String, Any>,
+    val forwardMsg: ForwardMessage,
     val forwardedMsgEncryptedTo: List<String>? = null
 )
 
@@ -133,9 +131,29 @@ internal fun resolveDIDCommServicesChain(
 
 /**
  * Routing protocol operations
+ *
  */
 class Routing(private val didDocResolver: DIDDocResolver, private val secretResolver: SecretResolver) {
 
+    /**
+     * Wraps the given packed DIDComm message in a Forward messages for every routing key.
+     *
+     * @param packedMsg the message to be wrapped in Forward
+     * @param to final recipient's DID (DID URL)
+     * @param encAlgAnon The encryption algorithm to be used for anonymous encryption (anon_crypt).
+     * @param routingKeys a list of routing keys
+     * @param headers optional headers for Forward message
+     * @param didDocResolver Sets Optional DIDDoc resolver that can override a default DIDDoc resolver.
+     * @param secretResolver Sets Optional Secret resolver that can override a default Secret resolver.
+     *
+     * @throws DIDCommException if pack can not be done, in particular:
+     *  - DIDDocException If a DID or DID URL (for example a key ID) can not be resolved to a DID Doc.
+     *  - SecretNotFoundException If there is no secret for the given DID or DID URL (key ID)
+     *  - DIDCommIllegalArgumentException If invalid input is provided.
+     *  - IncompatibleCryptoException If the sender and target crypto is not compatible (for example, there are no compatible keys for key agreement)
+     *
+     * @return Result of wrapping operation
+     */
     fun wrapInForward(
         packedMsg: Map<String, Any>,
         to: String,
@@ -158,7 +176,7 @@ class Routing(private val didDocResolver: DIDDocResolver, private val secretReso
         //  - logging
         //  - id generator as an argument
 
-        lateinit var fwdMsg: Message
+        lateinit var fwdMsg: ForwardMessage
         var forwardedMsg = packedMsg
         lateinit var encryptedResult: EncryptResult
 
@@ -168,31 +186,26 @@ class Routing(private val didDocResolver: DIDDocResolver, private val secretReso
         // wrap forward msgs in reversed order so the message to final
         // recipient 'to' will be the innermost one
         for ((_to, _next) in tos.zip(nexts)) {
-            val fwdAttach = Attachment.builder(
-                didcommIdGeneratorDefault(), Attachment.Data.Json(forwardedMsg)
-            ).build()
-            // TODO ??? .mediaType("application/json")
 
-            val fwdMsgBuilder = Message.builder(
+            val fwdMsgBuilder = ForwardMessage.builder(
                 didcommIdGeneratorDefault(),
-                mapOf("next" to _next),
-                DIDCommMessageProtocolTypes.Forward.typ
-            ).attachments(listOf(fwdAttach))
-
+                _next,
+                forwardedMsg
+            )
             headers?.forEach { (name, value) ->
                 fwdMsgBuilder.customHeader(name, value)
             }
 
-            fwdMsg = fwdMsgBuilder.build()
+            fwdMsg = fwdMsgBuilder.buildForward()
 
             // TODO improve: do not rebuild each time 'to' is changed
-            val packParamsBuilder = PackEncryptedParams.Builder(fwdMsg, _to)
+            val packParamsBuilder = PackEncryptedParams.Builder(fwdMsg.message, _to)
 
             if (encAlgAnon != null)
                 packParamsBuilder.encAlgAnon(encAlgAnon)
 
             encryptedResult = encrypt(
-                packParamsBuilder.build(), fwdMsg.toString(), keySelector
+                packParamsBuilder.build(), fwdMsg.message.toString(), keySelector
             ).first
 
             forwardedMsg = JSONObjectUtils.parse(encryptedResult.packedMessage)
@@ -211,7 +224,16 @@ class Routing(private val didDocResolver: DIDDocResolver, private val secretReso
     /**
      *  Unpacks the packed DIDComm Forward message by doing decryption and verifying the signatures.
      *
-     *  @param params Unpack Parameters.
+     *  @param packedMessage a Forward message as JSON string to be unpacked
+     *  @param expectDecryptByAllKeys Whether the message must be decryptable by all keys resolved by the secrets resolver. False by default.
+     *  @param didDocResolver Sets Optional DIDDoc resolver that can override a default DIDDoc resolver.
+     *  @param secretResolver Sets Optional Secret resolver that can override a default Secret resolver.
+     *
+     * @throws DIDCommException if unpack can not be done, in particular:
+     *   - MalformedMessageException if the message is invalid (can not be decrypted, signature is invalid, the plaintext is invalid, etc.)
+     *   - DIDDocException If a DID or DID URL (for example a key ID) can not be resolved to a DID Doc.
+     *   - SecretNotFoundException If there is no secret for the given DID or DID URL (key ID)
+     *
      *  @return Result of Unpack Forward Operation.
      */
     fun unpackForward(
@@ -231,14 +253,14 @@ class Routing(private val didDocResolver: DIDDocResolver, private val secretReso
                 .build(),
             recipientKeySelector
         )
-        val forwardedMsg = unpackResult.message.forwardedMsg
+        val forwardMessage = ForwardMessage.fromMessage(unpackResult.message)
 
-        return forwardedMsg?.let {
+        return forwardMessage?.let {
             UnpackForwardResult(
-                unpackResult.message,
-                forwardedMsg,
+                it,
                 unpackResult.metadata.encryptedTo
             )
-        } ?: throw MalformedMessageException("Not a Forward message")
+        }
+            ?: throw MalformedMessageException("Invalid forward message")
     }
 }

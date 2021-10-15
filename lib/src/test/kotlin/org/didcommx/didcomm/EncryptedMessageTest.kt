@@ -115,7 +115,7 @@ class EncryptedMessageTest {
             secretResolver = Mediator2SecretResolverMock()
         )
 
-        var forwardedMsg = toJson(forwardCharlie.forwardedMsg)
+        var forwardedMsg = toJson(forwardCharlie.forwardMsg.forwardedMsg)
 
         // CHARLIE's second mediator (MEDIATOR1)
         forwardCharlie = routing.unpackForward(
@@ -123,7 +123,7 @@ class EncryptedMessageTest {
             secretResolver = Mediator1SecretResolverMock()
         )
 
-        forwardedMsg = toJson(forwardCharlie.forwardedMsg)
+        forwardedMsg = toJson(forwardCharlie.forwardMsg.forwardedMsg)
 
         // CHARLIE
         val unpacked = didComm.unpack(

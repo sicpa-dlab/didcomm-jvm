@@ -14,6 +14,7 @@ import org.didcommx.didcomm.message.Message
 import org.didcommx.didcomm.model.Metadata
 import org.didcommx.didcomm.model.UnpackParams
 import org.didcommx.didcomm.model.UnpackResult
+import org.didcommx.didcomm.protocols.routing.ForwardMessage
 import org.didcommx.didcomm.utils.calculateAPV
 
 fun unpack(params: UnpackParams, keySelector: RecipientKeySelector): UnpackResult {
@@ -148,10 +149,9 @@ private fun ParseResult.JWE.anonUnpack(
 
     var reWrappedInForward = false
     if (parseResult is ParseResult.JWM) {
-        val forwardedMsg = parseResult.message.forwardedMsg
-
+        val forwardedMsg = ForwardMessage.fromMessage(parseResult.message)
         if (forwardedMsg != null && unwrapReWrappingForward) {
-            unpackedMessage = forwardedMsg
+            unpackedMessage = forwardedMsg.forwardedMsg
             reWrappedInForward = true
         }
     }

@@ -59,7 +59,7 @@ class DIDCommRoutingTest {
             secretResolver = mediator1SecretResolver
         )
 
-        val forwardedMsg = toJson(forwardBob.forwardedMsg)
+        val forwardedMsg = toJson(forwardBob.forwardMsg.forwardedMsg)
 
         // BOB
         val unpackResult = didComm.unpack(
@@ -104,7 +104,7 @@ class DIDCommRoutingTest {
             secretResolver = mediator2SecretResolver
         )
 
-        var forwardedMsg = toJson(forwardCharlie.forwardedMsg)
+        var forwardedMsg = toJson(forwardCharlie.forwardMsg.forwardedMsg)
 
         // CHARLIE's second mediator (MEDIATOR1)
         forwardCharlie = routing.unpackForward(
@@ -112,7 +112,7 @@ class DIDCommRoutingTest {
             secretResolver = mediator1SecretResolver
         )
 
-        forwardedMsg = toJson(forwardCharlie.forwardedMsg)
+        forwardedMsg = toJson(forwardCharlie.forwardMsg.forwardedMsg)
 
         // CHARLIE
         val unpackResult = didComm.unpack(
@@ -162,7 +162,7 @@ class DIDCommRoutingTest {
 
         // re-wrap to unexpected mediator (MEDIATOR2 here)
         val wrapResult = routing.wrapInForward(
-            forwardBob.forwardedMsg,
+            forwardBob.forwardMsg.forwardedMsg,
             nextTo,
             routingKeys = listOf(MEDIATOR2_DID),
             headers = mapOf("somefield" to 99999)
@@ -176,7 +176,7 @@ class DIDCommRoutingTest {
             secretResolver = mediator2SecretResolver
         )
 
-        val forwardedMsg = toJson(forwardBob.forwardedMsg)
+        val forwardedMsg = toJson(forwardBob.forwardMsg.forwardedMsg)
 
         // BOB
         val unpackResult = didComm.unpack(
@@ -225,7 +225,7 @@ class DIDCommRoutingTest {
 
         // re-wrap to the receiver
         val wrapResult = routing.wrapInForward(
-            forwardBob.forwardedMsg,
+            forwardBob.forwardMsg.forwardedMsg,
             nextTo,
             routingKeys = listOf(nextTo),
             headers = mapOf("somefield" to 99999)
