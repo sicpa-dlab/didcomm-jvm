@@ -3,6 +3,8 @@ package org.didcommx.didcomm.diddoc
 import org.didcommx.didcomm.common.VerificationMaterial
 import org.didcommx.didcomm.common.VerificationMaterialFormat
 import org.didcommx.didcomm.common.VerificationMethodType
+import org.didcommx.didcomm.protocols.routing.PROFILE_DIDCOMM_AIP2_ENV_RFC587
+import org.didcommx.didcomm.protocols.routing.PROFILE_DIDCOMM_V2
 
 val ALICE_VERIFICATION_METHOD_KEY_AGREEM_X25519_NOT_IN_SECRET = VerificationMethod(
     id = "did:example:alice#key-x25519-not-in-secrets-1",
@@ -153,7 +155,7 @@ val DID_DOC_ALICE_SPEC_TEST_VECTORS = DIDDoc(
         DIDCommService(
             id = "did:example:123456789abcdefghi#didcomm-1",
             serviceEndpoint = "did:example:mediator1",
-            accept = listOf("PROFILE_DIDCOMM_V2", "PROFILE_DIDCOMM_AIP2_ENV_RFC587"),
+            accept = listOf(PROFILE_DIDCOMM_V2, PROFILE_DIDCOMM_AIP2_ENV_RFC587),
             routingKeys = listOf(
                 "did:example:mediator2#key-p521-1",
             ),

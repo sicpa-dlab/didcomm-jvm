@@ -3,6 +3,8 @@ package org.didcommx.didcomm.diddoc
 import org.didcommx.didcomm.common.VerificationMaterial
 import org.didcommx.didcomm.common.VerificationMaterialFormat
 import org.didcommx.didcomm.common.VerificationMethodType
+import org.didcommx.didcomm.protocols.routing.PROFILE_DIDCOMM_AIP2_ENV_RFC587
+import org.didcommx.didcomm.protocols.routing.PROFILE_DIDCOMM_V2
 
 val MEDIATOR2_VERIFICATION_METHOD_KEY_AGREEM_X25519_1 = VerificationMethod(
     id = "did:example:mediator2#key-x25519-1",
@@ -99,7 +101,7 @@ val DID_DOC_MEDIATOR2 = DIDDoc(
         DIDCommService(
             id = "did:example:123456789abcdefghi#didcomm-1",
             serviceEndpoint = "http://example.com/path",
-            accept = listOf("PROFILE_DIDCOMM_V2", "PROFILE_DIDCOMM_AIP2_ENV_RFC587"),
+            accept = listOf(PROFILE_DIDCOMM_V2, PROFILE_DIDCOMM_AIP2_ENV_RFC587),
             routingKeys = listOf("did:example:mediator1#key-x25519-1"),
         )
     ),

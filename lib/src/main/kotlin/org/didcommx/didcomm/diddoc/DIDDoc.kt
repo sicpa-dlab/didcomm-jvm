@@ -2,6 +2,7 @@ package org.didcommx.didcomm.diddoc
 
 import org.didcommx.didcomm.common.VerificationMaterial
 import org.didcommx.didcomm.common.VerificationMethodType
+import org.didcommx.didcomm.exceptions.DIDDocException
 import org.didcommx.didcomm.exceptions.DIDUrlNotFoundException
 
 /**
@@ -29,6 +30,9 @@ data class DIDDoc(
 ) {
     fun findVerificationMethod(id: String): VerificationMethod = verificationMethods.find { it.id == id }
         ?: throw DIDUrlNotFoundException(id, did)
+
+    fun findDIDCommService(id: String): DIDCommService = didCommServices.find { it.id == id }
+        ?: throw DIDDocException("DIDComm service '$id' not found in DID Doc '$did'")
 }
 
 /**

@@ -32,7 +32,7 @@ val MEDIATOR1_VERIFICATION_METHOD_KEY_AGREEM_P256_1 = VerificationMethod(
                 "x": "FQVaTOksf-XsCUrt4J1L2UGvtWaDwpboVlqbKBY2AIo",
                 "y": "6XFB9PYo7dyC5ViJSO9uXNYkxTJWn0d_mqJ__ZYhcNY"
             }
-"""
+            """
     ),
 )
 val MEDIATOR1_VERIFICATION_METHOD_KEY_AGREEM_P384_1 = VerificationMethod(
@@ -48,7 +48,7 @@ val MEDIATOR1_VERIFICATION_METHOD_KEY_AGREEM_P384_1 = VerificationMethod(
                 "x": "MvnE_OwKoTcJVfHyTX-DLSRhhNwlu5LNoQ5UWD9Jmgtdxp_kpjsMuTTBnxg5RF_Y",
                 "y": "X_3HJBcKFQEG35PZbEOBn8u9_z8V1F9V1Kv-Vh0aSzmH-y9aOuDJUE3D4Hvmi5l7"
             }
-"""
+            """
     ),
 )
 val MEDIATOR1_VERIFICATION_METHOD_KEY_AGREEM_P521_1 = VerificationMethod(
@@ -64,7 +64,7 @@ val MEDIATOR1_VERIFICATION_METHOD_KEY_AGREEM_P521_1 = VerificationMethod(
                 "x": "Af9O5THFENlqQbh2Ehipt1Yf4gAd9RCa3QzPktfcgUIFADMc4kAaYVViTaDOuvVS2vMS1KZe0D5kXedSXPQ3QbHi",
                 "y": "ATZVigRQ7UdGsQ9j-omyff6JIeeUv3CBWYsZ0l6x3C_SYqhqVV7dEG-TafCCNiIxs8qeUiXQ8cHWVclqkH4Lo1qH"
             }
-"""
+            """
     ),
 )
 

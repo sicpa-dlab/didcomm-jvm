@@ -7,6 +7,7 @@ import org.didcommx.didcomm.exceptions.MalformedMessageException
 import org.didcommx.didcomm.utils.getTyped
 import org.didcommx.didcomm.utils.getTypedArray
 import org.didcommx.didcomm.utils.isDIDFragment
+import org.didcommx.didcomm.utils.isDIDOrDidUrl
 import org.didcommx.didcomm.utils.toJSONString
 
 data class Message(
@@ -27,9 +28,52 @@ data class Message(
     val pthid: String?,
     val customHeaders: Map<String, Any?>,
 ) {
+    // TODO a kind of temporary solution, need to design
+    //      to separate the routing protocol
+    //      from base Message abstraction
+    var forwardNext: String? = null
+    var forwardedMsg: Map<String, Any>? = null
+
     inline fun <reified T> customHeader(name: String) = customHeaders.getTyped<T>(name)
 
     inline fun <reified T> customHeaderArray(name: String) = customHeaders.getTypedArray<T>(name)
+
+    init {
+        // TODO validations
+        // - type is valid mturi (like in python validator__didcomm_protocol_mturi)
+        //     - uri format
+        //     - version compatibility
+
+        // mturi verification data
+        // const val ROUTING_PROTOCOL_VER_CURRENT = "2.0"
+        // const val ROUTING_PROTOCOL_VER_COMPATIBILITY = "~=2.0"
+        /*
+        enum class RoutingProtocolMsgTypes(val typ: String) {
+            Forward = "forward"
+
+            companion object {
+                fun parse(str: String): Typ = when (str) {
+                    Forward.typ -> Forward
+                    else -> throw IllegalArgumentException("Unsupported message typ")
+                }
+            }
+        }
+        */
+
+        val _next = body.get("next")
+
+        if (_next != null &&
+            _next is String &&
+            isDIDOrDidUrl(_next) &&
+            attachments != null &&
+            attachments.size == 1 &&
+            attachments[0].data is Attachment.Data.Json
+        ) {
+            forwardedMsg = attachments[0].data.toJSONObject().getTyped<Map<String, Any>>("json")
+            if (forwardedMsg != null)
+                forwardNext = _next
+        }
+    }
 
     private constructor(builder: Builder) : this(
         builder.id,
@@ -121,6 +165,12 @@ data class Message(
             builder.build()
         }
     }
+
+    /*
+    fun isForward(): Boolean {
+        return forwardedMsg != null
+    }
+    */
 
     class Builder(val id: String, val body: Map<String, Any?>, val type: String) {
         internal var typ: Typ = Typ.Plaintext

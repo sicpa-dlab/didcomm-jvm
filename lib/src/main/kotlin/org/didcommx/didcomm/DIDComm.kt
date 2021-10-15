@@ -13,6 +13,7 @@ import org.didcommx.didcomm.model.PackPlaintextParams
 import org.didcommx.didcomm.model.PackPlaintextResult
 import org.didcommx.didcomm.model.PackSignedParams
 import org.didcommx.didcomm.model.PackSignedResult
+import org.didcommx.didcomm.model.ServiceMetadata
 import org.didcommx.didcomm.model.UnpackParams
 import org.didcommx.didcomm.model.UnpackResult
 import org.didcommx.didcomm.operations.encrypt
@@ -20,6 +21,8 @@ import org.didcommx.didcomm.operations.packFromPrior
 import org.didcommx.didcomm.operations.protectSenderIfNeeded
 import org.didcommx.didcomm.operations.signIfNeeded
 import org.didcommx.didcomm.operations.unpack
+import org.didcommx.didcomm.operations.wrapInForwardIfNeeded
+import org.didcommx.didcomm.protocols.routing.resolveDIDCommServicesChain
 import org.didcommx.didcomm.secret.SecretResolver
 
 /**
@@ -148,21 +151,38 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
         val (message, fromPriorIssuerKid) = packFromPrior(params.message, params.fromPriorIssuerKid, senderKeySelector)
         val (payload, signFromKid) = signIfNeeded(message.toString(), params, senderKeySelector)
         val (encryptedResult, recipientKeys) = encrypt(params, payload, senderKeySelector)
-        val (packedMessage) = protectSenderIfNeeded(params, encryptedResult, recipientKeys)
+        var (packedMessage) = protectSenderIfNeeded(params, encryptedResult, recipientKeys)
+
+        // TODO make that (along with service metadata) as
+        //      an internal part of routing routine
+        val didServicesChain = resolveDIDCommServicesChain(
+            didDocResolver, params.to, params.forwardServiceId
+        )
+
+        val wrapInForwardResult = wrapInForwardIfNeeded(
+            packedMessage, params, didServicesChain, didDocResolver, secretResolver
+        )
+
+        if (wrapInForwardResult != null)
+            packedMessage = wrapInForwardResult.msgEncrypted.packedMessage
+
+        val serviceMetadata = if (didServicesChain.isEmpty()) null else ServiceMetadata(
+            didServicesChain.last().id,
+            didServicesChain.first().serviceEndpoint
+        )
 
         return PackEncryptedResult(
             packedMessage,
             encryptedResult.toKids,
             encryptedResult.fromKid,
             signFromKid,
-            fromPriorIssuerKid
+            fromPriorIssuerKid,
+            serviceMetadata
         )
     }
 
     /**
      *  Unpacks the packed DIDComm message by doing decryption and verifying the signatures.
-     *  If unpack config expects the message to be packed in a particular way (for example that a message is encrypted)
-     *  and the packed message doesn't meet the criteria (it's not encrypted), then `UnsatisfiedConstraintError` will be raised.
      *
      *  @param params Unpack Parameters.
      *  @return Result of Unpack Operation.

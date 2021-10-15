@@ -36,3 +36,14 @@ enum class VerificationMaterialFormat {
     MULTIBASE,
     OTHER
 }
+
+enum class DIDCommMessageProtocolTypes(val typ: String) {
+    Forward("https://didcomm.org/routing/2.0/forward");
+
+    companion object {
+        fun parse(str: String): DIDCommMessageProtocolTypes = when (str) {
+            Forward.typ -> Forward
+            else -> throw IllegalArgumentException("Unsupported protocol typ")
+        }
+    }
+}

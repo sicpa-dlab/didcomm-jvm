@@ -6,10 +6,14 @@ import org.didcommx.didcomm.mock.AliceSecretResolverMock
 import org.didcommx.didcomm.mock.BobSecretResolverMock
 import org.didcommx.didcomm.mock.CharlieSecretResolverMock
 import org.didcommx.didcomm.mock.DIDDocResolverMock
+import org.didcommx.didcomm.mock.Mediator1SecretResolverMock
+import org.didcommx.didcomm.mock.Mediator2SecretResolverMock
 import org.didcommx.didcomm.model.PackEncryptedParams
 import org.didcommx.didcomm.model.PackPlaintextParams
 import org.didcommx.didcomm.model.PackSignedParams
 import org.didcommx.didcomm.model.UnpackParams
+import org.didcommx.didcomm.protocols.routing.Routing
+import org.didcommx.didcomm.utils.toJson
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -252,6 +256,7 @@ class DIDCommDemoTest {
     @Test
     fun `Test_multi_recipient_support`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
+        val routing = Routing(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val message = Message.builder(
             id = "1234567890",
@@ -297,8 +302,25 @@ class DIDCommDemoTest {
         )
         println("Sending ${packResultCharlie.packedMessage} to ${packResultCharlie.serviceMetadata?.serviceEndpoint ?: ""} for Charlie")
 
+        // TODO make focused on initial subject (without forward)
+        // CHARLIE's first mediator (MEDIATOR2)
+        var forwardCharlie = routing.unpackForward(
+            packResultCharlie.packedMessage,
+            secretResolver = Mediator2SecretResolverMock()
+        )
+
+        var forwardedMsg = toJson(forwardCharlie.forwardedMsg)
+
+        // CHARLIE's second mediator (MEDIATOR1)
+        forwardCharlie = routing.unpackForward(
+            forwardedMsg,
+            secretResolver = Mediator1SecretResolverMock()
+        )
+
+        forwardedMsg = toJson(forwardCharlie.forwardedMsg)
+
         val unpackResultCharlie = didComm.unpack(
-            UnpackParams.Builder(packResultCharlie.packedMessage)
+            UnpackParams.Builder(forwardedMsg)
                 .secretResolver(CharlieSecretResolverMock())
                 .build()
         )

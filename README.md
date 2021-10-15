@@ -61,7 +61,9 @@ See https://github.com/sicpa-dlab/didcomm-demo.
 
 ## Examples
 
-See [demo scripts](lib/src/test/kotlin/org/didcommx/didcomm/DIDCommDemoTest.kt) for details.
+See demo scripts for details:
+- [DIDComm examples](lib/src/test/kotlin/org/didcommx/didcomm/DIDCommDemoTest.kt)
+- [Routing examples](lib/src/test/kotlin/org/didcommx/didcomm/protocols/routing/DIDCommRoutingTest.kt)
 
 A general usage of the API is the following:
 - Sender Side:

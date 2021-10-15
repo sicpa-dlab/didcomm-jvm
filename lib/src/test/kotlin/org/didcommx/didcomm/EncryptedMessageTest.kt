@@ -18,9 +18,13 @@ import org.didcommx.didcomm.mock.BobSecretResolverMock
 import org.didcommx.didcomm.mock.CharlieSecretResolverMock
 import org.didcommx.didcomm.mock.DIDDocResolverMock
 import org.didcommx.didcomm.mock.DIDDocResolverMockWithNoSecrets
+import org.didcommx.didcomm.mock.Mediator1SecretResolverMock
+import org.didcommx.didcomm.mock.Mediator2SecretResolverMock
 import org.didcommx.didcomm.model.PackEncryptedParams
 import org.didcommx.didcomm.model.UnpackParams
+import org.didcommx.didcomm.protocols.routing.Routing
 import org.didcommx.didcomm.utils.isJDK15Plus
+import org.didcommx.didcomm.utils.toJson
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -94,6 +98,7 @@ class EncryptedMessageTest {
     @Test
     fun `Test_decrypt_message_for_part_of_the_keys`() {
         val didComm = DIDComm(DIDDocResolverMock(), AliceSecretResolverMock())
+        val routing = Routing(DIDDocResolverMock(), AliceSecretResolverMock())
 
         val message = JWM.PLAINTEXT_MESSAGE.copy(to = listOf(JWM.CHARLIE_DID))
 
@@ -103,8 +108,26 @@ class EncryptedMessageTest {
                 .build()
         )
 
+        // TODO make focused on initial subject (without forward)
+        // CHARLIE's first mediator (MEDIATOR2)
+        var forwardCharlie = routing.unpackForward(
+            packed.packedMessage,
+            secretResolver = Mediator2SecretResolverMock()
+        )
+
+        var forwardedMsg = toJson(forwardCharlie.forwardedMsg)
+
+        // CHARLIE's second mediator (MEDIATOR1)
+        forwardCharlie = routing.unpackForward(
+            forwardedMsg,
+            secretResolver = Mediator1SecretResolverMock()
+        )
+
+        forwardedMsg = toJson(forwardCharlie.forwardedMsg)
+
+        // CHARLIE
         val unpacked = didComm.unpack(
-            UnpackParams.Builder(packed.packedMessage)
+            UnpackParams.Builder(forwardedMsg)
                 .secretResolver(CharlieSecretResolverMock())
                 .expectDecryptByAllKeys(true)
                 .build()
