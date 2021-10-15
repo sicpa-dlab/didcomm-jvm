@@ -16,29 +16,25 @@ fun packFromPrior(
     fromPriorIssuerKid: String?,
     keySelector: SenderKeySelector
 ): Pair<Message, String?> =
-    if (message.fromPrior != null) {
-        val key = keySelector.findSigningKey(fromPriorIssuerKid ?: message.fromPrior.iss)
+    message.fromPrior?.let {
+        val key = keySelector.findSigningKey(fromPriorIssuerKid ?: it.iss)
         val updatedMessage = message.copy(
             fromPrior = null,
-            fromPriorJwt = signJwt(JWTClaimsSet.parse(message.fromPrior.toJSONObject()), key)
+            fromPriorJwt = signJwt(JWTClaimsSet.parse(it.toJSONObject()), key)
         )
         Pair(updatedMessage, key.id)
-    } else {
-        Pair(message, null)
-    }
+    } ?: Pair(message, null)
 
 fun unpackFromPrior(message: Message, keySelector: RecipientKeySelector): Pair<Message, String?> =
-    if (message.fromPriorJwt != null) {
-        val issKid = extractFromPriorKid(message.fromPriorJwt)
+    message.fromPriorJwt?.let {
+        val issKid = extractFromPriorKid(it)
         val key = keySelector.findVerificationKey(issKid)
         val updatedMessage = message.copy(
-            fromPrior = FromPrior.parse(verifyJwt(message.fromPriorJwt, key).toJSONObject()),
+            fromPrior = FromPrior.parse(verifyJwt(it, key).toJSONObject()),
             fromPriorJwt = null
         )
         Pair(updatedMessage, key.id)
-    } else {
-        Pair(message, null)
-    }
+    } ?: Pair(message, null)
 
 private fun extractFromPriorKid(fromPriorJwt: String): String {
     val segments = fromPriorJwt.split(".")

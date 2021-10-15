@@ -42,6 +42,11 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
      * and it is the format used in the DIDComm spec to give examples of headers and other internals.
      * Depending on ambient security, plaintext may or may not be an appropriate format for DIDComm data at rest.
      *
+     * @throws DIDCommException if pack can not be done, in particular:
+     *  - DIDDocException If a DID or DID URL (for example a key ID) can not be resolved to a DID Doc.
+     *  - SecretNotFoundException If there is no secret for the given DID or DID URL (key ID)
+     *  - DIDCommIllegalArgumentException If invalid input is provided.
+     *
      * @param params Pack Plaintext Parameters.
      * @return Result of Pack Plaintext Operation.
      */
@@ -76,6 +81,12 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
      *    verification method identified by the given key ID is used.
      *
      * @param params Pack Signed Parameters.
+     *
+     * @throws DIDCommException if pack can not be done, in particular:
+     *  - DIDDocException If a DID or DID URL (for example a key ID) can not be resolved to a DID Doc.
+     *  - SecretNotFoundException If there is no secret for the given DID or DID URL (key ID)
+     *  - DIDCommIllegalArgumentException If invalid input is provided.
+     *
      * @return Result of Pack Signed Operation.
      */
     fun packSigned(params: PackSignedParams): PackSignedResult {
@@ -140,6 +151,12 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
      *  - If [PackEncryptedParams.signFrom] is a key ID, then the sender's [DIDDoc.authentications]
      *    verification method identified by the given key ID is used.
      *
+     * @throws DIDCommException if pack can not be done, in particular:
+     *  - DIDDocException If a DID or DID URL (for example a key ID) can not be resolved to a DID Doc.
+     *  - SecretNotFoundException If there is no secret for the given DID or DID URL (key ID)
+     *  - DIDCommIllegalArgumentException If invalid input is provided.
+     *  - IncompatibleCryptoException If the sender and target crypto is not compatible (for example, there are no compatible keys for key agreement)
+     *
      * @param params Pack Encrypted Parameters.
      * @return Result of pack encrypted operation.
      */
@@ -182,9 +199,15 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
     }
 
     /**
-     *  Unpacks the packed DIDComm message by doing decryption and verifying the signatures.
+     * Unpacks the packed DIDComm message by doing decryption and verifying the signatures.
      *
-     *  @param params Unpack Parameters.
+     * @param params Unpack Parameters.
+     *
+     * @throws DIDCommException if unpack can not be done, in particular:
+     *   - MalformedMessageException if the message is invalid (can not be decrypted, signature is invalid, the plaintext is invalid, etc.)
+     *   - DIDDocException If a DID or DID URL (for example a key ID) can not be resolved to a DID Doc.
+     *   - SecretNotFoundException If there is no secret for the given DID or DID URL (key ID)
+     *
      *  @return Result of Unpack Operation.
      */
     fun unpack(params: UnpackParams): UnpackResult {

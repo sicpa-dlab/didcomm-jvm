@@ -11,6 +11,7 @@ import org.didcommx.didcomm.fixtures.JWM
 import org.didcommx.didcomm.message.Attachment
 import org.didcommx.didcomm.message.FromPrior
 import org.didcommx.didcomm.message.Message
+import org.didcommx.didcomm.message.MessageHeader
 import org.didcommx.didcomm.mock.AliceRotatedToCharlieSecretResolverMock
 import org.didcommx.didcomm.mock.AliceSecretResolverMock
 import org.didcommx.didcomm.mock.DIDDocResolverMock
@@ -229,7 +230,7 @@ class PlaintextMessageTest {
     fun `Test_header_reserved_name`() {
         val builder = Message.builder("", mapOf(), "")
 
-        for (header in Message.reservedHeaderNames) {
+        for (header in MessageHeader.reservedHeaderNames) {
             val expected = "The header name '$header' is reserved"
 
             val actual = assertThrows<DIDCommException> {
