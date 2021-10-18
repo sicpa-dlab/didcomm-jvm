@@ -1,11 +1,43 @@
-# didcomm-jvm
+# DIDComm JVM
 
-Basic [DIDComm v2](https://identity.foundation/didcomm-messaging/spec) support in Java/Kotlin.
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Unit Tests](https://github.com/sicpa-dlab/didcomm-jvm/workflows/verify/badge.svg)](https://github.com/sicpa-dlab/didcomm-jvm/actions/workflows/verify.yml)
+
+
+Basic [DIDComm v2](https://identity.foundation/didcomm-messaging/spec) support in Java/Kotlin and Android.
+
+
+## Installation
+Available from Maven Central.
+
+Gradle:
+```
+dependencies {
+  implementation 'org.didcommx:didcomm:0.1.0'
+}
+```
+
+
+Maven:
+```
+<dependency>
+  <groupId>org.didcommx</groupId>
+  <artifactId>didcomm</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
+
+## DIDComm + peerdid Demo
+See https://github.com/sicpa-dlab/didcomm-demo.
 
 ## Assumptions and Limitations
+- Java 8+
 - In order to use the library, `SecretResolver` and `DIDDocResolver` interfaces must be implemented on the application level.
   Implementation of that interfaces is out of DIDComm library scope.
-    - Verification materials in DID Docs and secrets are expected in JWK format only.
+    - Verification materials are expected in JWK, Base58 and Multibase formats.
+        - In Base58 and Multibase formats, keys using only X25519 and Ed25519 curves are supported.
+        - For private keys in Base58 and Multibase formats, the verification material value contains both private and public parts (concatenated bytes).
+        - In Multibase format, bytes of the verification material value is prefixed with the corresponding Multicodec code.
     - Key IDs (kids) used in `SecretResolver` must match the corresponding key IDs from DID Doc verification methods.
     - Key IDs (kids) in DID Doc verification methods and secrets must be a full [DID Fragment](https://www.w3.org/TR/did-core/#fragment), that is `did#key-id`.
     - Verification methods referencing another DID Document are not supported (see [Referring to Verification Methods](https://www.w3.org/TR/did-core/#referring-to-verification-methods)).
@@ -18,19 +50,20 @@ Basic [DIDComm v2](https://identity.foundation/didcomm-messaging/spec) support i
             - A256CBC-HS512 (default for authcrypt)
         - Key wrapping algorithms: ECDH-ES+A256KW, ECDH-1PU+A256KW
     - Signing:
-        - Curves: Ed25519, Secp256k1 (JDK < 15), P-256
-        - Algorithms: EdDSA (with crv=Ed25519), ES256, ES256K
+        - Curves: Ed25519, Secp256k1 (currently JDK < 15 only), P-256
+        - Algorithms: EdDSA (with crv=Ed25519), ES256, ES256K (currently JDK < 15 only)
 - DID rotation (`fromPrior` field) is supported.
 - Limitations and known issues:
   - Forward protocol is not implemented 
   - Secp256k1 is supported on JDK < 15 only
+- DIDComm has been implemented under the following [Assumptions](https://hackmd.io/i3gLqgHQR2ihVFV5euyhqg)
 
-## DIDComm + peerdid Demo
-See https://github.com/sicpa-dlab/didcomm-demo.
 
 ## Examples
 
-See [demo scripts](lib/src/test/kotlin/org/didcommx/didcomm/DIDCommDemoTest.kt) for details.
+See demo scripts for details:
+- [DIDComm examples](lib/src/test/kotlin/org/didcommx/didcomm/DIDCommDemoTest.kt)
+- [Routing examples](lib/src/test/kotlin/org/didcommx/didcomm/protocols/routing/DIDCommRoutingTest.kt)
 
 A general usage of the API is the following:
 - Sender Side:

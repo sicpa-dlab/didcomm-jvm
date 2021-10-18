@@ -23,13 +23,18 @@ kotlin {
 
 dependencies {
     implementation "com.nimbusds:nimbus-jose-jwt:${nimbusJoseJWTVersion}"
+    implementation "com.github.multiformats:java-multibase:${javaMultibase}"
     shadow "com.google.crypto.tink:tink:${googleTinkVersion}"
+    shadow "com.zmannotes:varint:${zmanVarint}"
+    // implementation 'org.bouncycastle:bcprov-jdk15on:1.69'
 
     // TODO look for a better solution
     // currently it's a workaround for shadow of the above deps
     testImplementation "com.google.crypto.tink:tink:${googleTinkVersion}"
+    testImplementation "com.zmannotes:varint:${zmanVarint}"
 
     testImplementation "org.jetbrains.kotlin:kotlin-test"
+    testImplementation "org.junit.jupiter:junit-jupiter:${jUnitJupiter}"
     testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     testImplementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonKotlinVersion}"
 }
@@ -78,6 +83,7 @@ shadowJar {
 
     dependencies {
         include(dependency("com.nimbusds:nimbus-jose-jwt"))
+        include(dependency("com.github.multiformats:java-multibase"))
     }
 
     archiveClassifier.set("") // remove suffix `-all` as intellij can"t find the library otherwise
@@ -110,6 +116,10 @@ publishing {
             project.shadow.component(publication)
 
             artifactId = project.artifactId
+            // the following is required only for shadow
+            // https://github.com/johnrengelman/shadow/issues/544
+            artifact sourcesJar
+            artifact javadocJar
 
             pom {
                 name = "DIDComm"

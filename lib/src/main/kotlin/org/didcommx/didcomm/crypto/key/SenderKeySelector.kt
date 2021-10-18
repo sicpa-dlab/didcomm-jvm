@@ -12,7 +12,7 @@ import org.didcommx.didcomm.utils.divideDIDFragment
 import org.didcommx.didcomm.utils.isDIDFragment
 
 class SenderKeySelector(private val didDocResolver: DIDDocResolver, private val secretResolver: SecretResolver) {
-    fun findSigningKey(signFrom: String): Key = Key.wrapSecret(
+    fun findSigningKey(signFrom: String): Key = Key.fromSecret(
         if (isDIDFragment(signFrom)) {
             secretResolver.findKey(signFrom).orElseThrow { throw SecretNotFoundException(signFrom) }
         } else {
@@ -32,7 +32,7 @@ class SenderKeySelector(private val didDocResolver: DIDDocResolver, private val 
 
         return if (isDIDFragment(from)) {
             val sender = secretResolver.findKey(from)
-                .map { Key.wrapSecret(it) }
+                .map { Key.fromSecret(it) }
                 .orElseThrow { throw SecretNotFoundException(from) }
 
             val recipients = findRecipientKeys(didDocTo, to, sender.curve)
@@ -46,7 +46,7 @@ class SenderKeySelector(private val didDocResolver: DIDDocResolver, private val 
                 .map { secretResolver.findKey(it) }
                 .filter { it.isPresent }
                 .map { it.get() }
-                .map { Key.wrapSecret(it) }
+                .map { Key.fromSecret(it) }
                 .map { Pair(it, findRecipientKeys(didDocTo, to, it.curve)) }
                 .firstOrNull { it.second.isNotEmpty() }
                 ?: throw IncompatibleCryptoException("The DID Docs '${didDocFrom.did}' and '${didDocTo.did}' do not contain compatible 'keyAgreement' verification methods")
@@ -59,17 +59,17 @@ class SenderKeySelector(private val didDocResolver: DIDDocResolver, private val 
 
         return if (isDIDFragment(to)) {
             val method = didDoc.findVerificationMethod(to)
-            listOf(Key.wrapVerificationMethod(method))
+            listOf(Key.fromVerificationMethod(method))
         } else {
             val selectedCurve = didDoc.keyAgreements
                 .map { didDoc.findVerificationMethod(it) }
-                .map { Key.wrapVerificationMethod(it) }
+                .map { Key.fromVerificationMethod(it) }
                 .map { it.curve }
                 .firstOrNull()
 
             didDoc.keyAgreements
                 .map { didDoc.findVerificationMethod(it) }
-                .map { Key.wrapVerificationMethod(it) }
+                .map { Key.fromVerificationMethod(it) }
                 .filter { selectedCurve == it.curve }
                 .ifEmpty { throw DIDDocException("The DID Doc '${didDoc.did}' does not contain compatible 'keyAgreement' verification methods") }
         }
@@ -78,7 +78,7 @@ class SenderKeySelector(private val didDocResolver: DIDDocResolver, private val 
     private fun findRecipientKeys(didDoc: DIDDoc, to: String, curve: Curve): List<Key> {
         return if (isDIDFragment(to)) {
             val method = didDoc.findVerificationMethod(to)
-            val key = Key.wrapVerificationMethod(method)
+            val key = Key.fromVerificationMethod(method)
 
             when (curve != key.curve) {
                 true -> listOf()
@@ -87,7 +87,7 @@ class SenderKeySelector(private val didDocResolver: DIDDocResolver, private val 
         } else {
             didDoc.keyAgreements
                 .map { didDoc.findVerificationMethod(it) }
-                .map { Key.wrapVerificationMethod(it) }
+                .map { Key.fromVerificationMethod(it) }
                 .filter { curve == it.curve }
         }
     }

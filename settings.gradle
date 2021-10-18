@@ -3,10 +3,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        flatDir {
-            // TODO remove when contribution will be merged to upstream
-            dir "lib/libs"
-        }
+        maven { url 'https://jitpack.io' }
     }
 }
 

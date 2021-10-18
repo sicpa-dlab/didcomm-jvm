@@ -1,13 +1,21 @@
 package org.didcommx.didcomm.crypto.key
 
+import org.didcommx.didcomm.KeyAgreementCurveType
+import org.didcommx.didcomm.Person
+import org.didcommx.didcomm.diddoc.DID_DOC_BOB_WITH_NO_SECRETS
 import org.didcommx.didcomm.exceptions.DIDDocException
 import org.didcommx.didcomm.exceptions.DIDDocNotResolvedException
+import org.didcommx.didcomm.exceptions.DIDUrlNotFoundException
 import org.didcommx.didcomm.exceptions.IncompatibleCryptoException
 import org.didcommx.didcomm.exceptions.SecretNotFoundException
 import org.didcommx.didcomm.fixtures.JWM
+import org.didcommx.didcomm.getKeyAgreementMethods
+import org.didcommx.didcomm.getSecretsResolver
 import org.didcommx.didcomm.mock.AliceSecretResolverMock
 import org.didcommx.didcomm.mock.CharlieSecretResolverMock
 import org.didcommx.didcomm.mock.DIDDocResolverMock
+import org.didcommx.didcomm.mock.DIDDocResolverMockWithNoSecrets
+import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -184,11 +192,11 @@ class SenderKeySelectorTest {
     @Test
     fun `Test_verification_method_not_found_by_DID_URL`() {
         val senderKeySelector = SenderKeySelector(DIDDocResolverMock(), AliceSecretResolverMock())
-        val expected = "Verification method 'did:example:bob#key-4' not found in DID Doc 'did:example:bob'"
+        val expected = "The DID URL 'did:example:bob#key-4' not found in DID Doc 'did:example:bob'"
         val didUrl = "did:example:bob#key-4"
 
         run {
-            val actual = assertFailsWith<DIDDocException> {
+            val actual = assertFailsWith<DIDUrlNotFoundException> {
                 senderKeySelector.findAnonCryptKeys(didUrl)
             }
 
@@ -196,7 +204,7 @@ class SenderKeySelectorTest {
         }
 
         run {
-            val actual = assertFailsWith<DIDDocException> {
+            val actual = assertFailsWith<DIDUrlNotFoundException> {
                 senderKeySelector.findAuthCryptKeys(JWM.ALICE_DID, didUrl)
             }
 
@@ -301,5 +309,54 @@ class SenderKeySelectorTest {
 
             assertEquals("The recipient '$bobDIDUrl' curve is not compatible to 'X25519'", actual.message)
         }
+    }
+
+    @Test
+    fun `Test_find_anoncrypt_pack_recipient_public_keys_by_did_unknown_did`() {
+        val keySelector = SenderKeySelector(DIDDocResolverMock(), getSecretsResolver(Person.BOB))
+
+        assertThrows<DIDDocNotResolvedException> {
+            keySelector.findAnonCryptKeys("did:example:unknown")
+        }
+    }
+
+    @Test
+    fun `Test_find_anoncrypt_pack_recipient_public_keys_by_kid_unknown_did`() {
+        val keySelector = SenderKeySelector(DIDDocResolverMock(), getSecretsResolver(Person.BOB))
+
+        assertThrows<DIDDocNotResolvedException> {
+            keySelector.findAnonCryptKeys("did:example:unknown#key-1")
+        }
+    }
+
+    @Test
+    fun `Test_find_anoncrypt_pack_recipient_public_keys_by_kid_unknown_kid`() {
+        val keySelector = SenderKeySelector(DIDDocResolverMock(), getSecretsResolver(Person.BOB))
+
+        assertThrows<DIDDocNotResolvedException> {
+            keySelector.findAnonCryptKeys(JWM.BOB_DID + "unknown#key-1")
+        }
+    }
+
+    @Test
+    fun `Test_find_anoncrypt_pack_recipient_public_keys_by_kid_positive`() {
+        val keySelector = SenderKeySelector(DIDDocResolverMockWithNoSecrets(), getSecretsResolver(Person.BOB))
+
+        DID_DOC_BOB_WITH_NO_SECRETS.verificationMethods.forEach { vm ->
+            val res = keySelector.findAnonCryptKeys(vm.id).map { it.jwk.toPublicJWK() }.toList()
+            val listOfVM = listOf(Key.fromVerificationMethod(vm).jwk.toPublicJWK())
+            assertContentEquals(listOfVM, res)
+        }
+    }
+
+    @Test
+    fun `Test_find_anoncrypt_pack_recipient_public_keys_by_did_positive`() {
+        val keySelector = SenderKeySelector(DIDDocResolverMockWithNoSecrets(), getSecretsResolver(Person.BOB))
+
+        val expected = getKeyAgreementMethods(Person.BOB, KeyAgreementCurveType.X25519)
+            .map { Key.fromVerificationMethod(it).jwk.toPublicJWK() }
+        val res = keySelector.findAnonCryptKeys(JWM.BOB_DID).map { it.jwk.toPublicJWK() }.toList()
+
+        assertEquals(expected, res)
     }
 }

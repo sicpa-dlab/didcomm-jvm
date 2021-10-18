@@ -14,6 +14,7 @@ import org.didcommx.didcomm.message.Message
 import org.didcommx.didcomm.model.Metadata
 import org.didcommx.didcomm.model.UnpackParams
 import org.didcommx.didcomm.model.UnpackResult
+import org.didcommx.didcomm.protocols.routing.ForwardMessage
 import org.didcommx.didcomm.utils.calculateAPV
 
 fun unpack(params: UnpackParams, keySelector: RecipientKeySelector): UnpackResult {
@@ -21,7 +22,9 @@ fun unpack(params: UnpackParams, keySelector: RecipientKeySelector): UnpackResul
 
     val msg = when (val parseResult = parse(params.packedMessage)) {
         is ParseResult.JWS -> parseResult.unpack(keySelector, metadataBuilder)
-        is ParseResult.JWE -> parseResult.unpack(keySelector, params.expectDecryptByAllKeys, metadataBuilder)
+        is ParseResult.JWE -> parseResult.unpack(
+            keySelector, params.expectDecryptByAllKeys, metadataBuilder, params.unwrapReWrappingForward
+        )
         is ParseResult.JWM -> parseResult.unpack(keySelector, metadataBuilder)
     }
 
@@ -36,16 +39,24 @@ private fun ParseResult.JWM.unpack(keySelector: RecipientKeySelector, metadataBu
 }
 
 private fun ParseResult.JWS.unpack(keySelector: RecipientKeySelector, metadataBuilder: Metadata.Builder): Message {
-    val kid = message.unprotectedHeader?.keyID
-        ?: throw MalformedMessageException("JWS Unprotected Per-Signature header must be present")
+    if (message.signatures.isEmpty())
+        throw MalformedMessageException("Empty signatures")
+    message.signatures.forEach {
+        val kid = it.unprotectedHeader?.keyID
+            ?: throw MalformedMessageException("JWS Unprotected Per-Signature header must be present")
+        val key = keySelector.findVerificationKey(kid)
+        val alg = getCryptoAlg(it)
+        verify(it, alg, key)
 
-    val key = keySelector.findVerificationKey(kid)
-    val alg = getCryptoAlg(message)
-    val unpackedMessage = verify(message, alg, key)
+        // TODO: support multiple signatures on Metadata level
+        metadataBuilder
+            .signAlg(alg)
+            .signFrom(kid)
+    }
+
+    val unpackedMessage = message.payload.toJSONObject()
 
     metadataBuilder
-        .signAlg(alg)
-        .signFrom(kid)
         .nonRepudiation(true)
         .authenticated(true)
         .signedMessage(rawMessage)
@@ -59,11 +70,14 @@ private fun ParseResult.JWS.unpack(keySelector: RecipientKeySelector, metadataBu
 private fun ParseResult.JWE.unpack(
     keySelector: RecipientKeySelector,
     decryptByAllKeys: Boolean,
-    metadataBuilder: Metadata.Builder
+    metadataBuilder: Metadata.Builder,
+    unwrapReWrappingForward: Boolean
 ): Message =
     when (val alg = getCryptoAlg(message)) {
         is AuthCryptAlg -> authUnpack(keySelector, alg, decryptByAllKeys, metadataBuilder)
-        is AnonCryptAlg -> anonUnpack(keySelector, alg, decryptByAllKeys, metadataBuilder)
+        is AnonCryptAlg -> anonUnpack(
+            keySelector, alg, decryptByAllKeys, metadataBuilder, unwrapReWrappingForward
+        )
     }
 
 private fun ParseResult.JWE.authUnpack(
@@ -110,7 +124,8 @@ private fun ParseResult.JWE.anonUnpack(
     keySelector: RecipientKeySelector,
     anonCryptAlg: AnonCryptAlg,
     decryptByAllKeys: Boolean,
-    metadataBuilder: Metadata.Builder
+    metadataBuilder: Metadata.Builder,
+    unwrapReWrappingForward: Boolean
 ): Message {
     if (message.header.senderKeyID != null &&
         message.header.agreementPartyUInfo.decodeToString() != message.header.senderKeyID
@@ -128,13 +143,27 @@ private fun ParseResult.JWE.anonUnpack(
     val to = keySelector.findAnonCryptKeys(recipients)
     val decrypted = anonDecrypt(message, decryptByAllKeys, to)
 
+    var unpackedMessage = decrypted.unpackedMessage
+
+    val parseResult = parse(unpackedMessage)
+
+    var reWrappedInForward = false
+    if (parseResult is ParseResult.JWM) {
+        val forwardedMsg = ForwardMessage.fromMessage(parseResult.message)
+        if (forwardedMsg != null && unwrapReWrappingForward) {
+            unpackedMessage = forwardedMsg.forwardedMsg
+            reWrappedInForward = true
+        }
+    }
+
     metadataBuilder
         .encryptedTo(decrypted.toKids)
         .anonymousSender(true)
         .encAlgAnon(anonCryptAlg)
         .encrypted(true)
+        .reWrappedInForward(reWrappedInForward)
 
-    return when (val parseResult = parse(decrypted.unpackedMessage)) {
+    return when (val parseResult = parse(unpackedMessage)) {
         is ParseResult.JWE -> parseResult.anonAuthUnpack(keySelector, decryptByAllKeys, metadataBuilder)
         is ParseResult.JWS -> parseResult.unpack(keySelector, metadataBuilder)
         is ParseResult.JWM -> parseResult.unpack(keySelector, metadataBuilder)
