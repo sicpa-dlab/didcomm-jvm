@@ -142,7 +142,7 @@ jobs:
           # https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.MAVEN_GPG_ARMORED_KEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.MAVEN_GPG_PASSWORD }}
-        run: gradle publish
+        run: gradle publishToSonatype closeAndReleaseSonatypeStagingRepository
         shell: bash
 
   deploy-dev-maven:

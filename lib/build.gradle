@@ -2,7 +2,7 @@ plugins {
     id "java-library"
     id "org.jetbrains.kotlin.jvm"
     id "org.jlleitschuh.gradle.ktlint" version "${ktlintGradle}"
-    id "me.champeau.jmh" version "0.6.6"
+    id "me.champeau.jmh" version "${champeauJMH}"
     // publishing
     id 'maven-publish'
     id 'signing'
@@ -11,8 +11,6 @@ plugins {
     id "com.github.johnrengelman.shadow" version "${johnrengelmanShadow}"
 }
 
-group = "org.didcommx"
-version = "${version}"
 project.ext.artifactId = rootProject.name
 archivesBaseName = project.artifactId
 
