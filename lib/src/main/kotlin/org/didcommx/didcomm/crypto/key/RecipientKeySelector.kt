@@ -33,6 +33,20 @@ class RecipientKeySelector(private val didDocResolver: DIDDocResolver, private v
             .orElseThrow { DIDUrlNotFoundException(from, did) }
     }
 
+    fun containsKeysForForwardNext(next: String): Boolean {
+        return if (isDIDFragment(next)) {
+            secretResolver.findKeys(listOf(next)).isNotEmpty()
+        } else {
+            val (nextDid) = divideDIDFragment(next)
+
+            val didDocOpt = didDocResolver.resolve(nextDid)
+            if (!didDocOpt.isPresent)
+                return false
+
+            secretResolver.findKeys(didDocOpt.get().keyAgreements).isNotEmpty()
+        }
+    }
+
     fun findAnonCryptKeys(to: List<String>): Sequence<Key> = to
         .forEach { check(isDIDFragment(it)) { "'DID URL' is expected as a recipient key. Got: $it" } }
         .run { findRecipientKeys(to, null) }
