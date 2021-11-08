@@ -170,7 +170,7 @@ private fun ParseResult.JWE.anonUnpack(
 
     if (unwrapReWrappingForward && parseResult is ParseResult.JWM) {
         val forwardMsg = ForwardMessage.fromMessage(parseResult.message)
-        if (forwardMsg != null && keySelector.containsKeysForForwardNext(forwardMsg.forwardNext)) {
+        if (forwardMsg != null && keySelector.hasKeysForForwardNext(forwardMsg.forwardNext)) {
             metadataBuilder.reWrappedInForward(true)
             return unpack(
                 forwardMsg.forwardedMsg,

@@ -33,7 +33,7 @@ class RecipientKeySelector(private val didDocResolver: DIDDocResolver, private v
             .orElseThrow { DIDUrlNotFoundException(from, did) }
     }
 
-    fun containsKeysForForwardNext(next: String): Boolean {
+    fun hasKeysForForwardNext(next: String): Boolean {
         val nextKids =
             if (isDIDFragment(next))
                 listOf(next)
