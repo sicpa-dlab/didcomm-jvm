@@ -34,17 +34,15 @@ class RecipientKeySelector(private val didDocResolver: DIDDocResolver, private v
     }
 
     fun containsKeysForForwardNext(next: String): Boolean {
-        return if (isDIDFragment(next)) {
-            secretResolver.findKeys(listOf(next)).isNotEmpty()
-        } else {
-            val (nextDid) = divideDIDFragment(next)
+        val kids =
+            if (isDIDFragment(next))
+                listOf(next)
+            else
+                didDocResolver.resolve(next)
+                    .map { it.keyAgreements }
+                    .orElse(emptyList())
 
-            val didDocOpt = didDocResolver.resolve(nextDid)
-            if (!didDocOpt.isPresent)
-                return false
-
-            secretResolver.findKeys(didDocOpt.get().keyAgreements).isNotEmpty()
-        }
+        return secretResolver.findKeys(kids).isNotEmpty()
     }
 
     fun findAnonCryptKeys(to: List<String>): Sequence<Key> = to
