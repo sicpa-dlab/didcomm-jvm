@@ -196,7 +196,62 @@ class DIDCommRoutingTest {
     }
 
     @Test
-    fun `Test_single_mediator_re_wrap_to_receiver`() {
+    fun `Test_single_mediator_re_wrap_anoncrypt_to_receiver`() {
+        val message = Message.builder(
+            id = "1234567890",
+            body = mapOf("messagespecificattribute" to "and its value"),
+            type = "http://example.com/protocols/lets_do_lunch/1.0/proposal"
+        )
+            .to(listOf(BOB_DID))
+            .createdTime(1516269022)
+            .expiresTime(1516385931)
+            .build()
+
+        val packResult = didComm.packEncrypted(
+            PackEncryptedParams.builder(message, BOB_DID).build()
+        )
+
+        // BOB's MEDIATOR
+        val forwardBob = routing.unpackForward(
+            packResult.packedMessage,
+            secretResolver = mediator1SecretResolver
+        )
+
+        val nextTo = forwardBob.forwardMsg.forwardNext
+        assertNotNull(nextTo)
+
+        // re-wrap to the receiver
+        val wrapResult = routing.wrapInForward(
+            forwardBob.forwardMsg.forwardedMsg,
+            nextTo,
+            routingKeys = listOf(nextTo),
+            headers = mapOf("somefield" to 99999)
+        )
+
+        assertNotNull(wrapResult)
+
+        // BOB
+        val unpackResult = didComm.unpack(
+            UnpackParams.Builder(wrapResult.msgEncrypted.packedMessage)
+                .secretResolver(bobSecretResolver)
+                .unwrapReWrappingForward(true)
+                .build()
+        )
+
+        assertEquals(message, unpackResult.message)
+        // FIXME here first anon for forward is mixed with inner anon for initial message
+        //       in the same metadata
+        with(unpackResult.metadata) {
+            assertTrue { encrypted }
+            assertFalse { authenticated }
+            assertFalse { nonRepudiation }
+            assertTrue { anonymousSender }
+            assertTrue { reWrappedInForward }
+        }
+    }
+
+    @Test
+    fun `Test_single_mediator_re_wrap_authcrypt_to_receiver`() {
         val message = Message.builder(
             id = "1234567890",
             body = mapOf("messagespecificattribute" to "and its value"),
@@ -242,7 +297,7 @@ class DIDCommRoutingTest {
         )
 
         assertEquals(message, unpackResult.message)
-        // FIXME here first anon for forward is mixed with innder auth for initial message
+        // FIXME here first anon for forward is mixed with inner auth for initial message
         //       in the same metadata
         with(unpackResult.metadata) {
             assertTrue { encrypted }
@@ -250,6 +305,61 @@ class DIDCommRoutingTest {
             assertFalse { nonRepudiation }
             assertTrue { anonymousSender }
             assertTrue { reWrappedInForward }
+        }
+    }
+
+    @Test
+    fun `Test_unwrap_re_wrapping_forward_mode_for_no_re_wrapping`() {
+        val message = Message.builder(
+            id = "1234567890",
+            body = mapOf("messagespecificattribute" to "and its value"),
+            type = "http://example.com/protocols/lets_do_lunch/1.0/proposal"
+        )
+            .to(listOf(BOB_DID))
+            .createdTime(1516269022)
+            .expiresTime(1516385931)
+            .build()
+
+        val packResult = didComm.packEncrypted(
+            PackEncryptedParams.builder(message, BOB_DID).build()
+        )
+
+        // BOB's MEDIATOR
+        val unpackResultAtMediator = didComm.unpack(
+            UnpackParams.Builder(packResult.packedMessage)
+                .secretResolver(mediator1SecretResolver)
+                .unwrapReWrappingForward(true)
+                .build()
+        )
+
+        val forwardMessage = ForwardMessage.fromMessage(unpackResultAtMediator.message)
+        assertNotNull(forwardMessage)
+        assertEquals(BOB_DID, forwardMessage.forwardNext)
+
+        with(unpackResultAtMediator.metadata) {
+            assertTrue { encrypted }
+            assertFalse { authenticated }
+            assertFalse { nonRepudiation }
+            assertTrue { anonymousSender }
+            assertFalse { reWrappedInForward }
+        }
+
+        // BOB
+        val unpackResult = didComm.unpack(
+            UnpackParams.Builder(toJson(forwardMessage.forwardedMsg))
+                .secretResolver(bobSecretResolver)
+                .unwrapReWrappingForward(true)
+                .build()
+        )
+
+        assertEquals(message, unpackResult.message)
+
+        with(unpackResult.metadata) {
+            assertTrue { encrypted }
+            assertFalse { authenticated }
+            assertFalse { nonRepudiation }
+            assertTrue { anonymousSender }
+            assertFalse { reWrappedInForward }
         }
     }
 }
