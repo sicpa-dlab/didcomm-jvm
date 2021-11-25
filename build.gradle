@@ -19,6 +19,27 @@ buildscript {
     }
 }
 
+plugins {
+    id "io.github.gradle-nexus.publish-plugin" version "${gradleNexusPublish}"
+}
+
+
+// considers the same properties as for publishing:
+//  - ORG_GRADLE_PROJECT_mavenOSSRHUsername
+//  - ORG_GRADLE_PROJECT_mavenOSSRHPassword
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            // stagingProfileId = this.properties['mavenOSSRHStagingProfileId']
+            username = this.properties['mavenOSSRHUsername']
+            password = this.properties['mavenOSSRHPassword']
+        }
+    }
+}
+
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

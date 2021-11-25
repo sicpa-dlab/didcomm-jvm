@@ -119,9 +119,9 @@ class AliceRotatedToCharlieSecretResolverMock : SecretResolver {
                     """
                         {
                            "kty":"OKP",
-                           "d":"pFRUKkyzx4kHdJtFSnlPA9WzqkDT1HWV0xZ5OYZd2SY",
+                           "d":"T2azVap7CYD_kB8ilbnFYqwwYb5N-GcD6yjGEvquZXg",
                            "crv":"Ed25519",
-                           "x":"G-boxFB6vOZBu-wXkm-9Lh79I8nf9Z50cILaOgKKGww"
+                           "x":"VDXDwuGKVq91zxU6q7__jLDUq8_C5cuxECgd-1feFTE"
                         }
                     """.trimIndent()
                 )

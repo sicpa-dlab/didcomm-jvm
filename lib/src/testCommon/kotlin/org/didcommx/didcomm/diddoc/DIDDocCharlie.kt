@@ -64,7 +64,7 @@ val CHARLIE_AUTH_METHOD_25519 = VerificationMethod(
             {
                 "kty": "OKP",
                 "crv": "Ed25519",
-                "x": "G-boxFB6vOZBu-wXkm-9Lh79I8nf9Z50cILaOgKKGww"
+                "x": "VDXDwuGKVq91zxU6q7__jLDUq8_C5cuxECgd-1feFTE"
             }
             """
     ),

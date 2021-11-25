@@ -3,17 +3,9 @@ package org.didcommx.didcomm.crypto
 import com.nimbusds.jose.JOSEException
 import com.nimbusds.jose.JWEObjectJSON
 import com.nimbusds.jose.JWSObjectJSON
-import com.nimbusds.jose.util.JSONObjectUtils
 import org.didcommx.didcomm.exceptions.MalformedMessageException
 import org.didcommx.didcomm.message.Message
-import java.lang.IllegalArgumentException
 import java.text.ParseException
-
-fun parse(str: String): ParseResult = try {
-    parse(JSONObjectUtils.parse(str))
-} catch (e: ParseException) {
-    throw MalformedMessageException("Message cannot be parsed", e)
-}
 
 fun parse(json: Map<String, Any>): ParseResult = when {
     json.containsKey("signatures") -> ParseResult.JWS(json)
