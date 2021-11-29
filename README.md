@@ -13,7 +13,7 @@ Available from Maven Central.
 Gradle:
 ```
 dependencies {
-  implementation 'org.didcommx:didcomm:0.1.0'
+  implementation 'org.didcommx:didcomm:0.3.0'
 }
 ```
 
@@ -23,7 +23,7 @@ Maven:
 <dependency>
   <groupId>org.didcommx</groupId>
   <artifactId>didcomm</artifactId>
-  <version>0.1.0</version>
+  <version>0.3.0</version>
 </dependency>
 ```
 
@@ -53,8 +53,8 @@ See https://github.com/sicpa-dlab/didcomm-demo.
         - Curves: Ed25519, Secp256k1 (currently JDK < 15 only), P-256
         - Algorithms: EdDSA (with crv=Ed25519), ES256, ES256K (currently JDK < 15 only)
 - DID rotation (`fromPrior` field) is supported.
+- Forward protocol is implemented and used by default.
 - Limitations and known issues:
-  - Forward protocol is not implemented 
   - Secp256k1 is supported on JDK < 15 only
 - DIDComm has been implemented under the following [Assumptions](https://hackmd.io/i3gLqgHQR2ihVFV5euyhqg)
 
