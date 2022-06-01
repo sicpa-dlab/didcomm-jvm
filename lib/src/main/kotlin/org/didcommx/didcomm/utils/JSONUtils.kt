@@ -2,7 +2,6 @@ package org.didcommx.didcomm.utils
 
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import com.nimbusds.jose.shaded.json.JSONArray
 import com.nimbusds.jose.util.JSONObjectUtils
 import org.didcommx.didcomm.exceptions.MalformedMessageException
 
