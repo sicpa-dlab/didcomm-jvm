@@ -415,7 +415,7 @@ class JWM {
                        "attachments": "131"
                      }
                 """.trimIndent(),
-                "The expected type of header 'attachments' is 'JSONArray'. Got 'String'"
+                "The expected type of header 'attachments' is 'List'. Got 'String'"
             ),
 
             WrongMessage(

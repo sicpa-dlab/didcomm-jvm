@@ -7,7 +7,7 @@ import com.nimbusds.jose.util.JSONObjectUtils
 import org.didcommx.didcomm.exceptions.MalformedMessageException
 
 inline fun <reified T> Map<String, Any?>.getTypedArray(key: String): Array<T?>? = this[key]?.let {
-    if (it !is JSONArray) throw MalformedMessageException("The expected type of header '$key' is 'JSONArray'. Got '${it::class.simpleName}'")
+    if (it !is List<*>) throw MalformedMessageException("The expected type of header '$key' is 'List'. Got '${it::class.simpleName}'")
     else it.getTyped(key)
 }
 
@@ -16,7 +16,7 @@ inline fun <reified T> Map<String, Any?>.getTyped(key: String): T? = this[key]?.
     else it
 }
 
-inline fun <reified T> JSONArray.getTyped(key: String): Array<T?> = this.map {
+inline fun <reified T> List<*>.getTyped(key: String): Array<T?> = this.map {
     when (it) {
         null -> null
         !is T -> throw MalformedMessageException("The expected type of header '$key' is '${T::class.simpleName}'. Got '${it::class.simpleName}'")
