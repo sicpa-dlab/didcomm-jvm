@@ -64,5 +64,5 @@ data class DIDCommService(
     val id: String,
     val serviceEndpoint: String,
     val routingKeys: List<String>,
-    val accept: List<String>
+    val accept: List<String>?
 )
