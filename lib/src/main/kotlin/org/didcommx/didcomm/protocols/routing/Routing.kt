@@ -60,7 +60,7 @@ internal fun findDIDCommService(
     if (serviceId != null) {
         val didService = didDoc.findDIDCommService(serviceId)
 
-        if (PROFILE_DIDCOMM_V2 !in didService.accept) {
+        if (didService.accept != null && !didService.accept.isEmpty() && PROFILE_DIDCOMM_V2 !in didService.accept) {
             throw DIDCommServiceException(
                 toDid, "service '$serviceId' does not accept didcomm/v2 profile"
             )
@@ -73,7 +73,7 @@ internal fun findDIDCommService(
         // > by protocol availability or preference.
         // https://identity.foundation/didcomm-messaging/spec/#multiple-endpoints
         return try {
-            didDoc.didCommServices.find { PROFILE_DIDCOMM_V2 in it.accept }
+            didDoc.didCommServices.find { it.accept == null || it.accept.isEmpty() || PROFILE_DIDCOMM_V2 in it.accept }
         } catch (e: DIDDocException) {
             null
         }
