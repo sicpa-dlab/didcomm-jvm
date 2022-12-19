@@ -305,7 +305,7 @@ class JWEObjectJSON : JOSEObject, JSONSerializable {
                     getHeader(),
                     recipients,
                     iV,
-                    cipherText,
+                    cipherText!!,
                     authTag
                 )
             )

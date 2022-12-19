@@ -19,12 +19,12 @@ package org.didcommx.didcomm.jose.crypto
 import com.nimbusds.jose.*
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral
 import com.nimbusds.jose.crypto.impl.ECDH1PU
-import com.nimbusds.jose.crypto.impl.ECDH1PUCryptoProvider
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.OctetKeyPair
 import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jose.util.Pair
 import net.jcip.annotations.ThreadSafe
+import org.didcommx.didcomm.jose.JWEDecrypterMulti
 import org.didcommx.didcomm.jose.crypto.impl.ECDH1PUCryptoProviderMulti
 import java.util.*
 import javax.crypto.SecretKey
@@ -136,10 +136,10 @@ class ECDH1PUX25519DecrypterMulti(private val sender: OctetKeyPair, private val 
     @Throws(JOSEException::class)
     override fun decrypt(
         header: JWEHeader,
-        recipients: List<JWERecipient>,
-        iv: Base64URL,
+        recipients: List<JWERecipient>?,
+        iv: Base64URL?,
         cipherText: Base64URL,
-        authTag: Base64URL
+        authTag: Base64URL?
     ): ByteArray? {
         critPolicy.ensureHeaderPasses(header)
 
@@ -154,6 +154,6 @@ class ECDH1PUX25519DecrypterMulti(private val sender: OctetKeyPair, private val 
             )
             sharedKeys.add(Pair.of(recipient.left, Z))
         }
-        return decryptMulti(header, sharedKeys, recipients, iv, cipherText, authTag)
+        return decryptMultiNew(header, sharedKeys, recipients, iv, cipherText, authTag)
     }
 }

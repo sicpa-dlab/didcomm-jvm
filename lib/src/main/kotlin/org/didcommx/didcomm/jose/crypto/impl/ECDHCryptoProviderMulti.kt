@@ -14,7 +14,7 @@ import javax.crypto.SecretKey
 abstract class ECDHCryptoProviderMulti(curve: Curve) : ECDHCryptoProvider(curve) {
 
     @Throws(JOSEException::class)
-    override fun encryptMulti(
+    fun encryptMultiNew(
         header: JWEHeader,
         sharedSecrets: List<Pair<UnprotectedHeader, SecretKey>>,
         clearText: ByteArray
@@ -57,23 +57,25 @@ abstract class ECDHCryptoProviderMulti(curve: Curve) : ECDHCryptoProvider(curve)
     }
 
     @Throws(JOSEException::class)
-    override fun decryptMulti(
+    fun decryptMultiNew(
         header: JWEHeader,
         sharedSecrets: List<Pair<UnprotectedHeader, SecretKey>>,
-        recipients: List<JWERecipient>,
-        iv: Base64URL,
+        recipients: List<JWERecipient>?,
+        iv: Base64URL?,
         cipherText: Base64URL,
-        authTag: Base64URL
+        authTag: Base64URL?
     ): ByteArray? {
         var result: ByteArray? = null
         for (rs in sharedSecrets) {
             val kid = rs.left.keyID
             var encryptedKey: Base64URL? = null
-            for (recipient in recipients) {
-                if (recipient.header == null) continue
-                if (kid == recipient.header.keyID) {
-                    encryptedKey = recipient.encryptedKey
-                    break
+            if (recipients != null) {
+                for (recipient in recipients) {
+                    if (recipient.header == null) continue
+                    if (kid == recipient.header.keyID) {
+                        encryptedKey = recipient.encryptedKey
+                        break
+                    }
                 }
             }
             result = decryptWithZ(header, rs.right, encryptedKey, iv, cipherText, authTag)

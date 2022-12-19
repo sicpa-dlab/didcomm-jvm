@@ -18,12 +18,12 @@ package org.didcommx.didcomm.jose.crypto
 
 import com.nimbusds.jose.*
 import com.nimbusds.jose.crypto.impl.ECDH
-import com.nimbusds.jose.crypto.impl.ECDHCryptoProvider
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.OctetKeyPair
 import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator
 import com.nimbusds.jose.util.Pair
 import net.jcip.annotations.ThreadSafe
+import org.didcommx.didcomm.jose.JWEEncrypterMulti
 import org.didcommx.didcomm.jose.crypto.impl.ECDHCryptoProviderMulti
 import java.util.*
 import javax.crypto.SecretKey
@@ -117,6 +117,6 @@ class X25519EncrypterMulti(private val recipients: List<Pair<UnprotectedHeader, 
             )
             sharedKeys.add(Pair.of(recipient.left, Z))
         }
-        return encryptMulti(updatedHeader, sharedKeys, clearText)
+        return encryptMultiNew(updatedHeader, sharedKeys, clearText)
     }
 }
