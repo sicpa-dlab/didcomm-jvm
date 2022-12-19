@@ -23,6 +23,7 @@ import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import com.nimbusds.jose.util.Pair
 import net.jcip.annotations.ThreadSafe
+import org.didcommx.didcomm.jose.JWECryptoPartsMulti
 import org.didcommx.didcomm.jose.JWEEncrypterMulti
 import org.didcommx.didcomm.jose.crypto.impl.ECDHCryptoProviderMulti
 import java.util.*
@@ -102,7 +103,7 @@ class ECDHEncrypterMulti(private val recipients: List<Pair<UnprotectedHeader, EC
     }
 
     @Throws(JOSEException::class)
-    override fun encrypt(header: JWEHeader, clearText: ByteArray): JWECryptoParts {
+    override fun encrypt(header: JWEHeader, clearText: ByteArray): JWECryptoPartsMulti {
         // Generate ephemeral EC key pair on the same curve as the consumer's public key
         val ephemeralKeyPair = ECKeyGenerator(curve).generate()
         val ephemeralPublicKey = ephemeralKeyPair.toECPublicKey()

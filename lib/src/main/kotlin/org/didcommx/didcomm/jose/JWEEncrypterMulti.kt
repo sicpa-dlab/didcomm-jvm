@@ -17,7 +17,6 @@
 package org.didcommx.didcomm.jose
 
 import com.nimbusds.jose.JOSEException
-import com.nimbusds.jose.JWECryptoParts
 import com.nimbusds.jose.JWEHeader
 import com.nimbusds.jose.JWEProvider
 
@@ -44,5 +43,5 @@ interface JWEEncrypterMulti : JWEProvider {
      * other internal reason.
      */
     @Throws(JOSEException::class)
-    fun encrypt(header: JWEHeader, clearText: ByteArray): JWECryptoParts
+    fun encrypt(header: JWEHeader, clearText: ByteArray): JWECryptoPartsMulti
 }

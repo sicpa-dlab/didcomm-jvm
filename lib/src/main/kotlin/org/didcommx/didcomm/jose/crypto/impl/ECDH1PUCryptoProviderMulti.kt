@@ -5,6 +5,7 @@ import com.nimbusds.jose.crypto.impl.*
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jose.util.Pair
+import org.didcommx.didcomm.jose.JWECryptoPartsMulti
 import java.util.*
 import javax.crypto.SecretKey
 
@@ -15,7 +16,7 @@ abstract class ECDH1PUCryptoProviderMulti(curve: Curve) : ECDH1PUCryptoProvider(
         header: JWEHeader,
         sharedSecrets: List<Pair<UnprotectedHeader, SecretKey>>,
         clearText: ByteArray
-    ): JWECryptoParts {
+    ): JWECryptoPartsMulti {
         val algMode = ECDH1PU.resolveAlgorithmMode(header.algorithm)
         val cek = ContentCryptoProvider.generateCEK(
             header.encryptionMethod,
@@ -23,11 +24,11 @@ abstract class ECDH1PUCryptoProviderMulti(curve: Curve) : ECDH1PUCryptoProvider(
         )
         val recipients = ArrayList<JWERecipient>()
         var encrypted = false
-        var parts: JWECryptoParts? = null
+        var parts: JWECryptoPartsMulti? = null
         for (rs in sharedSecrets) {
             var encryptedKey: Base64URL? = null
             if (!encrypted) {
-                parts = encryptWithZ(header, rs.right, clearText, cek)
+                parts = encryptWithZMulti(header, rs.right, clearText, cek)
                 encryptedKey = parts.encryptedKey
                 encrypted = true
             } else if (algMode == ECDH.AlgorithmMode.KW) {
@@ -44,7 +45,7 @@ abstract class ECDH1PUCryptoProviderMulti(curve: Curve) : ECDH1PUCryptoProvider(
         if (parts == null) {
             throw JOSEException("Content MUST be encrypted")
         }
-        return JWECryptoParts(
+        return JWECryptoPartsMulti(
             parts.header,
             Collections.unmodifiableList(recipients),
             parts.initializationVector,
@@ -78,5 +79,15 @@ abstract class ECDH1PUCryptoProviderMulti(curve: Curve) : ECDH1PUCryptoProvider(
             result = decryptWithZ(header, rs.right, encryptedKey, iv, cipherText, authTag)
         }
         return result
+    }
+
+    private fun encryptWithZMulti(
+        header: JWEHeader?,
+        Z: SecretKey?,
+        clearText: ByteArray?,
+        contentEncryptionKey: SecretKey?
+    ): JWECryptoPartsMulti {
+        val nimparts = super.encryptWithZ(header, Z, clearText, contentEncryptionKey)
+        return JWECryptoPartsMulti(nimparts)
     }
 }

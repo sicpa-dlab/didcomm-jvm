@@ -261,7 +261,7 @@ class JWEObjectJSON : JOSEObject, JSONSerializable {
     fun encrypt(encrypter: JWEEncrypterMulti) {
         ensureUnencryptedState()
         ensureJWEEncrypterSupport(encrypter)
-        val parts: JWECryptoParts
+        val parts: JWECryptoPartsMulti
         try {
             parts = encrypter.encrypt(getHeader(), payload.toBytes())
         } catch (e: JOSEException) {

@@ -23,6 +23,7 @@ import com.nimbusds.jose.jwk.OctetKeyPair
 import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator
 import com.nimbusds.jose.util.Pair
 import net.jcip.annotations.ThreadSafe
+import org.didcommx.didcomm.jose.JWECryptoPartsMulti
 import org.didcommx.didcomm.jose.JWEEncrypterMulti
 import org.didcommx.didcomm.jose.crypto.impl.ECDHCryptoProviderMulti
 import java.util.*
@@ -100,7 +101,7 @@ class X25519EncrypterMulti(private val recipients: List<Pair<UnprotectedHeader, 
     }
 
     @Throws(JOSEException::class)
-    override fun encrypt(header: JWEHeader, clearText: ByteArray): JWECryptoParts {
+    override fun encrypt(header: JWEHeader, clearText: ByteArray): JWECryptoPartsMulti {
         // Generate ephemeral OctetKey key pair on the same curve as the consumer's public key
         val ephemeralPrivateKey = OctetKeyPairGenerator(curve).generate()
         val ephemeralPublicKey = ephemeralPrivateKey.toPublicJWK()
