@@ -81,20 +81,6 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "${jvmTarget}"
 }
 
-// TODO: remove once necessary version of Nimbus is published to Maven
-shadowJar {
-    // @see https://youtrack.jetbrains.com/issue/KT-25709
-    exclude("**/*.kotlin_metadata")
-    exclude("**/*.kotlin_builtins")
-
-    dependencies {
-        include(dependency("com.nimbusds:nimbus-jose-jwt"))
-        include(dependency("com.github.multiformats:java-multibase"))
-    }
-
-    archiveClassifier.set("") // remove suffix `-all` as intellij can"t find the library otherwise
-}
-
 // TODO tune settings
 jmh {
     benchmarkMode = ["thrpt", "avgt"]
