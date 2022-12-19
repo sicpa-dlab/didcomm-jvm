@@ -8,8 +8,6 @@ import com.nimbusds.jose.JWEHeader
 import com.nimbusds.jose.JWEObjectJSON
 import com.nimbusds.jose.Payload
 import com.nimbusds.jose.UnprotectedHeader
-import com.nimbusds.jose.crypto.ECDH1PUDecrypterMulti
-import com.nimbusds.jose.crypto.ECDH1PUEncrypterMulti
 import com.nimbusds.jose.crypto.ECDH1PUX25519DecrypterMulti
 import com.nimbusds.jose.crypto.ECDH1PUX25519EncrypterMulti
 import com.nimbusds.jose.crypto.X25519DecrypterMulti
@@ -28,6 +26,8 @@ import org.didcommx.didcomm.exceptions.MalformedMessageException
 import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.exceptions.UnsupportedCurveException
 import org.didcommx.didcomm.exceptions.UnsupportedJWKException
+import org.didcommx.didcomm.jose.crypto.ECDH1PUDecrypterMulti
+import org.didcommx.didcomm.jose.crypto.ECDH1PUEncrypterMulti
 import org.didcommx.didcomm.jose.crypto.ECDHDecrypterMulti
 import org.didcommx.didcomm.jose.crypto.ECDHEncrypterMulti
 import org.didcommx.didcomm.utils.asKeys
