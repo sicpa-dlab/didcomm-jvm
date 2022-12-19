@@ -25,6 +25,7 @@ import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jose.util.Pair
 import net.jcip.annotations.ThreadSafe
+import org.didcommx.didcomm.jose.crypto.impl.ECDH1PUCryptoProviderMulti
 import java.util.*
 import javax.crypto.SecretKey
 
@@ -105,7 +106,7 @@ import javax.crypto.SecretKey
  */
 @ThreadSafe
 class ECDH1PUDecrypterMulti(private val sender: ECKey, private val recipients: List<Pair<UnprotectedHeader, ECKey>>, defCritHeaders: Set<String>? = null) :
-    ECDH1PUCryptoProvider(sender.curve), JWEDecrypterMulti, CriticalHeaderParamsAware {
+    ECDH1PUCryptoProviderMulti(sender.curve), JWEDecrypterMulti, CriticalHeaderParamsAware {
 
     /**
      * The supported EC JWK curves by the ECDH crypto provider class.
@@ -141,7 +142,7 @@ class ECDH1PUDecrypterMulti(private val sender: ECKey, private val recipients: L
         iv: Base64URL,
         cipherText: Base64URL,
         authTag: Base64URL
-    ): ByteArray {
+    ): ByteArray? {
         critPolicy.ensureHeaderPasses(header)
 
         // Get ephemeral EC key

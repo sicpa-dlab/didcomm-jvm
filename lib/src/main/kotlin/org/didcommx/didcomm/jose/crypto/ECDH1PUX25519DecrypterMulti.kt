@@ -25,6 +25,7 @@ import com.nimbusds.jose.jwk.OctetKeyPair
 import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jose.util.Pair
 import net.jcip.annotations.ThreadSafe
+import org.didcommx.didcomm.jose.crypto.impl.ECDH1PUCryptoProviderMulti
 import java.util.*
 import javax.crypto.SecretKey
 
@@ -103,7 +104,7 @@ import javax.crypto.SecretKey
  */
 @ThreadSafe
 class ECDH1PUX25519DecrypterMulti(private val sender: OctetKeyPair, private val recipients: List<Pair<UnprotectedHeader, OctetKeyPair>>, defCritHeaders: Set<String>? = null) :
-    ECDH1PUCryptoProvider(sender.curve), JWEDecrypterMulti, CriticalHeaderParamsAware {
+    ECDH1PUCryptoProviderMulti(sender.curve), JWEDecrypterMulti, CriticalHeaderParamsAware {
 
     /**
      * The supported EC JWK curves by the ECDH crypto provider class.
@@ -139,12 +140,12 @@ class ECDH1PUX25519DecrypterMulti(private val sender: OctetKeyPair, private val 
         iv: Base64URL,
         cipherText: Base64URL,
         authTag: Base64URL
-    ): ByteArray {
+    ): ByteArray? {
         critPolicy.ensureHeaderPasses(header)
 
         // Get ephemeral key from header
         val ephemeralPublicKey = header.ephemeralPublicKey as OctetKeyPair
-        val sharedKeys: MutableList<Pair<UnprotectedHeader, SecretKey>> = ArrayList()
+        val sharedKeys = ArrayList<Pair<UnprotectedHeader, SecretKey>>()
         for (recipient in this.recipients) {
             val Z = ECDH1PU.deriveRecipientZ(
                 recipient.right,

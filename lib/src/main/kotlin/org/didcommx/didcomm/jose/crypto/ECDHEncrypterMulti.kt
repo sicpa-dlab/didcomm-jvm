@@ -24,6 +24,7 @@ import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import com.nimbusds.jose.util.Pair
 import net.jcip.annotations.ThreadSafe
+import org.didcommx.didcomm.jose.crypto.impl.ECDHCryptoProviderMulti
 import java.util.*
 import javax.crypto.SecretKey
 
@@ -87,7 +88,7 @@ import javax.crypto.SecretKey
  */
 @ThreadSafe
 class ECDHEncrypterMulti(private val recipients: List<Pair<UnprotectedHeader, ECKey>>) :
-    ECDHCryptoProvider(recipients[0].right.curve), JWEEncrypterMulti {
+    ECDHCryptoProviderMulti(recipients[0].right.curve), JWEEncrypterMulti {
 
     /**
      * The supported EC JWK curves by the ECDH crypto provider class.
@@ -113,7 +114,7 @@ class ECDHEncrypterMulti(private val recipients: List<Pair<UnprotectedHeader, EC
                 curve, ephemeralPublicKey
             ).build()
         ).build()
-        val sharedKeys: MutableList<Pair<UnprotectedHeader?, SecretKey>> = ArrayList()
+        val sharedKeys = ArrayList<Pair<UnprotectedHeader, SecretKey>>()
         for (recipient in recipients) {
             val Z = ECDH.deriveSharedSecret(
                 recipient.right.toECPublicKey(),

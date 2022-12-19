@@ -26,6 +26,7 @@ import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jose.util.Pair
 import net.jcip.annotations.ThreadSafe
+import org.didcommx.didcomm.jose.crypto.impl.ECDHCryptoProviderMulti
 import java.util.*
 import javax.crypto.SecretKey
 
@@ -92,7 +93,7 @@ import javax.crypto.SecretKey
  */
 @ThreadSafe
 class ECDHDecrypterMulti(private val recipients: List<Pair<UnprotectedHeader, ECKey>>, defCritHeaders: Set<String>? = null) :
-    ECDHCryptoProvider(recipients[0].right.curve), JWEDecrypterMulti, CriticalHeaderParamsAware {
+    ECDHCryptoProviderMulti(recipients[0].right.curve), JWEDecrypterMulti, CriticalHeaderParamsAware {
 
     /**
      * The supported EC JWK curves by the ECDH crypto provider class.
@@ -128,12 +129,12 @@ class ECDHDecrypterMulti(private val recipients: List<Pair<UnprotectedHeader, EC
         iv: Base64URL,
         cipherText: Base64URL,
         authTag: Base64URL
-    ): ByteArray {
+    ): ByteArray? {
         critPolicy.ensureHeaderPasses(header)
 
         // Get ephemeral EC key
         val ephemeralKey = header.ephemeralPublicKey as ECKey
-        val sharedKeys: MutableList<Pair<UnprotectedHeader?, SecretKey>> = ArrayList()
+        val sharedKeys = ArrayList<Pair<UnprotectedHeader, SecretKey>>()
         for (recipient in this.recipients) {
             if (!ECChecks.isPointOnCurve(ephemeralKey.toECPublicKey(), recipient.right.toECPrivateKey())) {
                 throw JOSEException("Invalid ephemeral public EC key: Point(s) not on the expected curve")
