@@ -21,7 +21,6 @@ import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jose.util.JSONArrayUtils
 import com.nimbusds.jose.util.JSONObjectUtils
 import net.jcip.annotations.ThreadSafe
-import sun.reflect.generics.reflectiveObjects.NotImplementedException
 import java.text.ParseException
 
 /**
@@ -60,11 +59,17 @@ class JWEObjectJSON : JOSEObject, JSONSerializable {
      * The header.
      */
     private var header: JWEHeader? = null
-
+    /**
+     * Returns the recipients of this JWE object.
+     *
+     * @return The recipients, `null` if not
+     * applicable or the JWE object has not been encrypted yet.
+     */
     /**
      * The recipients, `null` if not computed or applicable.
      */
-    private var recipients: List<JWERecipient>? = null
+    var recipients: List<JWERecipient>? = null
+        private set
     /**
      * Returns the initialisation vector (IV) of this JWE object.
      *
@@ -75,7 +80,8 @@ class JWEObjectJSON : JOSEObject, JSONSerializable {
      * The initialisation vector, `null` if not generated or
      * applicable.
      */
-    private var iV: Base64URL? = null
+    var iV: Base64URL? = null
+        private set
     /**
      * Returns the cipher text of this JWE object.
      *
@@ -85,7 +91,8 @@ class JWEObjectJSON : JOSEObject, JSONSerializable {
     /**
      * The cipher text, `null` if not computed.
      */
-    private var cipherText: Base64URL?
+    var cipherText: Base64URL?
+        private set
     /**
      * Returns the authentication tag of this JWE object.
      *
@@ -95,7 +102,8 @@ class JWEObjectJSON : JOSEObject, JSONSerializable {
     /**
      * The authentication tag, `null` if not computed or applicable.
      */
-    private var authTag: Base64URL? = null
+    var authTag: Base64URL? = null
+        private set
     /**
      * Returns the state of this JWE object.
      *
@@ -104,7 +112,8 @@ class JWEObjectJSON : JOSEObject, JSONSerializable {
     /**
      * The JWE object state.
      */
-    private var state: State
+    var state: State
+        private set
 
     /**
      * Creates a new to-be-encrypted JSON Web Encryption (JWE) object with
@@ -138,32 +147,38 @@ class JWEObjectJSON : JOSEObject, JSONSerializable {
      * @throws ParseException If parsing of the serialised parts failed.
      */
     constructor(
-        header: Base64URL,
+        header: Base64URL?,
         recipients: List<JWERecipient>?,
         iv: Base64URL?,
-        ciphertext: Base64URL,
+        ciphertext: Base64URL?,
         tag: Base64URL?
     ) {
+        if (header == null) {
+            throw IllegalArgumentException("The header must not be null")
+        }
         try {
             this.header = JWEHeader.parse(header)
         } catch (e: ParseException) {
             throw ParseException("Invalid JWE header: " + e.message, 0)
         }
-        if (recipients.isNullOrEmpty()) {
+        if (recipients == null || recipients.isEmpty()) {
             this.recipients = null
         } else {
             this.recipients = recipients
         }
-        iV = if (iv == null || iv.toString().isEmpty()) {
-            null
+        if (iv == null || iv.toString().isEmpty()) {
+            iV = null
         } else {
-            iv
+            iV = iv
+        }
+        if (ciphertext == null) {
+            throw IllegalArgumentException("The ciphertext must not be null")
         }
         cipherText = ciphertext
-        authTag = if (tag == null || tag.toString().isEmpty()) {
-            null
+        if (tag == null || tag.toString().isEmpty()) {
+            authTag = null
         } else {
-            tag
+            authTag = tag
         }
         state = State.ENCRYPTED // but not decrypted yet!
     }
@@ -246,7 +261,7 @@ class JWEObjectJSON : JOSEObject, JSONSerializable {
     fun encrypt(encrypter: JWEEncrypterMulti) {
         ensureUnencryptedState()
         ensureJWEEncrypterSupport(encrypter)
-        val parts: JWECryptoPartsMulti
+        val parts: JWECryptoParts
         try {
             parts = encrypter.encrypt(getHeader(), payload.toBytes())
         } catch (e: JOSEException) {
@@ -262,7 +277,7 @@ class JWEObjectJSON : JOSEObject, JSONSerializable {
         if (parts.header != null) {
             header = parts.header
         }
-        recipients = parts.getRecipients()
+        recipients = parts.recipients
         iV = parts.initializationVector
         cipherText = parts.cipherText
         authTag = parts.authenticationTag
@@ -290,7 +305,7 @@ class JWEObjectJSON : JOSEObject, JSONSerializable {
                     getHeader(),
                     recipients,
                     iV,
-                    cipherText!!,
+                    cipherText,
                     authTag
                 )
             )
@@ -335,11 +350,11 @@ class JWEObjectJSON : JOSEObject, JSONSerializable {
     }
 
     override fun toFlattenedJSONObject(): Map<String, Any> {
-        // flattened JSON serialization is not implemented
-        throw NotImplementedException()
+        throw Exception("Flattened JSON serialization is not implemented")
     }
 
     companion object {
+        private val serialVersionUID = 1L
 
         /**
          * Parses a JWE object from the specified string in json form. The
@@ -355,7 +370,7 @@ class JWEObjectJSON : JOSEObject, JSONSerializable {
          * JWE object.
          */
         @Throws(ParseException::class)
-        fun parse(s: String?): JWEObjectJSON {
+        fun parse(s: String): JWEObjectJSON {
             val json = JSONObjectUtils.parse(s)
             return parse(json)
         }
@@ -375,7 +390,7 @@ class JWEObjectJSON : JOSEObject, JSONSerializable {
          * JWE object.
          */
         @Throws(ParseException::class)
-        fun parse(jsonObject: Map<String?, Any?>?): JWEObjectJSON {
+        fun parse(jsonObject: Map<String, Any>): JWEObjectJSON {
             return JWEObjectJSON(
                 JSONObjectUtils.getBase64URL(jsonObject, "protected"),
                 JWERecipient.parse(JSONObjectUtils.getJSONObjectArray(jsonObject, "recipients")),

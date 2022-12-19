@@ -5,7 +5,7 @@ import com.nimbusds.jose.JOSEException
 import com.nimbusds.jose.JOSEObjectType
 import com.nimbusds.jose.JWEAlgorithm
 import com.nimbusds.jose.JWEHeader
-import com.nimbusds.jose.JWEObjectJSON
+import org.didcommx.didcomm.jose.JWEObjectJSON
 import com.nimbusds.jose.Payload
 import com.nimbusds.jose.UnprotectedHeader
 import com.nimbusds.jose.jwk.ECKey
