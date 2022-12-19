@@ -12,8 +12,6 @@ import com.nimbusds.jose.crypto.ECDH1PUDecrypterMulti
 import com.nimbusds.jose.crypto.ECDH1PUEncrypterMulti
 import com.nimbusds.jose.crypto.ECDH1PUX25519DecrypterMulti
 import com.nimbusds.jose.crypto.ECDH1PUX25519EncrypterMulti
-import com.nimbusds.jose.crypto.ECDHDecrypterMulti
-import com.nimbusds.jose.crypto.ECDHEncrypterMulti
 import com.nimbusds.jose.crypto.X25519DecrypterMulti
 import com.nimbusds.jose.crypto.X25519EncrypterMulti
 import com.nimbusds.jose.jwk.ECKey
@@ -30,6 +28,8 @@ import org.didcommx.didcomm.exceptions.MalformedMessageException
 import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.exceptions.UnsupportedCurveException
 import org.didcommx.didcomm.exceptions.UnsupportedJWKException
+import org.didcommx.didcomm.jose.crypto.ECDHDecrypterMulti
+import org.didcommx.didcomm.jose.crypto.ECDHEncrypterMulti
 import org.didcommx.didcomm.utils.asKeys
 import org.didcommx.didcomm.utils.calculateAPV
 
