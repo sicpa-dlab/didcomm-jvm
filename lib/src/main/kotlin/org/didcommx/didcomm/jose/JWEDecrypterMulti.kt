@@ -19,7 +19,6 @@ package org.didcommx.didcomm.jose
 import com.nimbusds.jose.JOSEException
 import com.nimbusds.jose.JWEHeader
 import com.nimbusds.jose.JWEProvider
-import com.nimbusds.jose.JWERecipient
 import com.nimbusds.jose.util.Base64URL
 
 /**

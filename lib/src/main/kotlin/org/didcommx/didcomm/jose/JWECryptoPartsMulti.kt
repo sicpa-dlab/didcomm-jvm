@@ -17,9 +17,9 @@
 package org.didcommx.didcomm.jose
 
 import com.nimbusds.jose.JWEHeader
-import com.nimbusds.jose.JWERecipient
 import com.nimbusds.jose.util.Base64URL
 import net.jcip.annotations.Immutable
+import java.util.stream.Collectors
 
 /**
  * The cryptographic parts of a JSON Web Encryption (JWE) object.
@@ -29,115 +29,36 @@ import net.jcip.annotations.Immutable
  */
 @Immutable
 class JWECryptoPartsMulti {
-    /**
-     * Gets the modified JWE header.
-     *
-     * @return The modified JWE header, `null` of not.
-     */
+
     /**
      * The modified JWE header (optional).
      */
     val header: JWEHeader?
-    /**
-     * Gets the encrypted key.
-     *
-     * @return The encrypted key, `null` if not required by
-     * the JWE algorithm or `recipients` are specified.
-     */
+
     /**
      * The encrypted key (optional).
      */
     val encryptedKey: Base64URL?
-    /**
-     * Gets the initialisation vector (IV).
-     *
-     * @return The initialisation vector (IV), `null` if not required
-     * by the JWE algorithm.
-     */
+
     /**
      * The initialisation vector (optional).
      */
     val initializationVector: Base64URL?
-    /**
-     * Gets the cipher text.
-     *
-     * @return The cipher text.
-     */
+
     /**
      * The cipher text.
      */
     val cipherText: Base64URL
-    /**
-     * Gets the authentication tag.
-     *
-     * @return The authentication tag, `null` if the encryption
-     * algorithm provides built-in integrity checking.
-     */
+
     /**
      * The authentication tag (optional).
      */
     val authenticationTag: Base64URL?
-    /**
-     * Gets the JWE recipients.
-     *
-     * @return The JWE recipients, `null` if not required by the JWE
-     * algorithm or an `encryptedKey` is specified.
-     */
+
     /**
      * The recipients (optional)
      */
     val recipients: List<JWERecipient>?
-
-    /**
-     * Creates a new cryptographic JWE parts instance.
-     *
-     * @param encryptedKey      The encrypted key, `null` if not
-     * required by the encryption algorithm.
-     * @param iv                The initialisation vector (IV),
-     * `null` if not required by the
-     * encryption algorithm.
-     * @param cipherText        The cipher text. Must not be `null`.
-     * @param authenticationTag The authentication tag, `null` if the
-     * JWE algorithm provides built-in integrity
-     * check.
-     */
-    constructor(
-        encryptedKey: Base64URL?,
-        iv: Base64URL?,
-        cipherText: Base64URL?,
-        authenticationTag: Base64URL?
-    ) : this(null, encryptedKey, iv, cipherText, authenticationTag)
-
-    /**
-     * Creates a new cryptographic JWE parts instance.
-     *
-     * @param header            The modified JWE header, `null` if
-     * not.
-     * @param encryptedKey      The encrypted key, `null` if not
-     * required by the encryption algorithm.
-     * @param iv                The initialisation vector (IV),
-     * `null` if not required by the
-     * encryption algorithm.
-     * @param cipherText        The cipher text. Must not be `null`.
-     * @param authenticationTag The authentication tag, `null` if the
-     * JWE algorithm provides built-in integrity
-     * check.
-     */
-    constructor(
-        header: JWEHeader?,
-        encryptedKey: Base64URL?,
-        iv: Base64URL?,
-        cipherText: Base64URL?,
-        authenticationTag: Base64URL?
-    ) {
-        this.header = header
-        this.encryptedKey = encryptedKey
-        initializationVector = iv
-        requireNotNull(cipherText) { "The cipher text must not be null" }
-        this.cipherText = cipherText
-        this.authenticationTag = authenticationTag
-        recipients = null
-    }
 
     /**
      * Creates a new cryptographic JWE parts instance.
@@ -158,16 +79,15 @@ class JWECryptoPartsMulti {
         header: JWEHeader?,
         recipients: List<JWERecipient>?,
         iv: Base64URL?,
-        cipherText: Base64URL?,
+        cipherText: Base64URL,
         authenticationTag: Base64URL?
     ) {
         this.header = header
-        encryptedKey = null
-        initializationVector = iv
-        requireNotNull(cipherText) { "The cipher text must not be null" }
+        this.initializationVector = iv
         this.cipherText = cipherText
         this.authenticationTag = authenticationTag
         this.recipients = recipients
+        encryptedKey = null
     }
 
     /**
@@ -181,6 +101,6 @@ class JWECryptoPartsMulti {
         initializationVector = parts.initializationVector
         cipherText = parts.cipherText
         authenticationTag = parts.authenticationTag
-        recipients = parts.recipients
+        recipients = null
     }
 }

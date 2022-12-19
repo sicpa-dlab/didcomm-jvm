@@ -18,7 +18,7 @@ import org.didcommx.didcomm.mock.Mediator2SecretResolverMock
 import org.didcommx.didcomm.mock.SecretResolverInMemoryMock
 import org.didcommx.didcomm.secret.Secret
 
-enum class Person(num: Int) {
+enum class Person(val num: Int) {
     ALICE(1),
     BOB(2),
     CHARLIE(3),
@@ -26,7 +26,7 @@ enum class Person(num: Int) {
     MEDIATOR2(5)
 }
 
-enum class KeyAgreementCurveType(num: Int) {
+enum class KeyAgreementCurveType(val num: Int) {
     ALL(0),
     X25519(1),
     P256(2),

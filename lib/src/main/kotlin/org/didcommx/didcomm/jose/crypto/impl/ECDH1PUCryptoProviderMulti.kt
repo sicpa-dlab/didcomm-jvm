@@ -6,6 +6,7 @@ import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jose.util.Pair
 import org.didcommx.didcomm.jose.JWECryptoPartsMulti
+import org.didcommx.didcomm.jose.JWERecipient
 import java.util.*
 import javax.crypto.SecretKey
 
@@ -69,7 +70,7 @@ abstract class ECDH1PUCryptoProviderMulti(curve: Curve) : ECDH1PUCryptoProvider(
             var encryptedKey: Base64URL? = null
             if (recipients != null) {
                 for (recipient in recipients) {
-                    if (recipient.header == null) continue
+                    // if (recipient.header == null) continue
                     if (kid == recipient.header.keyID) {
                         encryptedKey = recipient.encryptedKey
                         break
@@ -87,7 +88,7 @@ abstract class ECDH1PUCryptoProviderMulti(curve: Curve) : ECDH1PUCryptoProvider(
         clearText: ByteArray?,
         contentEncryptionKey: SecretKey?
     ): JWECryptoPartsMulti {
-        val nimparts = super.encryptWithZ(header, Z, clearText, contentEncryptionKey)
-        return JWECryptoPartsMulti(nimparts)
+        val parts = super.encryptWithZ(header, Z, clearText, contentEncryptionKey)
+        return JWECryptoPartsMulti(parts)
     }
 }

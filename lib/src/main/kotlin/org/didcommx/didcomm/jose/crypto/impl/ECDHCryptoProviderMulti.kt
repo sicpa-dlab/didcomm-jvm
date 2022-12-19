@@ -9,6 +9,7 @@ import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jose.util.Pair
 import org.didcommx.didcomm.jose.JWECryptoPartsMulti
+import org.didcommx.didcomm.jose.JWERecipient
 import java.util.*
 import javax.crypto.SecretKey
 
@@ -72,7 +73,7 @@ abstract class ECDHCryptoProviderMulti(curve: Curve) : ECDHCryptoProvider(curve)
             var encryptedKey: Base64URL? = null
             if (recipients != null) {
                 for (recipient in recipients) {
-                    if (recipient.header == null) continue
+                    // if (recipient.header == null) continue
                     if (kid == recipient.header.keyID) {
                         encryptedKey = recipient.encryptedKey
                         break

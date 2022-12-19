@@ -25,6 +25,7 @@ import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jose.util.Pair
 import net.jcip.annotations.ThreadSafe
 import org.didcommx.didcomm.jose.JWEDecrypterMulti
+import org.didcommx.didcomm.jose.JWERecipient
 import org.didcommx.didcomm.jose.crypto.impl.ECDHCryptoProviderMulti
 import java.util.*
 import javax.crypto.SecretKey
