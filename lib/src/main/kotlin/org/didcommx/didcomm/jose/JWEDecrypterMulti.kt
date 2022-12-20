@@ -27,6 +27,7 @@ import com.nimbusds.jose.util.Base64URL
  *
  *
  * @author Alexander Martynov
+ * @author Thomas Diesler <tdiesler@redhat.com>
  * @version 2021-08-19
  */
 interface JWEDecrypterMulti : JWEProvider {

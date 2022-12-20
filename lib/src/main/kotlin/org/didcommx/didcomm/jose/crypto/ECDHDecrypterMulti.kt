@@ -16,7 +16,10 @@
  */
 package org.didcommx.didcomm.jose.crypto
 
-import com.nimbusds.jose.*
+import com.nimbusds.jose.CriticalHeaderParamsAware
+import com.nimbusds.jose.JOSEException
+import com.nimbusds.jose.JWEHeader
+import com.nimbusds.jose.UnprotectedHeader
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral
 import com.nimbusds.jose.crypto.impl.ECDH
 import com.nimbusds.jose.crypto.utils.ECChecks
@@ -28,7 +31,6 @@ import net.jcip.annotations.ThreadSafe
 import org.didcommx.didcomm.jose.JWEDecrypterMulti
 import org.didcommx.didcomm.jose.JWERecipient
 import org.didcommx.didcomm.jose.crypto.impl.ECDHCryptoProviderMulti
-import java.util.*
 import javax.crypto.SecretKey
 
 /**
@@ -79,6 +81,7 @@ import javax.crypto.SecretKey
  *
  *
  * @author Alexander Martynov
+ * @author Thomas Diesler <tdiesler@redhat.com>
  * @version 2021-08-19
  */
 
@@ -100,7 +103,7 @@ class ECDHDecrypterMulti(private val recipients: List<Pair<UnprotectedHeader, EC
      * The supported EC JWK curves by the ECDH crypto provider class.
      */
     companion object {
-        val SUPPORTED_ELLIPTIC_CURVES= setOf(Curve.P_256, Curve.P_384, Curve.P_521)
+        val SUPPORTED_ELLIPTIC_CURVES: Set<Curve> = setOf(Curve.P_256, Curve.P_384, Curve.P_521)
     }
 
     /**

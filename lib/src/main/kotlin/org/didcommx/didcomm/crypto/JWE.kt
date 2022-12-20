@@ -5,7 +5,6 @@ import com.nimbusds.jose.JOSEException
 import com.nimbusds.jose.JOSEObjectType
 import com.nimbusds.jose.JWEAlgorithm
 import com.nimbusds.jose.JWEHeader
-import org.didcommx.didcomm.jose.JWEObjectJSON
 import com.nimbusds.jose.Payload
 import com.nimbusds.jose.UnprotectedHeader
 import com.nimbusds.jose.jwk.ECKey
@@ -22,6 +21,7 @@ import org.didcommx.didcomm.exceptions.MalformedMessageException
 import org.didcommx.didcomm.exceptions.UnsupportedAlgorithm
 import org.didcommx.didcomm.exceptions.UnsupportedCurveException
 import org.didcommx.didcomm.exceptions.UnsupportedJWKException
+import org.didcommx.didcomm.jose.JWEObjectJSON
 import org.didcommx.didcomm.jose.crypto.ECDH1PUDecrypterMulti
 import org.didcommx.didcomm.jose.crypto.ECDH1PUEncrypterMulti
 import org.didcommx.didcomm.jose.crypto.ECDH1PUX25519DecrypterMulti

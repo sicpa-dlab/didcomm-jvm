@@ -1,9 +1,9 @@
 package org.didcommx.didcomm.crypto
 
 import com.nimbusds.jose.JOSEException
-import org.didcommx.didcomm.jose.JWEObjectJSON
 import com.nimbusds.jose.JWSObjectJSON
 import org.didcommx.didcomm.exceptions.MalformedMessageException
+import org.didcommx.didcomm.jose.JWEObjectJSON
 import org.didcommx.didcomm.message.Message
 import java.text.ParseException
 

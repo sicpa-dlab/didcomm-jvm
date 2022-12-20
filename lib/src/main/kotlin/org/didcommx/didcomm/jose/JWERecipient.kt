@@ -34,6 +34,7 @@ import java.text.ParseException
  *
  * @author Alexander Martynov
  * @author Vladimir Dzhuvinov
+ * @author Thomas Diesler <tdiesler@redhat.com>
  * @version 2021-09-30
  */
 

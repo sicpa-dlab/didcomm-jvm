@@ -25,6 +25,7 @@ import com.nimbusds.jose.JWEProvider
  * It should be used only for General JSON Serialization [JWEObjectJSON].
  *
  * @author Alexander Martynov
+ * @author Thomas Diesler <tdiesler@redhat.com>
  * @version 2021-08-19
  */
 interface JWEEncrypterMulti : JWEProvider {

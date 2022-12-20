@@ -19,12 +19,12 @@ package org.didcommx.didcomm.jose
 import com.nimbusds.jose.JWEHeader
 import com.nimbusds.jose.util.Base64URL
 import net.jcip.annotations.Immutable
-import java.util.stream.Collectors
 
 /**
  * The cryptographic parts of a JSON Web Encryption (JWE) object.
  *
  * @author Vladimir Dzhuvinov
+ * @author Thomas Diesler <tdiesler@redhat.com>
  * @version 2021-09-30
  */
 @Immutable
