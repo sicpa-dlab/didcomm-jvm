@@ -82,7 +82,7 @@ jobs:
 
         # XXX do we need that here
       - name: Set up JDK 8
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: 8
@@ -150,7 +150,7 @@ jobs:
     if: github.ref != 'refs/heads/stable' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: set SNAPSHOT version
         run: |
@@ -162,7 +162,7 @@ jobs:
 
         # XXX do we need that here
       - name: Set up JDK 8
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: 8
