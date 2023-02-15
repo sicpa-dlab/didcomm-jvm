@@ -16,7 +16,7 @@ jobs:
         run: |
           version="$(gradle -q version)"
           echo "$version"
-          echo "::set-output name=current_version::$version"
+          echo "current_version=$version" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Check version format
@@ -31,7 +31,7 @@ jobs:
         run: |
           release_info="$(curl -s https://api.github.com/repos/${{ github.repository }}/releases \
               | jq '.[] | select(.name == "v${{ steps.current_version.outputs.current_version }}")')"
-          echo "::set-output name=release_info::$release_info"
+          echo "release_info=$release_info" >> $GITHUB_OUTPUT
           echo "$release_info"
         shell: bash
 

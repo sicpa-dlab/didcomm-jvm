@@ -34,15 +34,15 @@ jobs:
         run: |
           group="$(gradle -q group)"
           echo "$group"
-          echo "::set-output name=proj_group::$group"
+          echo "proj_group=$group" >> $GITHUB_OUTPUT
 
           artifactId="$(gradle -q artifactId)"
           echo "$artifactId"
-          echo "::set-output name=proj_artifactId::$artifactId"
+          echo "proj_artifactId=$artifactId" >> $GITHUB_OUTPUT
 
           version="$(gradle -q version)"
           echo "$version"
-          echo "::set-output name=current_version::$version"
+          echo "current_version=$version" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Get release info
@@ -50,16 +50,16 @@ jobs:
         run: |
           release_info="$(curl -s https://api.github.com/repos/${{ github.repository }}/releases \
               | jq '.[] | select(.name == "v${{ steps.proj_meta.outputs.current_version }}")')"
-          echo "::set-output name=release_info::$release_info"
+          echo "release_info=$release_info" >> $GITHUB_OUTPUT
           echo "$release_info"
 
           asset_jar_url="$(echo "$release_info" \
               | jq -r '.assets[] | select(.name | match("^${{ steps.proj_meta.outputs.proj_artifactId }}.*\\.jar$")) | .browser_download_url')"
-          echo "::set-output name=asset_jar_url::$asset_jar_url"
+          echo "asset_jar_url=$asset_jar_url" >> $GITHUB_OUTPUT
           echo "$asset_jar_url"
 
           upload_url="$(echo "$release_info" | jq -r '.upload_url')"
-          echo "::set-output name=upload_url::$upload_url"
+          echo "upload_url=$upload_url" >> $GITHUB_OUTPUT
           echo "$upload_url"
         shell: bash
 
@@ -69,7 +69,7 @@ jobs:
           out="$(curl -s 'https://search.maven.org/solrsearch/select?q=a:${{ steps.proj_meta.outputs.proj_artifactId }}+AND+g:${{ steps.proj_meta.outputs.proj_group }}+AND+v:${{ steps.proj_meta.outputs.current_version }}&wt=json'  \
                | jq -r '.response | .docs[] | .v')"
           echo "in maven check: $out"
-          echo "::set-output name=already_in_maven::$out"
+          echo "already_in_maven=$out" >> $GITHUB_OUTPUT
         shell: bash {0}  # to opt-out of default fail-fast behavior
 
   release:
@@ -94,7 +94,7 @@ jobs:
           gradle jar
           ls lib/build/libs
           asset_jar_name="$(find lib/build/libs -name '*${{ steps.proj_meta.outputs.current_version }}.jar' -printf '%f')"
-          echo "::set-output name=asset_jar_name::$asset_jar_name"
+          echo "asset_jar_name=$asset_jar_name" >> $GITHUB_OUTPUT
         shell: bash
           
       - name: Create GutHub Release
@@ -112,9 +112,9 @@ jobs:
         if: ${{ !needs.checks.outputs.asset_jar_url }}
         run: |
           if [[ -n "${{ needs.checks.outputs.upload_url }}" ]]; then
-            echo "::set-output name=value::${{ needs.checks.outputs.upload_url }}"
+            echo "value=${{ needs.checks.outputs.upload_url }}" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=value::${{ steps.create_release.outputs.upload_url }}"
+            echo "value=${{ steps.create_release.outputs.upload_url }}" >> $GITHUB_OUTPUT
           fi
 
       # XXX ??? do we actually need that
