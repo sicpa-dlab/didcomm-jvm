@@ -108,11 +108,11 @@ private fun ParseResult.JWE.authUnpack(
     )
         throw MalformedMessageException("apu is not equal to skid")
 
-    val sender = message.header?.senderKeyID
+    val sender = message.header.senderKeyID
         ?: message.header.agreementPartyUInfo.decodeToString()
         ?: throw MalformedMessageException("The \"skid\" header must be present")
 
-    val recipients = message.recipients?.mapNotNull { it?.header?.keyID }
+    val recipients = message.recipients?.mapNotNull { it.header.keyID }
         ?: throw MalformedMessageException("JWE Unprotected Per-Recipient header must be present")
 
     if (message.header.agreementPartyVInfo != null &&
@@ -149,7 +149,7 @@ private fun ParseResult.JWE.anonUnpack(
     )
         throw MalformedMessageException("apu is not equal to skid")
 
-    val recipients = message.recipients?.mapNotNull { it?.header?.keyID }
+    val recipients = message.recipients?.mapNotNull { it.header.keyID }
         ?: throw MalformedMessageException("JWE Unprotected Per-Recipient header must be present")
 
     if (message.header.agreementPartyVInfo != null &&
