@@ -1,6 +1,10 @@
 package org.didcommx.didcomm.diddoc
 
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import org.didcommx.didcomm.common.VerificationMaterial
+import org.didcommx.didcomm.common.VerificationMaterialFormat
 import org.didcommx.didcomm.common.VerificationMethodType
 import org.didcommx.didcomm.exceptions.DIDDocException
 import org.didcommx.didcomm.exceptions.DIDUrlNotFoundException
@@ -28,11 +32,17 @@ data class DIDDoc(
     val verificationMethods: List<VerificationMethod>,
     val didCommServices: List<DIDCommService>
 ) {
+    companion object {
+        fun fromJson(doc: String): DIDDoc = DIDDocDecoder.decodeJson(doc)
+    }
+
     fun findVerificationMethod(id: String): VerificationMethod = verificationMethods.find { it.id == id }
         ?: throw DIDUrlNotFoundException(id, did)
 
     fun findDIDCommService(id: String): DIDCommService = didCommServices.find { it.id == id }
         ?: throw DIDDocException("DIDComm service '$id' not found in DID Doc '$did'")
+
+    fun encodeJson(pretty: Boolean = false): String = DIDDocEncoder.encodeJson(this, pretty)
 }
 
 /**
@@ -66,3 +76,184 @@ data class DIDCommService(
     val routingKeys: List<String>,
     val accept: List<String>?
 )
+
+object DIDDocEncoder {
+
+    private val gson get() = GsonBuilder().create()
+    private val gsonPretty get() = GsonBuilder().setPrettyPrinting().create()
+
+    /**
+     * Encode according to
+     * https://www.w3.org/TR/did-core/#did-document-properties
+     */
+    fun encodeJson(doc: DIDDoc, pretty: Boolean = false): String {
+        val jsonObj = JsonObject()
+
+        // id
+        jsonObj.addProperty("id", doc.did)
+
+        // authentication
+        if (doc.authentications.isNotEmpty()) {
+            val authentication = doc.authentications.fold(JsonArray()) { arr, el -> arr.add(el); arr }
+            jsonObj.add("authentication", authentication)
+        }
+
+        // keyAgreement
+        if (doc.keyAgreements.isNotEmpty()) {
+            val keyAgreement = doc.keyAgreements.fold(JsonArray()) { arr, el -> arr.add(el); arr }
+            jsonObj.add("keyAgreement", keyAgreement)
+        }
+
+        // verificationMethod
+        if (doc.verificationMethods.isNotEmpty()) {
+            val verificationMethod = doc.verificationMethods.fold(JsonArray()) { arr, el -> arr.add(encodeVerificationMethod(el)); arr }
+            jsonObj.add("verificationMethod", verificationMethod)
+        }
+
+        // service
+        if (doc.didCommServices.isNotEmpty()) {
+            val service = doc.didCommServices.fold(JsonArray()) { arr, el -> arr.add(encodeDidCommService(el)); arr }
+            jsonObj.add("service", service)
+        }
+
+        return if (pretty)
+            gsonPretty.toJson(jsonObj)
+        else
+            gson.toJson(jsonObj)
+    }
+
+    private fun encodeVerificationMethod(vm: VerificationMethod): JsonObject {
+        val jsonObj = JsonObject()
+
+        // id
+        jsonObj.addProperty("id", vm.id)
+
+        // type
+        jsonObj.addProperty("type", when(vm.type) {
+            VerificationMethodType.ED25519_VERIFICATION_KEY_2018 -> "Ed25519VerificationKey2018"
+            VerificationMethodType.ED25519_VERIFICATION_KEY_2020 -> "Ed25519VerificationKey2020"
+            VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2019 -> "X25519KeyAgreementKey2019"
+            VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2020 -> "X25519KeyAgreementKey2020"
+            VerificationMethodType.JSON_WEB_KEY_2020 -> "JsonWebKey2020"
+            VerificationMethodType.OTHER -> throw IllegalStateException("Unsupported verification type: ${vm.type}")
+        })
+
+        // controller
+        jsonObj.addProperty("controller", vm.controller)
+
+        // verification material
+        val materialFormat = vm.verificationMaterial.format
+        val materialValue = vm.verificationMaterial.value
+        when(materialFormat) {
+            VerificationMaterialFormat.JWK -> {
+                jsonObj.add("publicKeyJwk", gson.fromJson(materialValue, JsonObject::class.java))
+            }
+            VerificationMaterialFormat.BASE58 -> {
+                jsonObj.addProperty("publicKeyBase58", materialValue)
+            }
+            VerificationMaterialFormat.MULTIBASE -> {
+                jsonObj.addProperty("publicKeyMultibase", materialValue)
+            }
+            VerificationMaterialFormat.OTHER -> throw IllegalStateException("Unsupported verification material: ${materialFormat}")
+        }
+        return jsonObj
+    }
+
+    private fun encodeDidCommService(srv: DIDCommService): JsonObject {
+        val jsonObj = JsonObject()
+
+        // id
+        jsonObj.addProperty("id", srv.id)
+
+        // type
+        jsonObj.addProperty("type", "DIDCommMessaging")
+
+        // accept
+        if (srv.accept?.isNotEmpty() == true) {
+            val accept = srv.accept.fold(JsonArray()) { arr, el -> arr.add(el); arr }
+            jsonObj.add("accept", accept)
+        }
+
+        // routingKeys
+        if (srv.routingKeys.isNotEmpty()) {
+            val routingKeys = srv.routingKeys.fold(JsonArray()) { arr, el -> arr.add(el); arr }
+            jsonObj.add("routingKeys", routingKeys)
+        }
+
+        // serviceEndpoint
+        jsonObj.addProperty("serviceEndpoint", srv.serviceEndpoint)
+
+        return jsonObj
+    }
+}
+
+object DIDDocDecoder {
+
+    private val gson get() = GsonBuilder().create()
+
+    /**
+     * Decode according to
+     * https://www.w3.org/TR/did-core/#did-document-properties
+     */
+    fun decodeJson(doc: String): DIDDoc {
+        val jsonObj = gson.fromJson(doc, JsonObject::class.java)
+
+        // id
+        val id = jsonObj["id"].asString
+
+        // keyAgreement
+        val keyAgreements = jsonObj.get("keyAgreement")
+            ?.let { it.asJsonArray.map { el -> el.asString }}
+            ?: listOf()
+
+        // authentication
+        val authentications = jsonObj.get("authentication")
+            ?.let { it.asJsonArray.map { el -> el.asString }}
+            ?: listOf()
+
+        // verificationMethod
+        val verificationMethods = jsonObj.get("verificationMethod")
+            ?.let { it.asJsonArray.map { el -> decodeVerificationMethod(el.asJsonObject) }}
+            ?: listOf()
+
+        // service
+        val didCommServices = jsonObj.get("service")
+            ?.let { it.asJsonArray.map { el -> decodeDIDCommService(el.asJsonObject) }}
+            ?: listOf()
+
+        return DIDDoc(
+            did = id,
+            keyAgreements = keyAgreements,
+            authentications = authentications,
+            verificationMethods = verificationMethods,
+            didCommServices = didCommServices)
+    }
+
+    private fun decodeVerificationMethod(obj: JsonObject): VerificationMethod {
+        val id = obj["id"].asString
+        val methodType = when(val type = obj["type"].asString) {
+            "Ed25519VerificationKey2018" -> VerificationMethodType.ED25519_VERIFICATION_KEY_2018
+            "Ed25519VerificationKey2020" -> VerificationMethodType.ED25519_VERIFICATION_KEY_2020
+            "X25519KeyAgreementKey2019" -> VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2019
+            "X25519KeyAgreementKey2020" -> VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2020
+            "JsonWebKey2020" -> VerificationMethodType.JSON_WEB_KEY_2020
+            else -> throw IllegalStateException("Unsupported verification type: $type")
+        }
+        val material = when {
+            obj["publicKeyJwk"] != null -> VerificationMaterial(VerificationMaterialFormat.JWK, gson.toJson(obj["publicKeyJwk"]))
+            obj["publicKeyBase58"] != null -> VerificationMaterial(VerificationMaterialFormat.BASE58, obj["publicKeyBase58"].asString)
+            obj["publicKeyMultibase"] != null -> VerificationMaterial(VerificationMaterialFormat.MULTIBASE, obj["publicKeyMultibase"].asString)
+            else -> throw IllegalStateException("Unsupported verification material: $obj")
+        }
+        val controller = obj["controller"].asString
+        return VerificationMethod(id, methodType, material, controller)
+    }
+
+    private fun decodeDIDCommService(obj: JsonObject): DIDCommService {
+        val id = obj["id"].asString
+        val serviceEndpoint = obj["serviceEndpoint"].asString
+        val accept = obj["accept"]?.let { it.asJsonArray.map { el -> el.asString }} ?: listOf()
+        val routingKeys = obj["routingKeys"]?.let { it.asJsonArray.map { el -> el.asString }} ?: listOf()
+        return DIDCommService(id, serviceEndpoint, routingKeys, accept)
+    }
+}
