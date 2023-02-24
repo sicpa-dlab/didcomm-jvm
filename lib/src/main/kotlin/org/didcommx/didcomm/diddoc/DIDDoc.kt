@@ -12,12 +12,24 @@ import org.didcommx.didcomm.exceptions.DIDUrlNotFoundException
 /**
  * DID DOC (https://www.w3.org/TR/did-core/#dfn-did-documents)
  * @property did                    a DID for the given DID Doc
- * @property keyAgreements          Key IDs (DID URLs) of all verification methods from the 'keyAgreement'
- *                                  verification relationship in this DID DOC.
- *                                  See https://www.w3.org/TR/did-core/#verification-methods.
  * @property authentications        Key IDs (DID URLs) of all verification methods from the 'authentication'
  *                                  verification relationship in this DID DOC.
- See https://www.w3.org/TR/did-core/#authentication.
+ *                                  See https://www.w3.org/TR/did-core/#authentication.
+ * @property assertionMethods       Key IDs (DID URLs) of all verification methods from the 'assertionMethod'
+ *                                  verification relationship in this DID DOC.
+ *                                  See https://www.w3.org/TR/did-core/#assertion
+ * @property keyAgreements          Key IDs (DID URLs) of all verification methods from the 'keyAgreement'
+ *                                  verification relationship in this DID DOC.
+ *                                  See https://www.w3.org/TR/did-core/#key-agreement
+ * @property capabilityInvocations  Key IDs (DID URLs) of all verification methods from the 'capabilityInvocation'
+ *                                  verification relationship in this DID DOC.
+ *                                  See https://www.w3.org/TR/did-core/#capability-invocation
+ * @property capabilityDelegations  Key IDs (DID URLs) of all verification methods from the 'capabilityDelegation'
+ *                                  verification relationship in this DID DOC.
+ *                                  See https://www.w3.org/TR/did-core/#capability-delegation
+ * @property keyAgreements          Key IDs (DID URLs) of all verification methods from the 'keyAgreement'
+ *                                  verification relationship in this DID DOC.
+ *                                  See https://www.w3.org/TR/did-core/#key-agreement
  * @property verificationMethods    Returns all local verification methods including embedded
  *                                  to key agreement and authentication sections.
  *                                  See https://www.w3.org/TR/did-core/#verification-methods.
@@ -27,11 +39,31 @@ import org.didcommx.didcomm.exceptions.DIDUrlNotFoundException
  */
 data class DIDDoc(
     val did: String,
-    val keyAgreements: List<String>,
     val authentications: List<String>,
+    val assertionMethods: List<String>,
+    val keyAgreements: List<String>,
+    val capabilityInvocations: List<String>,
+    val capabilityDelegations: List<String>,
     val verificationMethods: List<VerificationMethod>,
     val didCommServices: List<DIDCommService>
 ) {
+    @Deprecated("Deprecated constructor", ReplaceWith("Primary constructor including `assertionMethods`, `capabilityInvocations`, `capabilityDelegations`"))
+    constructor(
+        did: String,
+        keyAgreements: List<String>,
+        authentications: List<String>,
+        verificationMethods: List<VerificationMethod>,
+        didCommServices: List<DIDCommService>) : this(
+        did = did,
+        authentications = authentications,
+        assertionMethods = listOf(),        // empty assertionMethods
+        keyAgreements = keyAgreements,
+        capabilityInvocations = listOf(),   // empty capabilityInvocations
+        capabilityDelegations = listOf(),   // empty capabilityDelegations
+        verificationMethods = verificationMethods,
+        didCommServices = didCommServices
+    )
+
     companion object {
         fun fromJson(doc: String): DIDDoc = DIDDocDecoder.decodeJson(doc)
     }
@@ -98,10 +130,28 @@ object DIDDocEncoder {
             jsonObj.add("authentication", authentication)
         }
 
+        // assertionMethod
+        if (doc.assertionMethods.isNotEmpty()) {
+            val assertionMethod = doc.assertionMethods.fold(JsonArray()) { arr, el -> arr.add(el); arr }
+            jsonObj.add("assertionMethod", assertionMethod)
+        }
+
         // keyAgreement
         if (doc.keyAgreements.isNotEmpty()) {
             val keyAgreement = doc.keyAgreements.fold(JsonArray()) { arr, el -> arr.add(el); arr }
             jsonObj.add("keyAgreement", keyAgreement)
+        }
+
+        // capabilityInvocation
+        if (doc.capabilityInvocations.isNotEmpty()) {
+            val capabilityInvocation = doc.capabilityInvocations.fold(JsonArray()) { arr, el -> arr.add(el); arr }
+            jsonObj.add("capabilityInvocation", capabilityInvocation)
+        }
+
+        // capabilityDelegation
+        if (doc.capabilityDelegations.isNotEmpty()) {
+            val capabilityDelegation = doc.capabilityDelegations.fold(JsonArray()) { arr, el -> arr.add(el); arr }
+            jsonObj.add("capabilityDelegation", capabilityDelegation)
         }
 
         // verificationMethod
@@ -135,7 +185,7 @@ object DIDDocEncoder {
             VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2019 -> "X25519KeyAgreementKey2019"
             VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2020 -> "X25519KeyAgreementKey2020"
             VerificationMethodType.JSON_WEB_KEY_2020 -> "JsonWebKey2020"
-            VerificationMethodType.OTHER -> throw IllegalStateException("Unsupported verification type: ${vm.type}")
+            else -> throw IllegalStateException("Unsupported verification type: ${vm.type}")
         })
 
         // controller
@@ -154,7 +204,7 @@ object DIDDocEncoder {
             VerificationMaterialFormat.MULTIBASE -> {
                 jsonObj.addProperty("publicKeyMultibase", materialValue)
             }
-            VerificationMaterialFormat.OTHER -> throw IllegalStateException("Unsupported verification material: ${materialFormat}")
+            else -> throw IllegalStateException("Unsupported verification material: $materialFormat")
         }
         return jsonObj
     }
@@ -201,13 +251,28 @@ object DIDDocDecoder {
         // id
         val id = jsonObj["id"].asString
 
+        // authentication
+        val authentications = jsonObj.get("authentication")
+            ?.let { it.asJsonArray.map { el -> el.asString }}
+            ?: listOf()
+
+        // assertionMethod
+        val assertionMethods = jsonObj.get("assertionMethod")
+            ?.let { it.asJsonArray.map { el -> el.asString }}
+            ?: listOf()
+
         // keyAgreement
         val keyAgreements = jsonObj.get("keyAgreement")
             ?.let { it.asJsonArray.map { el -> el.asString }}
             ?: listOf()
 
-        // authentication
-        val authentications = jsonObj.get("authentication")
+        // capabilityInvocations
+        val capabilityInvocations = jsonObj.get("capabilityInvocation")
+            ?.let { it.asJsonArray.map { el -> el.asString }}
+            ?: listOf()
+
+        // capabilityDelegation
+        val capabilityDelegations = jsonObj.get("capabilityDelegation")
             ?.let { it.asJsonArray.map { el -> el.asString }}
             ?: listOf()
 
@@ -223,10 +288,14 @@ object DIDDocDecoder {
 
         return DIDDoc(
             did = id,
-            keyAgreements = keyAgreements,
             authentications = authentications,
+            assertionMethods = assertionMethods,
+            keyAgreements = keyAgreements,
+            capabilityInvocations = capabilityInvocations,
+            capabilityDelegations = capabilityDelegations,
             verificationMethods = verificationMethods,
-            didCommServices = didCommServices)
+            didCommServices = didCommServices
+        )
     }
 
     private fun decodeVerificationMethod(obj: JsonObject): VerificationMethod {
