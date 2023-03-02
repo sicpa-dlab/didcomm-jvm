@@ -2,6 +2,7 @@ package org.didcommx.didcomm.diddoc
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import org.didcommx.didcomm.common.VerificationMaterial
 import org.didcommx.didcomm.common.VerificationMaterialFormat
@@ -12,29 +13,22 @@ import org.didcommx.didcomm.exceptions.DIDUrlNotFoundException
 /**
  * DID DOC (https://www.w3.org/TR/did-core/#dfn-did-documents)
  * @property did                    a DID for the given DID Doc
- * @property authentications        Key IDs (DID URLs) of all verification methods from the 'authentication'
- *                                  verification relationship in this DID DOC.
+ * @property authentications        The authentication property is OPTIONAL. If present, the associated value MUST be a set of one or more verification methods. Each verification method MAY be embedded or referenced.
  *                                  See https://www.w3.org/TR/did-core/#authentication.
- * @property assertionMethods       Key IDs (DID URLs) of all verification methods from the 'assertionMethod'
- *                                  verification relationship in this DID DOC.
+ * @property assertionMethods       The assertionMethod property is OPTIONAL. If present, the associated value MUST be a set of one or more verification methods. Each verification method MAY be embedded or referenced.
  *                                  See https://www.w3.org/TR/did-core/#assertion
- * @property keyAgreements          Key IDs (DID URLs) of all verification methods from the 'keyAgreement'
- *                                  verification relationship in this DID DOC.
+ * @property keyAgreements          The keyAgreement property is OPTIONAL. If present, the associated value MUST be a set of one or more verification methods. Each verification method MAY be embedded or referenced.
  *                                  See https://www.w3.org/TR/did-core/#key-agreement
- * @property capabilityInvocations  Key IDs (DID URLs) of all verification methods from the 'capabilityInvocation'
- *                                  verification relationship in this DID DOC.
+ * @property capabilityInvocations  The capabilityInvocation property is OPTIONAL. If present, the associated value MUST be a set of one or more verification methods. Each verification method MAY be embedded or referenced.
  *                                  See https://www.w3.org/TR/did-core/#capability-invocation
- * @property capabilityDelegations  Key IDs (DID URLs) of all verification methods from the 'capabilityDelegation'
- *                                  verification relationship in this DID DOC.
+ * @property capabilityDelegations  The capabilityDelegation property is OPTIONAL. If present, the associated value MUST be a set of one or more verification methods. Each verification method MAY be embedded or referenced.
  *                                  See https://www.w3.org/TR/did-core/#capability-delegation
- * @property keyAgreements          Key IDs (DID URLs) of all verification methods from the 'keyAgreement'
- *                                  verification relationship in this DID DOC.
- *                                  See https://www.w3.org/TR/did-core/#key-agreement
- * @property verificationMethods    Returns all local verification methods including embedded
- *                                  to key agreement and authentication sections.
+ * @property verificationMethods    The verificationMethod property is OPTIONAL. If present, the value MUST be a set of verification methods, where each verification method is expressed using a map.
+ *                                  The verification method map MUST include the id, type, controller, and specific verification material properties that are determined by the value of type and are defined in 5.2.1 Verification Material.
+ *                                  A verification method MAY include additional properties.
  *                                  See https://www.w3.org/TR/did-core/#verification-methods.
- * @property didCommServices        All services of 'DIDCommMessaging' type in this DID DOC.
- *                                  Empty list is returned if there are no services of 'DIDCommMessaging' type.
+ * @property didCommServices        The service property is OPTIONAL. If present, the associated value MUST be a set of services, where each service is described by a map.
+ *                                  Each service map MUST contain id, type, and serviceEndpoint properties. Each service extension MAY include additional properties and MAY further restrict the properties associated with the extension.
  *                                  See https://www.w3.org/TR/did-core/#services and https://identity.foundation/didcomm-messaging/spec/#did-document-service-endpoint.
  */
 data class DIDDoc(
@@ -47,6 +41,7 @@ data class DIDDoc(
     val verificationMethods: List<VerificationMethod>,
     val didCommServices: List<DIDCommService>
 ) {
+
     @Deprecated("Deprecated constructor", ReplaceWith("Primary constructor including `assertionMethods`, `capabilityInvocations`, `capabilityDelegations`"))
     constructor(
         did: String,
@@ -247,38 +242,53 @@ object DIDDocDecoder {
      */
     fun decodeJson(doc: String): DIDDoc {
         val jsonObj = gson.fromJson(doc, JsonObject::class.java)
+        val verificationMethods = mutableMapOf<String, VerificationMethod>()
+
+        /**
+         * Each verification method MAY be embedded or referenced.
+         */
+        fun asVerificationMethod(el: JsonElement): String {
+            return when {
+                el.isJsonObject -> {
+                    val method = decodeVerificationMethod(el.asJsonObject)
+                    verificationMethods[method.id] = method
+                    method.id
+                }
+                else -> el.asString
+            }
+        }
 
         // id
         val id = jsonObj["id"].asString
 
+        // verificationMethod
+        jsonObj.get("verificationMethod")?.also {
+            it.asJsonArray.forEach { el -> asVerificationMethod(el) }
+        }
+
         // authentication
         val authentications = jsonObj.get("authentication")
-            ?.let { it.asJsonArray.map { el -> el.asString }}
+            ?.let { it.asJsonArray.map { el -> asVerificationMethod(el) }}
             ?: listOf()
 
         // assertionMethod
         val assertionMethods = jsonObj.get("assertionMethod")
-            ?.let { it.asJsonArray.map { el -> el.asString }}
+            ?.let { it.asJsonArray.map { el -> asVerificationMethod(el) }}
             ?: listOf()
 
         // keyAgreement
         val keyAgreements = jsonObj.get("keyAgreement")
-            ?.let { it.asJsonArray.map { el -> el.asString }}
+            ?.let { it.asJsonArray.map { el -> asVerificationMethod(el) }}
             ?: listOf()
 
         // capabilityInvocations
         val capabilityInvocations = jsonObj.get("capabilityInvocation")
-            ?.let { it.asJsonArray.map { el -> el.asString }}
+            ?.let { it.asJsonArray.map { el -> asVerificationMethod(el) }}
             ?: listOf()
 
         // capabilityDelegation
         val capabilityDelegations = jsonObj.get("capabilityDelegation")
-            ?.let { it.asJsonArray.map { el -> el.asString }}
-            ?: listOf()
-
-        // verificationMethod
-        val verificationMethods = jsonObj.get("verificationMethod")
-            ?.let { it.asJsonArray.map { el -> decodeVerificationMethod(el.asJsonObject) }}
+            ?.let { it.asJsonArray.map { el -> asVerificationMethod(el) }}
             ?: listOf()
 
         // service
@@ -293,7 +303,7 @@ object DIDDocDecoder {
             keyAgreements = keyAgreements,
             capabilityInvocations = capabilityInvocations,
             capabilityDelegations = capabilityDelegations,
-            verificationMethods = verificationMethods,
+            verificationMethods = verificationMethods.values.toList(),
             didCommServices = didCommServices
         )
     }
