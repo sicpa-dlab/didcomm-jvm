@@ -19,7 +19,8 @@ class DIDDocEncodingTest {
             DID_DOC_MEDIATOR1_SPEC_TEST_VECTORS,
             DID_DOC_MEDIATOR1,
             DID_DOC_MEDIATOR2_SPEC_TEST_VECTORS,
-            DID_DOC_MEDIATOR2).forEach { doc ->
+            DID_DOC_MEDIATOR2
+        ).forEach { doc ->
 
             val encoded = doc.encodeJson(true)
             println { encoded }

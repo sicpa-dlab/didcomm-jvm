@@ -10,11 +10,19 @@ import org.didcommx.didcomm.common.VerificationMethodType
 import org.didcommx.didcomm.exceptions.DIDDocException
 import org.didcommx.didcomm.exceptions.DIDUrlNotFoundException
 
+const val DID_CONTEXT_URL: String = "https://www.w3.org/ns/did/v1"
+
 /**
  * DID DOC (https://www.w3.org/TR/did-core/#dfn-did-documents)
  * @property did                    a DID for the given DID Doc
+ * @property context                The JSON-LD Context is either a string or a list containing any combination of strings and/or ordered maps.
+ *                                  See https://www.w3.org/TR/did-core/#json-ld
+ * @property alsoKnownAs            The alsoKnownAs property is OPTIONAL. If present, the value MUST be a set where each item in the set is a URI.
+ *                                  See https://www.w3.org/TR/did-core/#also-known-as
+ * @property controller             The controller property is OPTIONAL. If present, the value MUST be a string or a set of strings that conform to the rules in 3.1 DID Syntax.
+ *                                  See https://www.w3.org/TR/did-core/#did-controller
  * @property authentications        The authentication property is OPTIONAL. If present, the associated value MUST be a set of one or more verification methods. Each verification method MAY be embedded or referenced.
- *                                  See https://www.w3.org/TR/did-core/#authentication.
+ *                                  See https://www.w3.org/TR/did-core/#authentication
  * @property assertionMethods       The assertionMethod property is OPTIONAL. If present, the associated value MUST be a set of one or more verification methods. Each verification method MAY be embedded or referenced.
  *                                  See https://www.w3.org/TR/did-core/#assertion
  * @property keyAgreements          The keyAgreement property is OPTIONAL. If present, the associated value MUST be a set of one or more verification methods. Each verification method MAY be embedded or referenced.
@@ -26,13 +34,16 @@ import org.didcommx.didcomm.exceptions.DIDUrlNotFoundException
  * @property verificationMethods    The verificationMethod property is OPTIONAL. If present, the value MUST be a set of verification methods, where each verification method is expressed using a map.
  *                                  The verification method map MUST include the id, type, controller, and specific verification material properties that are determined by the value of type and are defined in 5.2.1 Verification Material.
  *                                  A verification method MAY include additional properties.
- *                                  See https://www.w3.org/TR/did-core/#verification-methods.
+ *                                  See https://www.w3.org/TR/did-core/#verification-methods
  * @property didCommServices        The service property is OPTIONAL. If present, the associated value MUST be a set of services, where each service is described by a map.
  *                                  Each service map MUST contain id, type, and serviceEndpoint properties. Each service extension MAY include additional properties and MAY further restrict the properties associated with the extension.
- *                                  See https://www.w3.org/TR/did-core/#services and https://identity.foundation/didcomm-messaging/spec/#did-document-service-endpoint.
+ *                                  See https://www.w3.org/TR/did-core/#services and https://identity.foundation/didcomm-messaging/spec/#did-document-service-endpoint
  */
 data class DIDDoc(
     val did: String,
+    val context: List<String>,
+    val alsoKnownAs: List<String>,
+    val controller: List<String>,
     val authentications: List<String>,
     val assertionMethods: List<String>,
     val keyAgreements: List<String>,
@@ -48,13 +59,17 @@ data class DIDDoc(
         keyAgreements: List<String>,
         authentications: List<String>,
         verificationMethods: List<VerificationMethod>,
-        didCommServices: List<DIDCommService>) : this(
+        didCommServices: List<DIDCommService>
+    ) : this(
         did = did,
+        context = listOf(DID_CONTEXT_URL),
+        alsoKnownAs = listOf(),
+        controller = listOf(),
         authentications = authentications,
-        assertionMethods = listOf(),        // empty assertionMethods
+        assertionMethods = listOf(),
         keyAgreements = keyAgreements,
-        capabilityInvocations = listOf(),   // empty capabilityInvocations
-        capabilityDelegations = listOf(),   // empty capabilityDelegations
+        capabilityInvocations = listOf(),
+        capabilityDelegations = listOf(),
         verificationMethods = verificationMethods,
         didCommServices = didCommServices
     )
@@ -119,6 +134,24 @@ object DIDDocEncoder {
         // id
         jsonObj.addProperty("id", doc.did)
 
+        // context
+        if (doc.context.isNotEmpty()) {
+            val context = doc.context.fold(JsonArray()) { arr, el -> arr.add(el); arr }
+            jsonObj.add("@context", context)
+        }
+
+        // alsoKnownAs
+        if (doc.alsoKnownAs.isNotEmpty()) {
+            val alsoKnownAs = doc.alsoKnownAs.fold(JsonArray()) { arr, el -> arr.add(el); arr }
+            jsonObj.add("alsoKnownAs", alsoKnownAs)
+        }
+
+        // controller
+        if (doc.controller.isNotEmpty()) {
+            val controller = doc.controller.fold(JsonArray()) { arr, el -> arr.add(el); arr }
+            jsonObj.add("controller", controller)
+        }
+
         // authentication
         if (doc.authentications.isNotEmpty()) {
             val authentication = doc.authentications.fold(JsonArray()) { arr, el -> arr.add(el); arr }
@@ -174,14 +207,17 @@ object DIDDocEncoder {
         jsonObj.addProperty("id", vm.id)
 
         // type
-        jsonObj.addProperty("type", when(vm.type) {
-            VerificationMethodType.ED25519_VERIFICATION_KEY_2018 -> "Ed25519VerificationKey2018"
-            VerificationMethodType.ED25519_VERIFICATION_KEY_2020 -> "Ed25519VerificationKey2020"
-            VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2019 -> "X25519KeyAgreementKey2019"
-            VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2020 -> "X25519KeyAgreementKey2020"
-            VerificationMethodType.JSON_WEB_KEY_2020 -> "JsonWebKey2020"
-            else -> throw IllegalStateException("Unsupported verification type: ${vm.type}")
-        })
+        jsonObj.addProperty(
+            "type",
+            when (vm.type) {
+                VerificationMethodType.ED25519_VERIFICATION_KEY_2018 -> "Ed25519VerificationKey2018"
+                VerificationMethodType.ED25519_VERIFICATION_KEY_2020 -> "Ed25519VerificationKey2020"
+                VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2019 -> "X25519KeyAgreementKey2019"
+                VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2020 -> "X25519KeyAgreementKey2020"
+                VerificationMethodType.JSON_WEB_KEY_2020 -> "JsonWebKey2020"
+                else -> throw IllegalStateException("Unsupported verification type: ${vm.type}")
+            }
+        )
 
         // controller
         jsonObj.addProperty("controller", vm.controller)
@@ -189,7 +225,7 @@ object DIDDocEncoder {
         // verification material
         val materialFormat = vm.verificationMaterial.format
         val materialValue = vm.verificationMaterial.value
-        when(materialFormat) {
+        when (materialFormat) {
             VerificationMaterialFormat.JWK -> {
                 jsonObj.add("publicKeyJwk", gson.fromJson(materialValue, JsonObject::class.java))
             }
@@ -261,6 +297,23 @@ object DIDDocDecoder {
         // id
         val id = jsonObj["id"].asString
 
+        // context
+        val context = jsonObj.get("@context")
+            ?.let { it.asJsonArray.map { el -> el.asString } }
+            ?: listOf(DID_CONTEXT_URL)
+
+        // alsoKnownAs
+        // [TODO] verify that these are URIs (needs logging)
+        val alsoKnownAs = jsonObj.get("alsoKnownAs")
+            ?.let { it.asJsonArray.map { el -> el.asString } }
+            ?: listOf()
+
+        // controller
+        // [TODO] verify that these are DIDs (needs logging)
+        val controller = jsonObj.get("controller")
+            ?.let { it.asJsonArray.map { el -> el.asString } }
+            ?: listOf()
+
         // verificationMethod
         jsonObj.get("verificationMethod")?.also {
             it.asJsonArray.forEach { el -> asVerificationMethod(el) }
@@ -268,36 +321,39 @@ object DIDDocDecoder {
 
         // authentication
         val authentications = jsonObj.get("authentication")
-            ?.let { it.asJsonArray.map { el -> asVerificationMethod(el) }}
+            ?.let { it.asJsonArray.map { el -> asVerificationMethod(el) } }
             ?: listOf()
 
         // assertionMethod
         val assertionMethods = jsonObj.get("assertionMethod")
-            ?.let { it.asJsonArray.map { el -> asVerificationMethod(el) }}
+            ?.let { it.asJsonArray.map { el -> asVerificationMethod(el) } }
             ?: listOf()
 
         // keyAgreement
         val keyAgreements = jsonObj.get("keyAgreement")
-            ?.let { it.asJsonArray.map { el -> asVerificationMethod(el) }}
+            ?.let { it.asJsonArray.map { el -> asVerificationMethod(el) } }
             ?: listOf()
 
         // capabilityInvocations
         val capabilityInvocations = jsonObj.get("capabilityInvocation")
-            ?.let { it.asJsonArray.map { el -> asVerificationMethod(el) }}
+            ?.let { it.asJsonArray.map { el -> asVerificationMethod(el) } }
             ?: listOf()
 
         // capabilityDelegation
         val capabilityDelegations = jsonObj.get("capabilityDelegation")
-            ?.let { it.asJsonArray.map { el -> asVerificationMethod(el) }}
+            ?.let { it.asJsonArray.map { el -> asVerificationMethod(el) } }
             ?: listOf()
 
         // service
         val didCommServices = jsonObj.get("service")
-            ?.let { it.asJsonArray.map { el -> decodeDIDCommService(el.asJsonObject) }}
+            ?.let { it.asJsonArray.map { el -> decodeDIDCommService(el.asJsonObject) } }
             ?: listOf()
 
         return DIDDoc(
             did = id,
+            context = context,
+            alsoKnownAs = alsoKnownAs,
+            controller = controller,
             authentications = authentications,
             assertionMethods = assertionMethods,
             keyAgreements = keyAgreements,
@@ -310,7 +366,7 @@ object DIDDocDecoder {
 
     private fun decodeVerificationMethod(obj: JsonObject): VerificationMethod {
         val id = obj["id"].asString
-        val methodType = when(val type = obj["type"].asString) {
+        val methodType = when (val type = obj["type"].asString) {
             "Ed25519VerificationKey2018" -> VerificationMethodType.ED25519_VERIFICATION_KEY_2018
             "Ed25519VerificationKey2020" -> VerificationMethodType.ED25519_VERIFICATION_KEY_2020
             "X25519KeyAgreementKey2019" -> VerificationMethodType.X25519_KEY_AGREEMENT_KEY_2019
@@ -331,8 +387,8 @@ object DIDDocDecoder {
     private fun decodeDIDCommService(obj: JsonObject): DIDCommService {
         val id = obj["id"].asString
         val serviceEndpoint = obj["serviceEndpoint"].asString
-        val accept = obj["accept"]?.let { it.asJsonArray.map { el -> el.asString }} ?: listOf()
-        val routingKeys = obj["routingKeys"]?.let { it.asJsonArray.map { el -> el.asString }} ?: listOf()
+        val accept = obj["accept"]?.let { it.asJsonArray.map { el -> el.asString } } ?: listOf()
+        val routingKeys = obj["routingKeys"]?.let { it.asJsonArray.map { el -> el.asString } } ?: listOf()
         return DIDCommService(id, serviceEndpoint, routingKeys, accept)
     }
 }
