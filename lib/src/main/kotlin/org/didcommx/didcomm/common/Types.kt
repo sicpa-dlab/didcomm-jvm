@@ -15,6 +15,9 @@ enum class Typ(val typ: String) {
     }
 }
 
+/**
+ * https://www.w3.org/TR/did-spec-registries/#verification-method-types
+ */
 enum class VerificationMethodType {
     JSON_WEB_KEY_2020,
     X25519_KEY_AGREEMENT_KEY_2019,
@@ -30,10 +33,17 @@ data class VerificationMaterial(
     val value: String
 )
 
+/**
+ * https://www.w3.org/TR/did-spec-registries/#verification-method-properties
+ */
 enum class VerificationMaterialFormat {
-    JWK,
-    BASE58,
+    @Deprecated(
+        "publicKeyBase58 is deprecated by spec. Use publicKeyMultibase or publicKeyJwk",
+        ReplaceWith("publicKeyMultibase or publicKeyJwk")
+    )
+    BASE58, // https://www.w3.org/TR/did-spec-registries/#publickeybase58
     MULTIBASE,
+    JWK,
     OTHER
 }
 
