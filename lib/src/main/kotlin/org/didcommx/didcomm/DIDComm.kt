@@ -5,7 +5,6 @@ import org.didcommx.didcomm.common.AuthCryptAlg
 import org.didcommx.didcomm.crypto.key.RecipientKeySelector
 import org.didcommx.didcomm.crypto.key.SenderKeySelector
 import org.didcommx.didcomm.crypto.sign
-import org.didcommx.didcomm.diddoc.DIDDoc
 import org.didcommx.didcomm.diddoc.DIDDocResolver
 import org.didcommx.didcomm.model.PackEncryptedParams
 import org.didcommx.didcomm.model.PackEncryptedResult
@@ -73,11 +72,11 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
      * relinquishes the sender’s ability to speak off the record.
      *
      * Signing is done as follows:
-     *  - Signing is done via the keys from the [DIDDoc.authentications] verification relationship in the DID Doc
+     *  - Signing is done via the keys from the [authentications] verification relationship in the DID Doc
      *    for the DID to be used for signing.
-     *  - If [PackSignedParams.signFrom] is a DID, then the first sender's [DIDDoc.authentications]
+     *  - If [PackSignedParams.signFrom] is a DID, then the first sender's [authentications]
      *    verification method is used for which a private key in the secrets resolver is found
-     *  - If [PackSignedParams.signFrom]  is a key ID, then the sender's [DIDDoc.authentications]
+     *  - If [PackSignedParams.signFrom]  is a key ID, then the sender's [authentications]
      *    verification method identified by the given key ID is used.
      *
      * @param params Pack Signed Parameters.
@@ -131,24 +130,24 @@ class DIDComm(private val didDocResolver: DIDDocResolver, private val secretReso
      * relinquishes the sender’s ability to speak off the record.
      *
      * Encryption is done as follows:
-     *  - encryption is done via the keys from the [DIDDoc.keyAgreements] verification relationship in the DID Doc;
+     *  - encryption is done via the keys from the [keyAgreements] verification relationship in the DID Doc;
      *  - if [PackEncryptedParams.from] is `null`, then anonymous encryption is done
      *    Otherwise authenticated encryption is done;
-     *  - if [PackEncryptedParams.from] is a DID, then the first sender's [DIDDoc.keyAgreements] verification method
+     *  - if [PackEncryptedParams.from] is a DID, then the first sender's [keyAgreements] verification method
      *    is used which can be resolved via secrets resolver and has the same type as any of recipient keys;
-     *  - if [PackEncryptedParams.from] is a key ID, then the sender's [DIDDoc.keyAgreements] verification method
+     *  - if [PackEncryptedParams.from] is a key ID, then the sender's [keyAgreements] verification method
      *    identified by the given key ID is used;
-     *  - if [PackEncryptedParams.to] is a DID, then multiplex encryption is done for all keys from the receiver's [DIDDoc.keyAgreements]
+     *  - if [PackEncryptedParams.to] is a DID, then multiplex encryption is done for all keys from the receiver's [keyAgreements]
      *    verification relationship which have the same type as the sender's key;
-     *  - if  [PackEncryptedParams.to] is a key ID, then encryption is done for the receiver's [DIDDoc.keyAgreements]
+     *  - if  [PackEncryptedParams.to] is a key ID, then encryption is done for the receiver's [keyAgreements]
      *    verification method identified by the given key ID.
      *
      * If non-repudiation (signing) is added by specifying a [PackEncryptedParams.signFrom] argument:
-     *  - Signing is done via the keys from the [DIDDoc.authentications] verification relationship
+     *  - Signing is done via the keys from the [authentications] verification relationship
      *    in the DID Doc for the DID to be used for signing;
-     *  - If [PackEncryptedParams.signFrom] is a DID, then the first sender's [DIDDoc.authentications]
+     *  - If [PackEncryptedParams.signFrom] is a DID, then the first sender's [authentications]
      *    verification method is used for which a private key in the secrets resolver is found;
-     *  - If [PackEncryptedParams.signFrom] is a key ID, then the sender's [DIDDoc.authentications]
+     *  - If [PackEncryptedParams.signFrom] is a key ID, then the sender's [authentications]
      *    verification method identified by the given key ID is used.
      *
      * @throws DIDCommException if pack can not be done, in particular:
